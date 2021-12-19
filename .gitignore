@@ -1,0 +1,10 @@
+/docs/
+/lib/
+/bin/
+/.shards/
+*.dwarf
+*.db
+*.sqlite
+*.md.backup
+config.yaml
+shard.lock

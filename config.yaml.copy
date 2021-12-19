@@ -1,0 +1,3 @@
+api-token: API token received from @BotFather
+
+database: "Path to SQLite database"
