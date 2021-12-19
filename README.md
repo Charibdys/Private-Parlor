@@ -12,8 +12,8 @@ shards install
 shards build --release
 ~~~
 
-## @BotFather Setup
-1. Start a conversation with @BotFather
+## BotFather Setup
+1. Start a conversation with [BotFather](https://t.me/botfather)
 2. Make a new bot with `/newbot` and answer the prompts
 3. `/setprivacy`: enabled
 4. `/setjoingroups`: disabled
