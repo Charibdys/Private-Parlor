@@ -6,5 +6,6 @@
 *.db
 *.sqlite
 *.md.backup
+*.txt
 config.yaml
 shard.lock

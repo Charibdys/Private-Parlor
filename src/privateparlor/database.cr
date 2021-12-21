@@ -55,9 +55,21 @@ class Database
        @warnings, @warn_expiry, @karma, @hide_karma, @debug_enabled, @tripcode]
     end
 
+    # Returns a string containing the username with an "@" appended to it if the user has a username.
+    #
+    # Otherwise, the user's realname is returned.
+    def get_formatted_name : String
+      if at = @username
+        at = "@" + at
+      else
+        @realname
+      end
+    end
+
     # Set *left* to nil, meaning that User has joined the chat.
     def rejoin : Nil
       @left = nil
+      Log.info{"User #{@id}, aka #{self.get_formatted_name}, rejoined the chat."}
     end
 
     # Set *last_active* to the current time.
@@ -68,6 +80,7 @@ class Database
     # Set *left* to the current time; user has left the chat.
     def set_left : Nil
       @left = Time.local
+      Log.info{"User #{@id}, aka #{self.get_formatted_name}, left the chat."}
     end
 
     # Predicate methods
@@ -106,17 +119,20 @@ class Database
   # Inserts a user with the given *id*, *username*, and *realname* into the database.
   def add_user(id, username, realname)
     # Prepare values
-    user = User.new({id: id, username: username, realname: realname}).to_array
+    user = User.new({id: id, username: username, realname: realname})
+    args = user.to_array
 
     # Prepare query
     sql = "INSERT INTO users VALUES ("
-    (user.size - 1).times do 
+    (args.size - 1).times do 
       sql += "?, "
     end
     sql += "?)"
 
     # Add user to database
-    db.exec(sql, args: user)
+    db.exec(sql, args: args)
+
+    Log.info{"User #{user.id}, aka #{user.get_formatted_name}, joined the chat."}
   end
 
   # Updates a user record in the database with the current state of *user*.
