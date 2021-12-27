@@ -1,6 +1,8 @@
 class PrivateParlor < Tourmaline::Client
   property database : Database
   property config : YAML::Any
+  property history : History
+  getter tasks : Hash(Symbol, Tasker::Task)
 
   # Creates a new instance of PrivateParlor.
   #
@@ -18,6 +20,14 @@ class PrivateParlor < Tourmaline::Client
     super(bot_token: bot_token)
     @config = config
     @database = Database.new(connection)
+    @history = History.new(24)
+    @tasks = register_tasks()
+  end
+
+  def register_tasks() : Hash
+    tasks = {} of Symbol => Tasker::Task
+    # Handle cache expiration
+    tasks.merge!({:cache => Tasker.every(((1/4) * @history.lifespan).hours) {@history.expire}})
   end
 
   # Update user's record in database.
@@ -25,7 +35,7 @@ class PrivateParlor < Tourmaline::Client
     user.username = info.username
     user.realname = info.full_name
     user.set_active
-    database.modify_user(user)
+    database.modify_user(user) 
   end
 
   # Start bot and begin receiving messages.
@@ -69,7 +79,7 @@ class PrivateParlor < Tourmaline::Client
       if result
         result.set_left
         send_message(info.id, "You left the chat!")
-        database.modify_user(result)
+        database.modify_user(result) 
       end
     end
   end
@@ -81,7 +91,10 @@ class PrivateParlor < Tourmaline::Client
       if user = database.get_user(info.id)
         if message.text.not_nil!.[0] != '/'
           if user.left == nil
+            # FIXME: If a user sends too many messages at once, this will lock the database
+            # when the message is being relayed
             update_user(info, user)
+            @history.new_message(info.id, message.message_id)
             relay(message, info)
           else
             send_message(user.id, "You're not in this chat!")
@@ -98,10 +111,15 @@ class PrivateParlor < Tourmaline::Client
     database.get_ids do |result|
       result.each do
         id = result.read(Int64)
-        if id != info.id
+        if id != info.id 
           if receiver = database.get_user(id)
             if receiver.left == nil
-              send_message(receiver.id, message.text)
+              reply_msid = nil
+              if reply = message.reply_message
+                reply_msid = @history.get_msid(reply.message_id, receiver.id)
+              end
+              success = send_message(receiver.id, message.text, reply_to_message: reply_msid)
+              @history.add_to_cache(success.message_id, receiver.id)
             end
           end
         end

@@ -5,6 +5,9 @@ dependencies:
   tourmaline:
     github: protoncr/tourmaline
     branch: master
+  tasker:
+    github: spider-gazelle/tasker
+    branch: master
   sqlite3:
     github: crystal-lang/crystal-sqlite3
 
