@@ -4,4 +4,5 @@ database: "Path to SQLite database"
 
 # Path to an optional log file
 # Where info is any of the following: TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, FATAL
-# log: [info, "./log.txt"]
+#log-level: "info"
+#log-file: "./log.txt"
