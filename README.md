@@ -50,7 +50,7 @@ The following features are planned and being worked on:
 	- [ ] Configurable command permissions 
 - [ ] Message history
 	- [ ] Configurable cache contents
-	- [ ] Configurable cache life
+	- [x] Configurable cache life
 - [ ] Karma
 - [ ] Message queue
 - [ ] Spam prevention

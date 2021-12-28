@@ -6,3 +6,7 @@ database: "Path to SQLite database"
 # Where info is any of the following: TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, FATAL
 #log-level: "info"
 #log-file: "./log.txt"
+
+# Modify lifetime of a message, in hours (24 hours is the default)
+# This should be between 1 and 48 hours (inclusive)
+#lifetime: 24
