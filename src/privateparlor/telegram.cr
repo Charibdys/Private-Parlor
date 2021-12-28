@@ -1,6 +1,6 @@
 class PrivateParlor < Tourmaline::Client
   property database : Database
-  property config : YAML::Any
+  property config : Hash(Symbol, String)
   property history : History
   getter tasks : Hash(Symbol, Tasker::Task)
 

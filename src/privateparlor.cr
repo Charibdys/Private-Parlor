@@ -4,44 +4,108 @@ require "yaml"
 require "sqlite3"
 require "./privateparlor/*"
 
+
+# Parse config.yaml and return the values as a hash
+#
+# Values that aren't specified in the config file or are specified as the wrong type
+# will be set to a default value
+def parse_config : Hash
+  defaults = {:log_level => "info", :lifetime => "24"} 
+  values = {} of Symbol => String
+  begin 
+    config = File.open(File.expand_path("config.yaml")) do |file|
+      YAML.parse(file)
+    end
+
+    # Read config and put values into a hash
+    temp = config.as_h
+
+    # Run checks; we cannot proceed without token or database
+    if !temp["api-token"]? || !temp["api-token"].as_s?
+      Log.error {"Could not get api-token. Check your configuration. Exiting..."}
+      exit
+    elsif !temp["database"]? || !temp["database"].as_s?
+      Log.error {"Could not get database path. Check your configuration. Exiting..."}
+      exit
+    else
+      values.merge!({:token => temp["api-token"].as_s, :database => temp["database"].as_s})
+    end
+
+    # Get every other value in config; add to hash
+    if (log_level = temp["log-level"]?) && log_level.as_s?
+      values.merge!({:log_level => log_level.as_s})
+    else
+      Log.notice{"No log level specified; defaulting to INFO."}
+    end
+
+    if (log_path = temp["log-file"]?) && log_path.as_s?
+      values.merge!({:log_path => log_path.as_s})
+    else
+      Log.notice{"No log path specified; defaulting to STDOUT."}
+    end
+
+    if (lifetime = temp["lifetime"]?) && lifetime.as_i?
+      if lifetime.as_i >= 1 && lifetime.as_i <= 48
+        values.merge!({:lifetime => lifetime.to_s})
+      else
+        Log.notice{"Message lifetime not within range, was #{lifetime}; defaulting to 24 hours."}
+      end
+    end
+
+  rescue ex
+    Log.error(exception: ex) {"Could not open \"./config.yaml\". Exiting..."}
+    exit
+  end
+
+  defaults = defaults.merge(values)
+end
+
 # Reset log with the severity level defined in `config.yaml`.
 #
 # A file can also be used to store log output. If the file does not exist, a new one will be made.
 #
 # If there is an error in the configuration, the log outputs to `STDOUT` with the `INFO` severity.
-def set_log()
-  if CONFIG["log"]?
-    begin
-      begin
-        severity = Log::Severity.parse(CONFIG["log"][0].to_s)
-      rescue ex : ArgumentError
-        Log.error(exception: ex) {"Could not get log level; defaulting to INFO. Check your configuration"}
-        severity = Log::Severity::Info
-      end
-      if File.file?(CONFIG["log"][1].to_s) # If log file already exists
-        Log.setup(severity, Log::IOBackend.new(File.open(CONFIG["log"][1].to_s, "a+")))
+def set_log(config : Hash) : Nil
+  # Skip setup if default values were given
+  if config[:log_level] == "info" && !config[:log_path]?
+    return
+  end
+
+  # Get log level
+  if level = config[:log_level].to_s
+    severity = Log::Severity.parse(level)
+  else
+    severity = Log::Severity::Info
+  end
+
+  # Reset log with log level; outputting to a file if a path was given
+  begin
+    if path = config[:log_path].to_s
+      if File.file?(path) # If log file already exists
+        Log.setup(severity, Log::IOBackend.new(File.open(path, "a+")))
       else # Log file does not exist, make one
-        Log.setup(severity, Log::IOBackend.new(File.new(CONFIG["log"][1].to_s, "a+")))
+        Log.setup(severity, Log::IOBackend.new(File.new(path, "a+")))
       end
-    rescue ex
-      Log.error(exception: ex) {"Could not get log file path. Check your configuration."}
+    else # Default to STDOUT
+      Log.setup(severity)
     end
+  rescue ex
+    Log.error(exception: ex) {"Could not open/create log file"}
   end
 end
 
 # MAIN STARTS HERE
 
-CONFIG = File.open(File.expand_path("config.yaml")) do |file|
-  YAML.parse(file)
-end
+config = parse_config()
+set_log(config)
 
-set_log()
 Log.info{"Starting Private Parlor v#{Version::VERSION}..."}
 
-TOKEN = CONFIG["api-token"].to_s
-DB_PATH = Path.new(CONFIG["database"].to_s) # TODO: We'll want check if this works on Windows later
+token = config[:token].to_s
+db_path = Path.new(config[:database].to_s) # TODO: We'll want check if this works on Windows later
 
-db = DB.open("sqlite3://#{DB_PATH}")
+db = DB.open("sqlite3://#{db_path}")
 
-bot = PrivateParlor.new(bot_token: TOKEN, config: CONFIG, connection: db)
+bot = PrivateParlor.new(bot_token: token, config: config, connection: db)
+
 bot.poll
