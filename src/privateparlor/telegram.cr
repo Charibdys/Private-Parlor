@@ -20,7 +20,7 @@ class PrivateParlor < Tourmaline::Client
     super(bot_token: bot_token)
     @config = config
     @database = Database.new(connection)
-    @history = History.new(24)
+    @history = History.new(config[:lifetime].to_i8)
     @tasks = register_tasks()
   end
 
