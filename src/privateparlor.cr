@@ -72,7 +72,7 @@ def set_log(config : Hash) : Nil
   end
 
   # Get log level
-  if level = config[:log_level].to_s
+  if level = config[:log_level]?.to_s
     severity = Log::Severity.parse(level)
   else
     severity = Log::Severity::Info
@@ -80,7 +80,7 @@ def set_log(config : Hash) : Nil
 
   # Reset log with log level; outputting to a file if a path was given
   begin
-    if path = config[:log_path].to_s
+    if (path = config[:log_path]?.to_s) && (!path.empty?)
       if File.file?(path) # If log file already exists
         Log.setup(severity, Log::IOBackend.new(File.open(path, "a+")))
       else # Log file does not exist, make one
