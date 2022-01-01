@@ -8,12 +8,14 @@ class PrivateParlor < Tourmaline::Client
   struct QueuedMessage
     getter hashcode : UInt64
     getter receiver : Int64
-    getter function : Proc(Int64, Tourmaline::Message)
+    getter reply_to : Int64 | Nil
+    getter function : Proc(Int64, Int64 | Nil, Tourmaline::Message)
     
-    # Creates an instance of `QueuedMessage` with a `hashcode` for caching and a `receiver` for the `function` proc.
-    def initialize(hash : UInt64, receiver_id : Int64, func : Proc)
+    # Creates an instance of `QueuedMessage` with a `hashcode` for caching and a `receiver` and `reply_to` for the `function` proc.
+    def initialize(hash : UInt64, receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
       @hashcode = hash
       @receiver = receiver_id
+      @reply_to = reply_msid
       @function = func
     end
   end 
@@ -106,8 +108,7 @@ class PrivateParlor < Tourmaline::Client
       if user = database.get_user(info.id)
         if message.text.not_nil!.[0] != '/'
           if user.left == nil
-            # FIXME: If a user sends too many messages at once, this will lock the database
-            # when the message is being relayed
+            # NOTE: If a user sends too many messages at once, this may lock the database when relaying messages
             update_user(info, user)
             hash = @history.new_message(info.id, message.message_id)
             relay(message, info, hash)
@@ -120,12 +121,10 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Takes a message and returns a CoreMethod proc according to its content type.
-  #
-  # If a reply_msid is given, the proc will contain it.
-  def type_to_proc(message, reply) : Proc(Int64, Tourmaline::Message) | Nil
+  def type_to_proc(message) : Proc(Int64, Int64 | Nil, Tourmaline::Message) | Nil
     case message
     when .text
-      proc = ->(receiver : Int64){send_message(receiver, message.text, reply_to_message: reply)}
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_message(receiver, message.text, reply_to_message: reply)}
     else # Message did not match any type; return nil and cease relaying for this message
       proc = nil
     end
@@ -133,32 +132,31 @@ class PrivateParlor < Tourmaline::Client
 
   # Relay message to every joined user except for the sender.
   def relay(message, info, hash)
-    database.get_ids do |result|
-      result.each do
-        id = result.read(Int64)
-        if id != info.id 
-          if receiver = database.get_user(id)
-            if receiver.left == nil
-              reply_msid = nil
-              if reply = message.reply_message
-                reply_msid = @history.get_msid(reply.message_id, receiver.id)
-              end
-              
-              if proc = type_to_proc(message, reply_msid)
-                add_to_queue(hash, receiver.id, proc)
-              end
-            end
+    if proc = type_to_proc(message)
+      if !(reply = message.reply_message) # Message was NOT a reply
+        @database.get_prioritized_users.each do |receiver_id| # No need for a left? check here
+          if receiver_id != info.id
+            add_to_queue(hash, receiver_id, nil, proc)
+          end
+        end
+      else # Message was a reply
+        reply_msids = @history.get_all_msids(reply.message_id)
+        @database.get_prioritized_users.each do |receiver_id|
+          if receiver_id != info.id
+            add_to_queue(hash, receiver_id, reply_msids[receiver_id], proc)
           end
         end
       end
+    else
+      Log.error {"Could not create proc for message type. Message was #{message}"}
     end
   end
 
   # Queue functions
 
   # Creates a new `Message` and sends it to the `queue` channel to be sent later.
-  def add_to_queue(hashcode : UInt64, receiver_id : Int64, func : Proc)
-    @queue.send(QueuedMessage.new(hashcode, receiver_id, func))
+  def add_to_queue(hashcode : UInt64, receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
+    @queue.send(QueuedMessage.new(hashcode, receiver_id, reply_msid, func))
   end
 
   # Receives a `Message` from the `queue` channel, calls its proc, and adds the 
@@ -169,7 +167,7 @@ class PrivateParlor < Tourmaline::Client
   # TODO: Check if receiver has blocked the bot.
   def send_messages
     msg = @queue.receive
-    success = msg.function.call(msg.receiver)
+    success = msg.function.call(msg.receiver, msg.reply_to)
     @history.add_to_cache(msg.hashcode, success.message_id, msg.receiver)
   end
 
