@@ -83,7 +83,9 @@ class Database
       Log.info{"User #{@id}, aka #{self.get_formatted_name}, left the chat."}
     end
 
-    # Predicate methods
+    #####################
+    # Predicate methods #
+    #####################
 
     # Returns `true` if *rank* is -10; user is blacklisted.
     #

@@ -94,7 +94,9 @@ def set_log(config : Hash) : Nil
   end
 end
 
-# MAIN STARTS HERE
+####################
+# MAIN STARTS HERE #
+####################
 
 config = parse_config()
 set_log(config)

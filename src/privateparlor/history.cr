@@ -5,7 +5,12 @@ class History
   # MessageGroup hashcode => MessageGroup
   property message_history : Hash(UInt64, MessageGroup)
 
-  # Create an instance of `History` with a `message_life` for expiring messages.
+  # Create an instance of `History`
+  #
+  # ## Arguments:
+  #
+  # `message_life`
+  # :       how many hours a message may exist before expiring (should be between 1 and 48, inclusive).
   def initialize(message_life : Int8)
     @lifespan = message_life
     @msid_map = {} of Int64 => UInt64
@@ -17,7 +22,15 @@ class History
     property receivers : Hash(Int64, Int64)
     property sent : Time
 
-    # Create an instance of `MessageGroup`
+    # Creates an instance of `MessageGroup`
+    #
+    # ## Arguments:
+    #
+    # `sender_id`
+    # :     the id of the user who originally sent this message
+    #
+    # `msid`
+    # :     the messaage ID returned when the new message was sent successfully
     def initialize(sender_id : Int64, msid : Int64)
       @sender = sender_id
       @receivers = {sender_id => msid} of Int64 => Int64

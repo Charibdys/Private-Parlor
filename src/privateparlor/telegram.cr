@@ -11,7 +11,21 @@ class PrivateParlor < Tourmaline::Client
     getter reply_to : Int64 | Nil
     getter function : Proc(Int64, Int64 | Nil, Tourmaline::Message)
     
-    # Creates an instance of `QueuedMessage` with a `hashcode` for caching and a `receiver` and `reply_to` for the `function` proc.
+    # Creates an instance of `QueuedMessage`. 
+    #
+    # ## Arguments:
+    #
+    # `hash` 
+    # :     a hashcode that refers to the associated `MessageGroup` stored in the message history
+    #
+    # `receiver_id`
+    # :     the ID of the user who will receive this message
+    #
+    # `reply_msid` 
+    # :     the MSID of a message to reply to. May be `nil` if this message isn't a reply.
+    #
+    # `function` 
+    # :     a proc that points to a Tourmaline CoreMethod send function and takes a user ID and MSID as its arguments
     def initialize(hash : UInt64, receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
       @hashcode = hash
       @receiver = receiver_id
@@ -28,10 +42,10 @@ class PrivateParlor < Tourmaline::Client
   # :     the bot token given by `@BotFather`
   #
   # `config`
-  # :     a `YAML::ANY` from parsing the `config.yaml` file
+  # :     a `Hash(Symbol, String)` from parsing the `config.yaml` file
   #
   # `connection`
-  #:      the DB::Databse object obtained from the database path in the `config.yaml` file
+  # :     the `DB::Databse` object obtained from the database path in the `config.yaml` file
   def initialize(bot_token, config, connection)
     super(bot_token: bot_token)
     @config = config
@@ -41,13 +55,14 @@ class PrivateParlor < Tourmaline::Client
     @tasks = register_tasks()
   end
 
+  # Starts various background tasks and stores them in a hash.
   def register_tasks() : Hash
     tasks = {} of Symbol => Tasker::Task
     # Handle cache expiration
     tasks.merge!({:cache => Tasker.every(((1/4) * @history.lifespan).hours) {@history.expire}})
   end
 
-  # Update user's record in database.
+  # Updates user's record in the database.
   def update_user(info, user : Database::User)
     user.username = info.username
     user.realname = info.full_name
@@ -55,7 +70,7 @@ class PrivateParlor < Tourmaline::Client
     database.modify_user(user) 
   end
 
-  # Start bot and begin receiving messages.
+  # User starts the bot and begins receiving messages.
   #
   # If the user is not in the database, this will add the user to it
   #
@@ -152,7 +167,9 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
-  # Queue functions
+  ###################
+  # Queue functions #
+  ###################
 
   # Creates a new `Message` and sends it to the `queue` channel to be sent later.
   def add_to_queue(hashcode : UInt64, receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
