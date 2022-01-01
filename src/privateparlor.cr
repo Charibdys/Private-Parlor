@@ -108,4 +108,11 @@ db = DB.open("sqlite3://#{db_path}")
 
 bot = PrivateParlor.new(bot_token: token, config: config, connection: db)
 
+# Start message sending routine
+spawn(name: "SendingQueue") do
+  loop do
+    bot.send_messages
+  end
+end
+
 bot.poll

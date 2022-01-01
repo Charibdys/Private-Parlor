@@ -2,7 +2,21 @@ class PrivateParlor < Tourmaline::Client
   property database : Database
   property config : Hash(Symbol, String)
   property history : History
+  property queue : Channel(QueuedMessage)
   getter tasks : Hash(Symbol, Tasker::Task)
+
+  struct QueuedMessage
+    getter hashcode : UInt64
+    getter receiver : Int64
+    getter function : Proc(Int64, Tourmaline::Message)
+    
+    # Creates an instance of `QueuedMessage` with a `hashcode` for caching and a `receiver` for the `function` proc.
+    def initialize(hash : UInt64, receiver_id : Int64, func : Proc)
+      @hashcode = hash
+      @receiver = receiver_id
+      @function = func
+    end
+  end 
 
   # Creates a new instance of PrivateParlor.
   #
@@ -21,6 +35,7 @@ class PrivateParlor < Tourmaline::Client
     @config = config
     @database = Database.new(connection)
     @history = History.new(config[:lifetime].to_i8)
+    @queue = Channel(QueuedMessage).new
     @tasks = register_tasks()
   end
 
@@ -94,8 +109,8 @@ class PrivateParlor < Tourmaline::Client
             # FIXME: If a user sends too many messages at once, this will lock the database
             # when the message is being relayed
             update_user(info, user)
-            @history.new_message(info.id, message.message_id)
-            relay(message, info)
+            hash = @history.new_message(info.id, message.message_id)
+            relay(message, info, hash)
           else
             send_message(user.id, "You're not in this chat!")
           end
@@ -104,10 +119,20 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
-  # Relay message to every joined user except for the sender.
+  # Takes a message and returns a CoreMethod proc according to its content type.
   #
-  # TODO: Check if receiver has blocked the bot.
-  def relay(message, info)
+  # If a reply_msid is given, the proc will contain it.
+  def type_to_proc(message, reply) : Proc(Int64, Tourmaline::Message) | Nil
+    case message
+    when .text
+      proc = ->(receiver : Int64){send_message(receiver, message.text, reply_to_message: reply)}
+    else # Message did not match any type; return nil and cease relaying for this message
+      proc = nil
+    end
+  end
+
+  # Relay message to every joined user except for the sender.
+  def relay(message, info, hash)
     database.get_ids do |result|
       result.each do
         id = result.read(Int64)
@@ -118,13 +143,34 @@ class PrivateParlor < Tourmaline::Client
               if reply = message.reply_message
                 reply_msid = @history.get_msid(reply.message_id, receiver.id)
               end
-              success = send_message(receiver.id, message.text, reply_to_message: reply_msid)
-              @history.add_to_cache(success.message_id, receiver.id)
+              
+              if proc = type_to_proc(message, reply_msid)
+                add_to_queue(hash, receiver.id, proc)
+              end
             end
           end
         end
       end
     end
+  end
+
+  # Queue functions
+
+  # Creates a new `Message` and sends it to the `queue` channel to be sent later.
+  def add_to_queue(hashcode : UInt64, receiver_id : Int64, func : Proc)
+    @queue.send(QueuedMessage.new(hashcode, receiver_id, func))
+  end
+
+  # Receives a `Message` from the `queue` channel, calls its proc, and adds the 
+  # returned message id to the History
+  #
+  # This function should be invoked in a Fiber
+  #
+  # TODO: Check if receiver has blocked the bot.
+  def send_messages
+    msg = @queue.receive
+    success = msg.function.call(msg.receiver)
+    @history.add_to_cache(msg.hashcode, success.message_id, msg.receiver)
   end
 
 end

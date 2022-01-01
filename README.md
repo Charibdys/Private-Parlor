@@ -52,7 +52,7 @@ The following features are planned and being worked on:
 	- [ ] Configurable cache contents
 	- [x] Configurable cache life
 - [ ] Karma
-- [ ] Message queue
+- [x] Message queue
 - [ ] Spam prevention
 	- [ ] Configurable time and content limits
 - [ ] Inactivity timeout

@@ -27,18 +27,20 @@ class History
   end
 
   # Creates a new `MessageGroup` with the *sender_id* and its associated *msid*
-  def new_message(sender_id : Int64, msid : Int64) : Nil
+  #
+  # Returns the initial hashcode of the new MessageGroup
+  def new_message(sender_id : Int64, msid : Int64) : UInt64
     message = MessageGroup.new(sender_id, msid)
-    @message_history.merge!({message.hash => message})
-    @msid_map.merge!({msid => message.hash})
+    hashcode = message.hash
+    @message_history.merge!({hashcode => message})
+    @msid_map.merge!({msid => hashcode})
+    hashcode
   end
 
   # Adds receiver_id and its associated msid to an existing `MessageGroup`
-  def add_to_cache(msid : Int64, receiver_id : Int64) : Nil
-    # FIXME: If there is no value in msid_map (can happen if lifespan is too short and message expired) then this won't work
-    message = @msid_map.last_value 
-    @msid_map.merge!({msid => message})
-    @message_history[message].receivers.merge!({receiver_id => msid})
+  def add_to_cache(hashcode : UInt64, msid : Int64, receiver_id : Int64) : Nil
+    @msid_map.merge!({msid => hashcode})
+    @message_history[hashcode].receivers.merge!({receiver_id => msid})
   end
 
   # Returns the receivers hash found in the associated `MessageGroup`
