@@ -82,16 +82,16 @@ class PrivateParlor < Tourmaline::Client
   @[Command("start")]
   def start_command(ctx)
     if info = ctx.message.from.not_nil!
-      result = database.get_user(info.id)
-      if result # User exists in DB; run checks
-        if result.blacklisted?
+      user = database.get_user(info.id)
+      if user # User exists in DB; run checks
+        if user.blacklisted?
           send_message(info.id, "You're blacklisted and cannot rejoin.")
-        elsif result.left?
-          result.rejoin
-          update_user(info, result)
+        elsif user.left?
+          user.rejoin
+          update_user(info, user)
           send_message(info.id, "You rejoined the chat!")
         else # user is already in the chat
-          update_user(info, result)
+          update_user(info, user)
           send_message(info.id, "You're already in the chat.")
         end
       else # User does not exist; add to DB
@@ -107,11 +107,10 @@ class PrivateParlor < Tourmaline::Client
   @[Command(["stop", "leave"])]
   def stop_command(ctx)
     if info = ctx.message.from.not_nil!
-      result = database.get_user(info.id)
-      if result
-        result.set_left
+      if (user = database.get_user(info.id)) && !user.left?
+        user.set_left
         send_message(info.id, "You left the chat!")
-        database.modify_user(result) 
+        database.modify_user(user) 
       end
     end
   end
@@ -120,17 +119,15 @@ class PrivateParlor < Tourmaline::Client
   @[On(:message)]
   def check(update)
     if (message = update.message) && (info = message.from.not_nil!)
-      if user = database.get_user(info.id)
-        if message.text.not_nil!.[0] != '/'
-          if user.left == nil
-            # NOTE: If a user sends too many messages at once, this may lock the database when relaying messages
-            update_user(info, user)
-            hash = @history.new_message(info.id, message.message_id)
-            relay(message, info, hash)
-          else
-            send_message(user.id, "You're not in this chat!")
-          end
+      if (user = database.get_user(info.id)) && !user.left?
+        if !((text = message.text) && text.starts_with?('/')) # Don't relay commands
+          # NOTE: If a user sends too many messages at once, this may lock the database when relaying messages
+          update_user(info, user)
+          hash = @history.new_message(info.id, message.message_id)
+          relay(message, info, hash)
         end
+      else # Either user has left or is not in the database
+        send_message(info.id, "You're not in this chat! Type /start to join.")
       end
     end
   end
