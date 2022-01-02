@@ -1,0 +1,19 @@
+image: "crystallang/crystal:latest"
+
+before_script:
+  - shards install
+  - crystal -v
+
+cache:
+  paths:
+  - lib/
+
+pages:
+  stage: deploy
+  script:
+  - crystal docs -o public src/privateparlor.cr
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
