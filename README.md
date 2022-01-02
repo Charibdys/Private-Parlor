@@ -3,6 +3,7 @@
 A rewrite of [secretlounge-ng](https://github.com/secretlounge/secretlounge-ng), a bot to make an anonymous group chat on Telegram. 
 Written in Crystal with the aim of being a fast, memory efficient, and featureful alternative.
 
+[Updates posted on Telegram](https://t.me/privateparlor)
 ## Installation
 
 ~~~
