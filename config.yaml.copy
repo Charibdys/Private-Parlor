@@ -10,3 +10,6 @@ database: "Path to SQLite database"
 # Modify lifetime of a message, in hours (24 hours is the default)
 # This should be between 1 and 48 hours (inclusive)
 #lifetime: 24
+
+# Relaying toggles
+#relay-luck: true
