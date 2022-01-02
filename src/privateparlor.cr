@@ -10,7 +10,7 @@ require "./privateparlor/*"
 # Values that aren't specified in the config file or are specified as the wrong type
 # will be set to a default value
 def parse_config : Hash
-  defaults = {:log_level => "info", :lifetime => "24"} 
+  defaults = {:log_level => "info", :lifetime => "24", :relay_luck => "false"} 
   values = {} of Symbol => String
   begin 
     config = File.open(File.expand_path("config.yaml")) do |file|
@@ -50,6 +50,14 @@ def parse_config : Hash
       else
         Log.notice{"Message lifetime not within range, was #{lifetime}; defaulting to 24 hours."}
       end
+    end
+
+    if relay_luck = temp["relay-luck"]?
+      if relay_luck.as_bool?.is_a?(Bool)
+        values.merge!({:relay_luck => relay_luck.to_s})
+      end
+    else
+      Log.notice{"Relay-luck was not specified, not sending luck-based emojis (dice, darts, etc)."}
     end
 
   rescue ex

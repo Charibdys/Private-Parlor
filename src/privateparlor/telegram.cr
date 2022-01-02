@@ -137,6 +137,25 @@ class PrivateParlor < Tourmaline::Client
     case message
     when .text
       proc = ->(receiver : Int64, reply : Int64 | Nil){send_message(receiver, message.text, reply_to_message: reply)}
+    when .dice
+      if @config[:relay_luck] == "true"
+        case message.dice.not_nil!.emoji
+        when "🎲"
+          proc = ->(receiver : Int64, reply : Int64 | Nil){send_dice(receiver, message.text, reply_to_message: reply)}
+        when "🎯"
+          proc = ->(receiver : Int64, reply : Int64 | Nil){send_dart(receiver, message.text, reply_to_message: reply)}
+        when "🏀"
+          proc = ->(receiver : Int64, reply : Int64 | Nil){send_basketball(receiver, message.text, reply_to_message: reply)}
+        when "⚽"
+          proc = ->(receiver : Int64, reply : Int64 | Nil){send_soccerball(receiver, message.text, reply_to_message: reply)}
+        when "🎰"
+          proc = ->(receiver : Int64, reply : Int64 | Nil){send_slot_machine(receiver, message.text, reply_to_message: reply)}
+        when "🎳"
+          proc = ->(receiver : Int64, reply : Int64 | Nil){send_bowling(receiver, message.text, reply_to_message: reply)}
+        end
+      else
+        proc = nil
+      end
     else # Message did not match any type; return nil and cease relaying for this message
       proc = nil
     end
