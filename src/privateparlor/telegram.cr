@@ -1,9 +1,16 @@
 class PrivateParlor < Tourmaline::Client
   property database : Database
-  property config : Hash(Symbol, String)
   property history : History
   property queue : Channel(QueuedMessage)
   getter tasks : Hash(Symbol, Tasker::Task)
+  getter config : NamedTuple(
+    token: String,
+    database: String,
+    log_level: String,
+    log_path: String,
+    lifetime: Time::Span,
+    relay_luck: Bool
+    )
 
   struct QueuedMessage
     getter hashcode : UInt64
@@ -50,7 +57,7 @@ class PrivateParlor < Tourmaline::Client
     super(bot_token: bot_token)
     @config = config
     @database = Database.new(connection)
-    @history = History.new(config[:lifetime].to_i8)
+    @history = History.new(config[:lifetime])
     @queue = Channel(QueuedMessage).new
     @tasks = register_tasks()
   end
@@ -59,7 +66,7 @@ class PrivateParlor < Tourmaline::Client
   def register_tasks() : Hash
     tasks = {} of Symbol => Tasker::Task
     # Handle cache expiration
-    tasks.merge!({:cache => Tasker.every(((1/4) * @history.lifespan).hours) {@history.expire}})
+    tasks.merge!({:cache => Tasker.every(((1/4) * @history.lifespan.to_i).hours) {@history.expire}})
   end
 
   # Updates user's record in the database.
@@ -138,7 +145,7 @@ class PrivateParlor < Tourmaline::Client
     when .text
       proc = ->(receiver : Int64, reply : Int64 | Nil){send_message(receiver, message.text, reply_to_message: reply)}
     when .dice
-      if @config[:relay_luck] == "true"
+      if @config[:relay_luck]
         case message.dice.not_nil!.emoji
         when "🎲"
           proc = ->(receiver : Int64, reply : Int64 | Nil){send_dice(receiver, message.text, reply_to_message: reply)}

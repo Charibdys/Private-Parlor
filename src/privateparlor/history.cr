@@ -1,5 +1,5 @@
 class History
-  getter lifespan : Int8
+  getter lifespan : Time::Span
   # MSID => MessageGroup hashcode
   property msid_map : Hash(Int64, UInt64)
   # MessageGroup hashcode => MessageGroup
@@ -11,7 +11,7 @@ class History
   #
   # `message_life`
   # :       how many hours a message may exist before expiring (should be between 1 and 48, inclusive).
-  def initialize(message_life : Int8)
+  def initialize(message_life : Time::Span)
     @lifespan = message_life
     @msid_map = {} of Int64 => UInt64
     @message_history = {} of UInt64 => MessageGroup
@@ -83,7 +83,7 @@ class History
   #
   # Returns `false` otherwise.
   def expired?(message : MessageGroup)
-    message.sent <= Time.local - @lifespan.hours
+    message.sent <= Time.local - @lifespan
   end
 
   # Delete messages which have expired. 
