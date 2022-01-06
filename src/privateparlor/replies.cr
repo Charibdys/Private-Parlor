@@ -69,4 +69,50 @@ class Replies
     unparse_text(text, entities, Tourmaline::ParseMode::MarkdownV2, escape: true)
   end
 
+  ###################
+  # SYSTEM MESSAGES #
+  ###################
+
+  # Returns an italicized message for when the user rejoins the chat.
+  def rejoined() : String
+    Italic.new("You rejoined the chat!").to_md
+  end
+
+  # Returns an italicized message for when a new user joins the chat.
+  def joined() : String
+    Italic.new("Welcome to the chat!").to_md
+  end
+
+  # Returns an italicized message for when the user leaves the chat.
+  def left() : String
+    Italic.new("You left the chat.").to_md
+  end
+
+  # Returns an italicized message for when the user tries to join the chat, but is already in it.
+  def already_in_chat() : String
+    Italic.new("You're already in the chat.").to_md
+  end
+  
+  # Returns an italicized message for when a user sends a message, but is not in the chat.
+  def not_in_chat() : String
+    Italic.new("You're not in this chat! Type /start to join.").to_md
+  end
+
+  # Returns an italicized message for when a sent message was rejected.
+  def rejected_message() : String
+    Italic.new("Your message was not relayed because it contained a special font.").to_md
+  end
+
+  # Returns an italicized message for when the user is blacklisted.
+  #
+  # Includes the user's `blacklist_text` if one was given.
+  def blacklisted(reason : String | Nil) : String
+    message = "You've been blacklisted"
+
+    message += reason ? " for: #{reason}" : "."
+
+    message = Italic.new(message)
+    message.to_md
+  end
+
 end

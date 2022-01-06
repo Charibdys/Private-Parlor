@@ -95,18 +95,18 @@ class PrivateParlor < Tourmaline::Client
       user = database.get_user(info.id)
       if user # User exists in DB; run checks
         if user.blacklisted?
-          send_message(info.id, "You're blacklisted and cannot rejoin.")
+          send_message(user.id, @replies.blacklisted(user.blacklist_text))
         elsif user.left?
           user.rejoin
           update_user(info, user)
-          send_message(info.id, "You rejoined the chat!")
+          send_message(user.id, @replies.rejoined)
         else # user is already in the chat
           update_user(info, user)
-          send_message(info.id, "You're already in the chat.")
+          send_message(user.id, @replies.already_in_chat)
         end
       else # User does not exist; add to DB
-        database.add_user(info.id, info.username, info.full_name)
-        send_message(info.id, "Welcome to the chat!")
+        user = database.add_user(info.id, info.username, info.full_name)
+        send_message(user.id, @replies.joined)
       end
     end
   end
@@ -119,7 +119,7 @@ class PrivateParlor < Tourmaline::Client
     if info = ctx.message.from.not_nil!
       if (user = database.get_user(info.id)) && !user.left?
         user.set_left
-        send_message(info.id, "You left the chat!")
+        send_message(info.id, @replies.left)
         database.modify_user(user) 
       end
     end
@@ -131,7 +131,7 @@ class PrivateParlor < Tourmaline::Client
     if (message = update.message) && (info = message.from.not_nil!)
       if (text = message.text) || (text = message.caption)
         if !@replies.allow_text?(text)
-          return send_message(info.id, "Your message was not relayed because it contained a special font")
+          return send_message(info.id, @replies.rejected_message)
         end
       end
       if (user = database.get_user(info.id)) && !user.left?
@@ -142,7 +142,7 @@ class PrivateParlor < Tourmaline::Client
           relay(message, info, hash)
         end
       else # Either user has left or is not in the database
-        send_message(info.id, "You're not in this chat! Type /start to join.")
+        send_message(info.id, @replies.not_in_chat)
       end
     end
   end
