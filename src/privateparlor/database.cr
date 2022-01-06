@@ -129,7 +129,9 @@ class Database
   end
   
   # Inserts a user with the given *id*, *username*, and *realname* into the database.
-  def add_user(id, username, realname)
+  #
+  # Returns the new `User`.
+  def add_user(id, username, realname) : User
     # Prepare values
     user = User.new({id: id, username: username, realname: realname})
     args = user.to_array
@@ -145,6 +147,7 @@ class Database
     db.exec(sql, args: args)
 
     Log.info{"User #{user.id}, aka #{user.get_formatted_name}, joined the chat."}
+    user
   end
 
   # Updates a user record in the database with the current state of *user*.
