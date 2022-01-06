@@ -1,16 +1,24 @@
 require "tourmaline"
+require "tourmaline/src/tourmaline/extra/format.cr"
 require "tasker"
 require "yaml"
 require "sqlite3"
 require "./privateparlor/*"
-
 
 # Parse config.yaml and return the values as a NamedTuple
 #
 # Values that aren't specified in the config file or are specified as the wrong type
 # will be set to a default value.
 def parse_config : NamedTuple
-  tuple = {token: "", database: "", log_level: "info", log_path: "", lifetime: 24.hours, relay_luck: false} 
+  tuple = {
+    token: "", 
+    database: "", 
+    log_level: "info", 
+    log_path: "", 
+    lifetime: 24.hours, 
+    relay_luck: false,
+    entities: ["bold", "italic", "text_link"]
+  } 
 
   begin 
     config = File.open(File.expand_path("config.yaml")) do |file|
@@ -53,6 +61,19 @@ def parse_config : NamedTuple
       tuple = tuple.merge({relay_luck: relay_luck})
     else
       Log.notice{"Relay-luck was not specified, not sending luck-based emojis (dice, darts, etc)."}
+    end
+
+    if (entities = config["strip-format"]?) && (entities = entities.as_a?)
+      begin
+        removed_entities = [] of String
+        entities.each do |entity|
+          removed_entities << entity.as_s.downcase
+        end
+        
+        tuple = tuple.merge({entities: removed_entities})
+      rescue ex
+        Log.notice(exception: ex){"Could not determine strip-entities; removing inline links, bold, and italic text from user messages."}
+      end
     end
 
   rescue ex
@@ -112,7 +133,7 @@ Log.info{"Starting Private Parlor v#{Version::VERSION}..."}
 db_path = Path.new(config[:database].to_s) # TODO: We'll want check if this works on Windows later
 db = DB.open("sqlite3://#{db_path}")
 
-bot = PrivateParlor.new(bot_token: config[:token], config: config, connection: db)
+bot = PrivateParlor.new(bot_token: config[:token], config: config, connection: db, parse_mode: Tourmaline::ParseMode::MarkdownV2)
 
 # Start message sending routine
 spawn(name: "SendingQueue") do

@@ -2,6 +2,7 @@ class PrivateParlor < Tourmaline::Client
   property database : Database
   property history : History
   property queue : Channel(QueuedMessage)
+  property replies : Replies
   getter tasks : Hash(Symbol, Tasker::Task)
   getter config : NamedTuple(
     token: String,
@@ -9,7 +10,8 @@ class PrivateParlor < Tourmaline::Client
     log_level: String,
     log_path: String,
     lifetime: Time::Span,
-    relay_luck: Bool
+    relay_luck: Bool,
+    entities: Array(String)
     )
 
   struct QueuedMessage
@@ -53,12 +55,13 @@ class PrivateParlor < Tourmaline::Client
   #
   # `connection`
   # :     the `DB::Databse` object obtained from the database path in the `config.yaml` file
-  def initialize(bot_token, config, connection)
-    super(bot_token: bot_token)
+  def initialize(bot_token, config, connection, parse_mode)
+    super(bot_token: bot_token, default_parse_mode: parse_mode)
     @config = config
     @database = Database.new(connection)
     @history = History.new(config[:lifetime])
     @queue = Channel(QueuedMessage).new
+    @replies = Replies.new(config[:entities])
     @tasks = register_tasks()
   end
 
@@ -126,6 +129,11 @@ class PrivateParlor < Tourmaline::Client
   @[On(:message)]
   def check(update)
     if (message = update.message) && (info = message.from.not_nil!)
+      if (text = message.text) || (text = message.caption)
+        if !@replies.allow_text?(text)
+          return send_message(info.id, "Your message was not relayed because it contained a special font")
+        end
+      end
       if (user = database.get_user(info.id)) && !user.left?
         if !((text = message.text) && text.starts_with?('/')) # Don't relay commands
           # NOTE: If a user sends too many messages at once, this may lock the database when relaying messages
@@ -143,7 +151,8 @@ class PrivateParlor < Tourmaline::Client
   def type_to_proc(message) : Proc(Int64, Int64 | Nil, Tourmaline::Message) | Nil
     case message
     when .text
-      proc = ->(receiver : Int64, reply : Int64 | Nil){send_message(receiver, message.text, reply_to_message: reply)}
+      text = @replies.strip_format(message.text.not_nil!, message.entities)
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_message(receiver, text, entities: message.entities, reply_to_message: reply)}
     when .dice
       if @config[:relay_luck]
         case message.dice.not_nil!.emoji
