@@ -40,13 +40,14 @@ The following features are planned and being worked on:
 
 - [ ] Relay message types
 	- [x] Text
-	- [ ] Photos
+	- [x] Photos
 	- [ ] Albums
-	- [ ] Videos
-	- [ ] Files/Documents
-	- [ ] GIFs
+	- [x] Videos
+	- [x] Files/Documents
+	- [x] GIFs
 	- [ ] Stickers
 	- [ ] Polls
+	- [ ] Venues/Contacts
 - [ ] Admin commands
 	- [ ] Configurable command permissions 
 - [ ] Message history

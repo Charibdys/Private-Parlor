@@ -149,13 +149,34 @@ class PrivateParlor < Tourmaline::Client
 
   # Takes a message and returns a CoreMethod proc according to its content type.
   def type_to_proc(message) : Proc(Int64, Int64 | Nil, Tourmaline::Message) | Nil
-    case message
-    when .text
-      text = @replies.strip_format(message.text.not_nil!, message.entities)
-      proc = ->(receiver : Int64, reply : Int64 | Nil){send_message(receiver, text, entities: message.entities, reply_to_message: reply)}
-    when .dice
+    if caption = message.caption
+      caption = @replies.strip_format(caption, message.caption_entities)
+    end
+
+    # Standard text message
+    if text = message.text
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_message(receiver, @replies.strip_format(text, message.entities), reply_to_message: reply)}
+
+    # Captioned types
+    elsif animation = message.animation
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_animation(receiver, animation.file_id, caption: caption, reply_to_message: reply)}
+    elsif audio = message.audio
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_audio(receiver, audio.file_id, caption, reply_to_message: reply)}
+    elsif document = message.document
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_document(receiver, document.file_id, caption, reply_to_message: reply)}
+    elsif video = message.video
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_video(receiver, video.file_id, caption: caption, reply_to_message: reply)}
+    elsif video_note = message.video_note
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_video_note(receiver, video_note.file_id, caption: caption, reply_to_message: reply)}
+    elsif voice = message.voice
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_voice(receiver, voice.file_id, caption, reply_to_message: reply)}
+    elsif photo = message.photo.last? # The last photo in the array will have the highest resolution
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_photo(receiver, photo.file_id, caption, reply_to_message: reply)}
+    
+    # Dice and other luck types
+    elsif dice = message.dice
       if @config[:relay_luck]
-        case message.dice.not_nil!.emoji
+        case dice.emoji
         when "🎲"
           proc = ->(receiver : Int64, reply : Int64 | Nil){send_dice(receiver, message.text, reply_to_message: reply)}
         when "🎯"
