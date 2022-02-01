@@ -149,6 +149,10 @@ class PrivateParlor < Tourmaline::Client
 
   # Takes a message and returns a CoreMethod proc according to its content type.
   def type_to_proc(message) : Proc(Int64, Int64 | Nil, Tourmaline::Message) | Nil
+    if (forward = message.forward_from) || (forward = message.forward_from_chat)
+      return proc = ->(receiver : Int64, reply : Int64 | Nil){forward_message(receiver, message.chat.id, message.message_id)}
+    end
+    
     if caption = message.caption
       caption = @replies.strip_format(caption, message.caption_entities)
     end

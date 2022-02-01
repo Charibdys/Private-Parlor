@@ -48,6 +48,7 @@ The following features are planned and being worked on:
 	- [ ] Stickers
 	- [ ] Polls
 	- [ ] Venues/Contacts
+	- [x] Forwards
 - [ ] Admin commands
 	- [ ] Configurable command permissions 
 - [ ] Message history
