@@ -138,13 +138,30 @@ class PrivateParlor < Tourmaline::Client
         if !((text = message.text) && text.starts_with?('/')) # Don't relay commands
           # NOTE: If a user sends too many messages at once, this may lock the database when relaying messages
           update_user(info, user)
-          hash = @history.new_message(info.id, message.message_id)
-          relay(message, info, hash)
+          if(check_message_type(message, info))
+            hash = @history.new_message(info.id, message.message_id)
+            relay(message, info, hash)
+          end
         end
       else # Either user has left or is not in the database
         send_message(info.id, @replies.not_in_chat)
       end
     end
+  end
+
+
+  # Check whether or not the type of message should be relayed
+  # Primarily used to prevent non-anonymous polls
+  #
+  # Returns true if the message type is allowed, false otherwise
+  def check_message_type(message, info) : Bool
+    if poll = message.poll 
+      if poll.is_anonymous == false
+        send_message(info.id, @replies.deanon_poll)
+        return false
+      end
+    end
+    return true
   end
 
   # Takes a message and returns a CoreMethod proc according to its content type.
@@ -176,6 +193,10 @@ class PrivateParlor < Tourmaline::Client
       proc = ->(receiver : Int64, reply : Int64 | Nil){send_voice(receiver, voice.file_id, caption, reply_to_message: reply)}
     elsif photo = message.photo.last? # The last photo in the array will have the highest resolution
       proc = ->(receiver : Int64, reply : Int64 | Nil){send_photo(receiver, photo.file_id, caption, reply_to_message: reply)}
+
+    # Forward polls
+    elsif poll = message.poll
+      proc = ->(receiver : Int64, reply : Int64 | Nil){forward_message(receiver, message.chat.id, message.message_id)}
     
     # Dice and other luck types
     elsif dice = message.dice

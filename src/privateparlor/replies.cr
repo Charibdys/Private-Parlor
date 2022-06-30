@@ -103,6 +103,11 @@ class Replies
     Italic.new("Your message was not relayed because it contained a special font.").to_md
   end
 
+  # Returns an italicized message for when a poll is sent without anonymous voting.
+  def deanon_poll() : String
+    Italic.new("Your poll was not sent because it does not allow anonymous voting.").to_md
+  end
+
   # Returns an italicized message for when the user is blacklisted.
   #
   # Includes the user's `blacklist_text` if one was given.
