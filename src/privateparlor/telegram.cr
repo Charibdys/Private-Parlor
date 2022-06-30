@@ -197,6 +197,10 @@ class PrivateParlor < Tourmaline::Client
     # Forward polls
     elsif poll = message.poll
       proc = ->(receiver : Int64, reply : Int64 | Nil){forward_message(receiver, message.chat.id, message.message_id)}
+
+    # Stickers
+    elsif sticker = message.sticker
+      proc = ->(receiver : Int64, reply : Int64 | Nil){send_sticker(receiver, sticker.file_id, reply_to_message: reply)}
     
     # Dice and other luck types
     elsif dice = message.dice

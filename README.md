@@ -45,8 +45,8 @@ The following features are planned and being worked on:
 	- [x] Videos
 	- [x] Files/Documents
 	- [x] GIFs
-	- [ ] Stickers
-	- [ ] Polls
+	- [x] Stickers
+	- [x] Polls
 	- [ ] Venues/Contacts
 	- [x] Forwards
 - [ ] Admin commands
