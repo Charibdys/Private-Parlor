@@ -1,5 +1,5 @@
 name: privateparlor
-version: 0.1.1
+version: 0.3.0
 
 dependencies:
   tourmaline:
@@ -18,4 +18,4 @@ targets:
   privateparlor:
     main: src/privateparlor.cr
 
-crystal: 1.2.2
+crystal: 1.4.0
