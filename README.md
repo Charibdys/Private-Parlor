@@ -41,7 +41,7 @@ The following features are planned and being worked on:
 - [ ] Relay message types
 	- [x] Text
 	- [x] Photos
-	- [ ] Albums
+	- [X] Albums
 	- [x] Videos
 	- [x] Files/Documents
 	- [x] GIFs

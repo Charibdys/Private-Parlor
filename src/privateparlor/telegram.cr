@@ -3,6 +3,7 @@ class PrivateParlor < Tourmaline::Client
   property history : History
   property queue : Channel(QueuedMessage)
   property replies : Replies
+  property albums : Hash(String, Album)
   getter tasks : Hash(Symbol, Tasker::Task)
   getter config : NamedTuple(
     token: String,
@@ -15,10 +16,10 @@ class PrivateParlor < Tourmaline::Client
     )
 
   struct QueuedMessage
-    getter hashcode : UInt64
+    getter hashcode : UInt64 | Array(UInt64)
     getter receiver : Int64
     getter reply_to : Int64 | Nil
-    getter function : Proc(Int64, Int64 | Nil, Tourmaline::Message)
+    getter function : Proc(Int64, Int64 | Nil, Tourmaline::Message) | Proc(Int64, Int64 | Nil, Array(Tourmaline::Message))
     
     # Creates an instance of `QueuedMessage`. 
     #
@@ -35,13 +36,23 @@ class PrivateParlor < Tourmaline::Client
     #
     # `function` 
     # :     a proc that points to a Tourmaline CoreMethod send function and takes a user ID and MSID as its arguments
-    def initialize(hash : UInt64, receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
+    def initialize(hash : UInt64 | Array(UInt64), receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
       @hashcode = hash
       @receiver = receiver_id
       @reply_to = reply_msid
       @function = func
     end
   end 
+
+  struct Album
+    property message_ids : Array(Int64)
+    property media_ids : Array(InputMediaPhoto | InputMediaVideo | InputMediaAudio | InputMediaDocument)
+
+    def initialize(msid : Int64, media : InputMediaPhoto | InputMediaVideo | InputMediaAudio | InputMediaDocument)
+      @message_ids = [msid]
+      @media_ids = [media]
+    end
+  end
 
   # Creates a new instance of PrivateParlor.
   #
@@ -63,6 +74,7 @@ class PrivateParlor < Tourmaline::Client
     @queue = Channel(QueuedMessage).new
     @replies = Replies.new(config[:entities])
     @tasks = register_tasks()
+    @albums = {} of String => Album
   end
 
   # Starts various background tasks and stores them in a hash.
@@ -151,7 +163,7 @@ class PrivateParlor < Tourmaline::Client
 
 
   # Check whether or not the type of message should be relayed
-  # Primarily used to prevent non-anonymous polls
+  # Prevents non-anonymous polls and handles Album relaying
   #
   # Returns true if the message type is allowed, false otherwise
   def check_message_type(message, info) : Bool
@@ -161,13 +173,62 @@ class PrivateParlor < Tourmaline::Client
         return false
       end
     end
+
+    if album = message.media_group_id
+      # Can't use @replies.strip_format() as that will send the caption with formatting syntax escaped
+      if caption = message.caption
+        caption = @replies.replace_links(caption, message.caption_entities)
+      end
+      if entities = message.caption_entities
+        entities = @replies.remove_entities(entities)
+      end
+
+      if (media = message.photo.last?) 
+        input = InputMediaPhoto.new(media.file_id, caption: caption , caption_entities: entities)
+      elsif (media = message.video) 
+        input = InputMediaVideo.new(media.file_id, caption: caption, caption_entities: entities)
+      elsif (media = message.audio) 
+        input = InputMediaAudio.new(media.file_id, caption: caption, caption_entities: entities)
+      elsif (media = message.document)
+        input = InputMediaDocument.new(media.file_id, caption: caption, caption_entities: entities)
+      else
+        return false
+      end
+        
+      if @albums[album]?
+        @albums[album].message_ids << message.message_id
+        @albums[album].media_ids << input
+      else
+        media_group = Album.new(message.message_id, input)
+        @albums[album] = media_group
+
+        # Wait an arbitrary amount of time for Telegram MediaGroup updates to come in before relaying the album.
+        Tasker.at(2.seconds.from_now) {
+          hash = Array(UInt64).new
+          @albums[album].message_ids.each do |msid|
+            hash << @history.new_message(info.id, msid)
+          end
+
+          relay(message, info, hash)
+        }
+      end
+      return false
+    end
     return true
   end
 
   # Takes a message and returns a CoreMethod proc according to its content type.
-  def type_to_proc(message) : Proc(Int64, Int64 | Nil, Tourmaline::Message) | Nil
+  def type_to_proc(message) : Proc(Int64, Int64 | Nil, Tourmaline::Message) | Proc(Int64, Int64 | Nil, Array(Tourmaline::Message)) | Nil
     if (forward = message.forward_from) || (forward = message.forward_from_chat)
       return proc = ->(receiver : Int64, reply : Int64 | Nil){forward_message(receiver, message.chat.id, message.message_id)}
+    end
+
+    if album = message.media_group_id
+      if temp_album = @albums.delete(album)
+        return proc = ->(receiver : Int64, reply : Int64 | Nil){send_media_group(receiver, temp_album.media_ids, reply_to_message: reply)}
+      else
+        return nil
+      end
     end
     
     if caption = message.caption
@@ -254,7 +315,7 @@ class PrivateParlor < Tourmaline::Client
   ###################
 
   # Creates a new `Message` and sends it to the `queue` channel to be sent later.
-  def add_to_queue(hashcode : UInt64, receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
+  def add_to_queue(hashcode : UInt64 | Array(UInt64), receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
     @queue.send(QueuedMessage.new(hashcode, receiver_id, reply_msid, func))
   end
 
@@ -267,7 +328,16 @@ class PrivateParlor < Tourmaline::Client
   def send_messages
     msg = @queue.receive
     success = msg.function.call(msg.receiver, msg.reply_to)
-    @history.add_to_cache(msg.hashcode, success.message_id, msg.receiver)
+
+    if !success.is_a?(Array(Tourmaline::Message))
+      @history.add_to_cache(msg.hashcode.as(UInt64), success.message_id, msg.receiver)
+    else
+      sent_msids = success.map {|msg| msg.message_id}
+
+      sent_msids.zip(msg.hashcode.as(Array(UInt64))) do |msid, hashcode|
+        @history.add_to_cache(hashcode, msid, msg.receiver)
+      end
+    end
   end
 
 end
