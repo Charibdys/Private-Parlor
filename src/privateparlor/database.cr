@@ -83,6 +83,16 @@ class Database
       Log.info{"User #{@id}, aka #{self.get_formatted_name}, left the chat."}
     end
 
+    def set_rank(rank : Ranks) : Nil
+      if @rank <= rank.value
+        @rank = rank.value
+        Log.info{"User #{@id}, aka #{self.get_formatted_name}, has been promoted to #{rank.to_s.downcase()}."}
+      else
+        @rank = rank.value
+        Log.info{"User #{@id}, aka #{self.get_formatted_name}, has been demoted."}
+      end
+    end
+
     #####################
     # Predicate methods #
     #####################
@@ -118,6 +128,17 @@ class Database
     end
   end
 
+  def get_user_by_name(username) : User | Nil
+    if result = db.query_one?("SELECT * FROM users WHERE LOWER(username) = ?", username, as: {
+        id: Int64, username: String?, realname: String, rank: Int32, joined: Time, left: Time?, 
+        last_active: Time, cooldown_until: Time?, blacklist_text: String?, warnings: Int32, 
+        warn_expiry: Time?, karma: Int32, hide_karma: Bool, debug_enabled: Bool, tripcode: String?
+      })
+
+      User.new(result)
+    end
+  end
+
   # Queries the database for all user ids, ordered by highest ranking users first then most active users.
   def get_prioritized_users() : Array(Int64)
     sql = "SELECT id
@@ -131,9 +152,9 @@ class Database
   # Inserts a user with the given *id*, *username*, and *realname* into the database.
   #
   # Returns the new `User`.
-  def add_user(id, username, realname) : User
+  def add_user(id, username, realname, rank = 0) : User
     # Prepare values
-    user = User.new({id: id, username: username, realname: realname})
+    user = User.new({id: id, username: username, realname: realname, rank: rank})
     args = user.to_array
 
     # Prepare query
@@ -174,7 +195,17 @@ class Database
 
   # Yields a `ResultSet` containing the ids of each user in the database.
   def get_ids
-    yield db.query("SELECT id FROM users")
+    db.query("SELECT id FROM users") do |rs|
+      yield rs
+    end
+  end
+
+  def no_users?
+    if(get_ids() do |set| set.move_next end)
+      return false
+    else
+      return true
+    end
   end
   
   # Ensures that the DB schema is usable by the program.

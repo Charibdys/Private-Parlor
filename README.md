@@ -50,6 +50,15 @@ The following features are planned and being worked on:
 	- [ ] Venues/Contacts
 	- [x] Forwards
 - [ ] Admin commands
+	- [ ] Delete
+	- [ ] Delete all
+	- [ ] Remove
+	- [ ] Warn
+	- [ ] Setting rules
+	- [ ] User info
+	- [ ] Blacklist
+	- [X] Promotion 
+	- [X]	Demotion 
 	- [ ] Configurable command permissions 
 - [ ] Message history
 	- [ ] Configurable cache contents

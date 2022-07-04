@@ -117,7 +117,12 @@ class PrivateParlor < Tourmaline::Client
           send_message(user.id, @replies.already_in_chat)
         end
       else # User does not exist; add to DB
-        user = database.add_user(info.id, info.username, info.full_name)
+        if(database.no_users?)
+          user = database.add_user(info.id, info.username, info.full_name, rank: 1000)
+        else
+          user = database.add_user(info.id, info.username, info.full_name)
+        end
+
         send_message(user.id, @replies.joined)
       end
     end
@@ -133,6 +138,92 @@ class PrivateParlor < Tourmaline::Client
         user.set_left
         send_message(info.id, @replies.left)
         database.modify_user(user) 
+      end
+    end
+  end
+
+
+  ##################
+  # ADMIN COMMANDS #
+  ##################
+
+  def authorized?(user_id, rank : Ranks)
+    if user = database.get_user(user_id)
+      if user.rank >= rank.value
+        return true
+      else
+        return false
+      end
+    end
+  end
+
+  @[Command(["mod"])]
+  def mod_command(ctx)
+    if info = ctx.message.from.not_nil!
+      if authorized?(info.id, Ranks::HOST)
+        arg = ctx.message.text.not_nil!
+        if arg = arg.split[1]?
+          if user = database.get_user_by_name(arg)
+            if user.left?
+              return
+            elsif user.rank >= Ranks::MOD.value
+              return
+            else
+              user.set_rank(Ranks::MOD)
+              @database.modify_user(user)
+
+              send_message(user.id, @replies.promoted(Ranks::MOD))
+              return send_message(info.id, @replies.success)
+            end
+          end
+        else
+          return send_message(info.id, @replies.missing_args)
+        end
+      end
+    end
+  end
+   
+  @[Command(["admin"])]
+  def admin_command(ctx)
+    if info = ctx.message.from.not_nil!
+      if authorized?(info.id, Ranks::HOST)
+        arg = ctx.message.text.not_nil!
+        if arg = arg.split[1]?
+          if user = database.get_user_by_name(arg)
+            if user.left?
+              return
+            elsif user.rank >= Ranks::ADMIN.value
+              return
+            else
+              user.set_rank(Ranks::ADMIN)
+              @database.modify_user(user)
+
+              send_message(user.id, @replies.promoted(Ranks::ADMIN))
+              return send_message(info.id, @replies.success)
+            end
+          end
+        else
+          return send_message(info.id, @replies.missing_args)
+        end
+      end
+    end
+  end
+
+  @[Command(["demote"])]
+  def demote_command(ctx)
+    if info = ctx.message.from.not_nil!
+      if authorized?(info.id, Ranks::HOST)
+        arg = ctx.message.text.not_nil!
+        if arg = arg.split[1]?
+          if user = database.get_user_by_name(arg)
+            user.set_rank(Ranks::USER)
+            @database.modify_user(user)
+
+            return send_message(info.id, @replies.success)
+          end
+        else
+          return send_message(info.id, @replies.missing_args)
+        end
       end
     end
   end
@@ -341,3 +432,10 @@ class PrivateParlor < Tourmaline::Client
   end
 
 end
+
+enum Ranks
+  USER  = 0
+  MOD   = 10
+  ADMIN = 100
+  HOST  = 1000 
+end 

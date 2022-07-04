@@ -108,6 +108,21 @@ class Replies
     Italic.new("Your poll was not sent because it does not allow anonymous voting.").to_md
   end
 
+  # Returns an italicized message for when a command is used without an argument.
+  def missing_args() : String
+    Italic.new("You need to give an input to use this command").to_md
+  end
+
+  # Returns an italicized message for when a user is promoted to a given rank.
+  def promoted(rank : Ranks) : String
+    Italic.new("You have been promoted to #{rank.to_s.downcase()}!").to_md
+  end
+
+  # Returns a checkmark for when a command executed successfully.
+  def success() : String
+    "✅".to_md
+  end
+
   # Returns an italicized message for when the user is blacklisted.
   #
   # Includes the user's `blacklist_text` if one was given.
