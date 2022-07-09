@@ -66,6 +66,24 @@ class History
     @message_history[@msid_map[msid]].receivers[receiver_id]
   end
 
+  # Returns the *sender* of a specific `MessageGroup`
+  def get_sender_id(msid : Int64) : Int64
+    @message_history[@msid_map[msid]].sender
+  end
+
+  # Iterates trhough *message_history* and returns all message ids sent by a given user.
+  def get_msids_from_user(uid : Int64) : Array(Int64)
+    user_msgs = [] of Int64
+    @message_history.each_value do |msg|
+      if msg.sender != uid
+        next
+      end 
+
+      user_msgs << msg.receivers[uid]
+    end
+    return user_msgs
+  end
+
   # Delete message from cache with a hashcode associated with the given *msid*.
   def del_message_group(msid : Int64) : Nil
     hash = @msid_map[msid]

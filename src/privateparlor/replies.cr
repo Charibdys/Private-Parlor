@@ -113,9 +113,28 @@ class Replies
     Italic.new("You need to give an input to use this command").to_md
   end
 
+  # Returns an italicized message for when a command is used without a reply.
+  def no_reply() : String
+    Italic.new("You need to reply to a message to use this command").to_md
+  end
+
   # Returns an italicized message for when a user is promoted to a given rank.
   def promoted(rank : Ranks) : String
     Italic.new("You have been promoted to #{rank.to_s.downcase()}!").to_md
+  end
+
+  # Returns an italicized message for when a message is deleted or removed.
+  def message_deleted(warning : Bool) : String
+    if warning
+      Italic.new("This message has been deleted. You are on cooldown for some amount of time").to_md
+    else
+      Italic.new("This message has been removed, but no cooldown has been given. Please refrain from posting the same message again.").to_md
+    end
+  end
+
+  # Returns an italicized message and the number of messages deleted after a purge command was successful.
+  def purge_complete(msgs_deleted : Int32) : String
+    Italic.new("#{msgs_deleted} messages were matched and deleted.").to_md
   end
 
   # Returns a checkmark for when a command executed successfully.

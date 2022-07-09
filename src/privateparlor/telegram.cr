@@ -147,6 +147,9 @@ class PrivateParlor < Tourmaline::Client
   # ADMIN COMMANDS #
   ##################
 
+  # Checks if the user is authorized to use a particular command.
+  #
+  # Returns true if authorized, false otherwise.
   def authorized?(user_id, rank : Ranks)
     if user = database.get_user(user_id)
       if user.rank >= rank.value
@@ -157,6 +160,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Promote a user to the moderator rank.
   @[Command(["mod"])]
   def mod_command(ctx)
     if info = ctx.message.from.not_nil!
@@ -183,6 +187,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
    
+  # Promote a user to the administrator rank.
   @[Command(["admin"])]
   def admin_command(ctx)
     if info = ctx.message.from.not_nil!
@@ -209,6 +214,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Returns a ranked user to the user rank
   @[Command(["demote"])]
   def demote_command(ctx)
     if info = ctx.message.from.not_nil!
@@ -223,6 +229,85 @@ class PrivateParlor < Tourmaline::Client
           end
         else
           return send_message(info.id, @replies.missing_args)
+        end
+      end
+    end
+  end
+
+  # Delete a message from a user, give a warning and a cooldown.
+  # TODO: Implement warning/cooldown system
+  @[Command(["delete"])]
+  def delete_message(ctx)
+    if info = ctx.message.from.not_nil!
+      if authorized?(info.id, Ranks::MOD)
+        if reply = ctx.message.reply_message
+          reply_msids = @history.get_all_msids(reply.message_id)
+          reply_msids.each_key do |receiver_id|
+            if receiver_id != @history.get_sender_id(reply.message_id)
+              delete_message(receiver_id, reply_msids[receiver_id])
+            end
+          end
+
+          send_message(@history.get_sender_id(reply.message_id), @replies.message_deleted(true), reply_to_message: reply_msids[@history.get_sender_id(reply.message_id)])
+          @history.del_message_group(reply.message_id)
+
+          return send_message(info.id, @replies.success)
+        else
+          return send_message(info.id, @replies.no_reply)
+        end
+      end
+    end
+  end
+
+
+  # Remove a message from a user without giving a warning or cooldown.
+  @[Command(["remove"])]
+  def remove_message(ctx)
+    if info = ctx.message.from.not_nil!
+      if authorized?(info.id, Ranks::MOD)
+        if reply = ctx.message.reply_message
+          reply_msids = @history.get_all_msids(reply.message_id)
+          reply_msids.each_key do |receiver_id|
+            if receiver_id != @history.get_sender_id(reply.message_id)
+              delete_message(receiver_id, reply_msids[receiver_id])
+            end
+          end
+
+          send_message(@history.get_sender_id(reply.message_id), @replies.message_deleted(false), reply_to_message: reply_msids[@history.get_sender_id(reply.message_id)])
+          @history.del_message_group(reply.message_id)
+
+          return send_message(info.id, @replies.success)
+        else
+          return send_message(info.id, @replies.no_reply)
+        end
+      end
+    end
+  end
+
+  # Delete all messages from recently blacklisted users.
+  @[Command(["purge"])]
+  def delete_all_messages(ctx)
+    if info = ctx.message.from.not_nil!
+      if authorized?(info.id, Ranks::ADMIN)
+        if user = @database.get_blacklisted_users()
+          delete_msids = [] of Int64
+          user.each do |user|
+            @history.get_msids_from_user(user.id).each do |msid|
+              reply_msids = @history.get_all_msids(msid)
+              reply_msids.each_key do |receiver_id|
+                if receiver_id != user.id
+                  delete_message(receiver_id, reply_msids[receiver_id])
+                end
+              end
+              delete_msids << msid
+            end
+
+            delete_msids.each do |msid|
+              @history.del_message_group(msid)
+            end
+
+            return send_message(info.id, @replies.purge_complete(delete_msids.size()))
+          end
         end
       end
     end

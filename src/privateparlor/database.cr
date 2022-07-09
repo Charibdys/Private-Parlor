@@ -128,6 +128,27 @@ class Database
     end
   end
 
+  # Queries the database for blacklisted users who have been banned within the past 48 hours.
+  #
+  # Returns an array of `User` or `Nil` if no users were found.
+  def get_blacklisted_users() : Array(User) | Nil
+    users = [] of User
+    if result = db.query_all("SELECT * FROM users WHERE rank = -10 AND left > (?)", (Time.local - 48.hours), as: {
+      id: Int64, username: String?, realname: String, rank: Int32, joined: Time, left: Time?, 
+      last_active: Time, cooldown_until: Time?, blacklist_text: String?, warnings: Int32, 
+      warn_expiry: Time?, karma: Int32, hide_karma: Bool, debug_enabled: Bool, tripcode: String?
+    }) 
+      result.each do |output|
+        users << User.new(output)
+      end
+    end
+
+    return users
+  end
+
+  # Queries the database for a user with a given *username*.
+  #
+  # Returns a `User` object or Nil if no user was found.
   def get_user_by_name(username) : User | Nil
     if result = db.query_one?("SELECT * FROM users WHERE LOWER(username) = ?", username, as: {
         id: Int64, username: String?, realname: String, rank: Int32, joined: Time, left: Time?, 
