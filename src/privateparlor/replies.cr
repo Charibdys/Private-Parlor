@@ -124,12 +124,11 @@ class Replies
   end
 
   # Returns an italicized message for when a message is deleted or removed.
-  def message_deleted(warning : Bool) : String
-    if warning
-      Italic.new("This message has been deleted. You are on cooldown for some amount of time").to_md
-    else
-      Italic.new("This message has been removed, but no cooldown has been given. Please refrain from posting the same message again.").to_md
-    end
+  def message_deleted(deleted : Bool, reason : String | Nil = nil) : String
+    Italic.new("This message has been #{deleted ? 
+      "deleted#{reason ? " for: #{reason}." : "."} You are on cooldown for some amount of time" :
+      "removed#{reason ? " for: #{reason}." : "."} No cooldown has been given, but please refrain from posting the same message again."
+      }").to_md
   end
 
   # Returns an italicized message and the number of messages deleted after a purge command was successful.

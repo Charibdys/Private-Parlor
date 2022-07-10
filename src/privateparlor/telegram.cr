@@ -219,8 +219,7 @@ class PrivateParlor < Tourmaline::Client
   def demote_command(ctx)
     if info = ctx.message.from.not_nil!
       if authorized?(info.id, Ranks::HOST)
-        arg = ctx.message.text.not_nil!
-        if arg = arg.split[1]?
+        if arg = get_args(ctx.message)
           if user = database.get_user_by_name(arg)
             user.set_rank(Ranks::USER)
             @database.modify_user(user)
@@ -248,7 +247,7 @@ class PrivateParlor < Tourmaline::Client
             end
           end
 
-          send_message(@history.get_sender_id(reply.message_id), @replies.message_deleted(true), reply_to_message: reply_msids[@history.get_sender_id(reply.message_id)])
+          send_message(@history.get_sender_id(reply.message_id), @replies.message_deleted(true, get_args(ctx.message)), reply_to_message: reply_msids[@history.get_sender_id(reply.message_id)])
           @history.del_message_group(reply.message_id)
 
           return send_message(info.id, @replies.success)
@@ -273,7 +272,7 @@ class PrivateParlor < Tourmaline::Client
             end
           end
 
-          send_message(@history.get_sender_id(reply.message_id), @replies.message_deleted(false), reply_to_message: reply_msids[@history.get_sender_id(reply.message_id)])
+          send_message(@history.get_sender_id(reply.message_id), @replies.message_deleted(false, get_args(ctx.message)), reply_to_message: reply_msids[@history.get_sender_id(reply.message_id)])
           @history.del_message_group(reply.message_id)
 
           return send_message(info.id, @replies.success)
@@ -483,6 +482,19 @@ class PrivateParlor < Tourmaline::Client
       end
     else
       Log.error {"Could not create proc for message type. Message was #{message}"}
+    end
+  end
+
+  # Returns arguments found after a command from a message text.
+  def get_args(msg : Tourmaline::Message, count : Int = 1) : String | Array(String) | Nil
+    args = msg.text.not_nil!.split(count + 1)
+    case args.size()
+    when 2
+      return args[1]
+    when 2..
+      return args.shift
+    else
+      return nil
     end
   end
 
