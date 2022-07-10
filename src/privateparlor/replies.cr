@@ -143,6 +143,13 @@ class Replies
     Italic.new("#{msgs_deleted} messages were matched and deleted.").to_md
   end
 
+  # Returns a custom text from a given string.
+  def custom(text : String) : String
+    message = Section.new
+    message << text
+    return message.to_md
+  end
+
   # Returns a checkmark for when a command executed successfully.
   def success() : String
     "✅".to_md

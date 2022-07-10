@@ -124,6 +124,9 @@ class PrivateParlor < Tourmaline::Client
         end
 
         send_message(user.id, @replies.joined)
+        if motd = @database.get_motd
+          send_message(info.id, @replies.custom(motd))
+        end
       end
     end
   end
@@ -327,6 +330,24 @@ class PrivateParlor < Tourmaline::Client
           end
         else
           return send_message(info.id, @replies.no_reply)
+        end
+      end
+    end
+  end
+
+  # Replies with the motd/rules associated with this bot.
+  # If the host invokes this command, the motd/rules can be set or modified.
+  @[Command(["motd", "rules"])]
+  def motd(ctx)
+    if info = ctx.message.from.not_nil!
+      if arg = get_args(ctx.message)
+        if authorized?(info.id, Ranks::HOST)
+          @database.set_motd(arg)
+          return send_message(info.id, @replies.success)
+        end
+      else
+        if motd = @database.get_motd
+          return send_message(info.id, @replies.custom(motd), reply_to_message: ctx.message.message_id)
         end
       end
     end

@@ -235,6 +235,18 @@ class Database
       return true
     end
   end
+
+  # Sets the motd/rules to the given string.
+  def set_motd(text : String)
+    db.exec("REPLACE INTO system_config VALUES ('motd', ?)", text)
+  end
+
+  # Retrieves the motd/rules from the database.
+  #
+  # Returns the motd as a string, or returns nil if the motd could not be retrieved.
+  def get_motd() : String | Nil
+    db.query_one?("SELECT value FROM system_config WHERE name = 'motd'", as: String)
+  end
   
   # Ensures that the DB schema is usable by the program.
   #
