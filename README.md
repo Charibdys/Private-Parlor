@@ -50,13 +50,13 @@ The following features are planned and being worked on:
 	- [ ] Venues/Contacts
 	- [x] Forwards
 - [ ] Admin commands
-	- [ ] Delete
-	- [ ] Delete all
-	- [ ] Remove
+	- [X] Delete
+	- [X] Delete all
+	- [X] Remove
 	- [ ] Warn
 	- [ ] Setting rules
 	- [ ] User info
-	- [ ] Blacklist
+	- [X] Blacklist
 	- [X] Promotion 
 	- [X]	Demotion 
 	- [ ] Configurable command permissions 

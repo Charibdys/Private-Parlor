@@ -131,6 +131,13 @@ class Replies
       }").to_md
   end
 
+  # Returns an italicized message for when the user is blacklisted.
+  #
+  #Includes the user's `blacklist_text` if one was given.
+  def blacklisted(reason : String | Nil = nil) : String
+    Italic.new("You have been blacklisted#{reason ? " for: #{reason}": "."}").to_md
+  end
+
   # Returns an italicized message and the number of messages deleted after a purge command was successful.
   def purge_complete(msgs_deleted : Int32) : String
     Italic.new("#{msgs_deleted} messages were matched and deleted.").to_md
@@ -139,18 +146,6 @@ class Replies
   # Returns a checkmark for when a command executed successfully.
   def success() : String
     "✅".to_md
-  end
-
-  # Returns an italicized message for when the user is blacklisted.
-  #
-  # Includes the user's `blacklist_text` if one was given.
-  def blacklisted(reason : String | Nil) : String
-    message = "You've been blacklisted"
-
-    message += reason ? " for: #{reason}" : "."
-
-    message = Italic.new(message)
-    message.to_md
   end
 
 end

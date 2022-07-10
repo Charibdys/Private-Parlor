@@ -312,6 +312,26 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  @[Command(["blacklist", "ban"])]
+  def blacklist(ctx)
+    if info = ctx.message.from.not_nil!
+      if authorized?(info.id, Ranks::ADMIN)
+        if reply = ctx.message.reply_message
+          if user = database.get_user(@history.get_sender_id(reply.message_id))
+            user.blacklist(get_args(ctx.message))
+            @database.modify_user(user)
+
+            send_message(user.id, @replies.blacklisted(get_args(ctx.message)), reply_to_message: @history.get_msid(reply.message_id, user.id))
+
+            return send_message(info.id, @replies.success)
+          end
+        else
+          return send_message(info.id, @replies.no_reply)
+        end
+      end
+    end
+  end
+
   # Checks if the message is a command and ensure that the user is in the chat.
   @[On(:message)]
   def check(update)
@@ -531,8 +551,9 @@ class PrivateParlor < Tourmaline::Client
 end
 
 enum Ranks
-  USER  = 0
-  MOD   = 10
-  ADMIN = 100
-  HOST  = 1000 
+  BANNED  = -10
+  USER    = 0
+  MOD     = 10
+  ADMIN   = 100
+  HOST    = 1000 
 end 

@@ -83,6 +83,13 @@ class Database
       Log.info{"User #{@id}, aka #{self.get_formatted_name}, left the chat."}
     end
 
+    def blacklist(reason : String | Nil) : Nil
+      @rank = -10
+      self.set_left
+      @blacklist_text = reason
+      Log.info{"User #{@id}, aka #{self.get_formatted_name}, has been blacklisted#{reason ? " for: #{reason}" : "."}"}
+    end
+
     def set_rank(rank : Ranks) : Nil
       if @rank <= rank.value
         @rank = rank.value
