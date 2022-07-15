@@ -94,6 +94,21 @@ class Database
       Log.info{"User #{@id}, aka #{self.get_formatted_name}, left the chat."}
     end
 
+    # Set *hide_karma* to its opposite value.
+    def toggle_karma
+      @hide_karma = !hide_karma
+    end
+
+    # Increment the user's karma by a given amount (1 by default)
+    def increment_karma(amount : Int32 = 1)
+      @karma += amount
+    end
+
+    # Decrement the user's karma by a given amount (1 by default)
+    def decrement_karma(amount : Int32 = 1)
+      @karma -= amount
+    end
+
     def blacklist(reason : String | Nil) : Nil
       @rank = -10
       self.set_left

@@ -123,6 +123,31 @@ class Replies
     Italic.new("You have been promoted to #{rank.to_s.downcase()}!").to_md
   end
 
+  # Returns a message for when a user disables or enables karma notifications.
+  def toggle_karma(hide_karma : Bool) : String
+    Group.new(Bold.new("Karma notifications"), ": #{hide_karma ? "disabled" : "enabled"}").to_md
+  end
+
+  # Returns an italicized message for when a user upvotes a message.
+  def gave_upvote() : String
+    Italic.new("You upvoted this message!").to_md
+  end
+
+  # Returns an italicized message for when a user was upvoted.
+  def got_upvote() : String
+    Italic.new("You've just been upvoted! (check /info to see your karma or /toggleKarma to turn these notifications off)").to_md
+  end
+
+  # Returns an italicized message for when a user tries to upvote their own message.
+  def upvoted_own_message() : String
+    Italic.new("You can't upvote your own message!").to_md
+  end
+  
+  # Returns an italicized message for when a user tries to upvote a message they already upvoted.
+  def already_upvoted() : String
+    Italic.new("You have already upvoted this message.").to_md
+  end
+
   def user_info(oid : String, username : String, rank : Ranks, karma : Int32, warnings : Int32, warn_expiry : Time | Nil = nil, cooldown_until : Time | Nil = nil) : String
     return Section.new(
       Group.new(Bold.new("id"), ": #{oid}, ", Bold.new("username"), ": #{username}, ", Bold.new("rank"), ": #{rank.value} (#{rank.to_s})"),

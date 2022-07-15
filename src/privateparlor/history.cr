@@ -21,6 +21,7 @@ class History
     getter sender : Int64
     property receivers : Hash(Int64, Int64)
     property sent : Time
+    property ratings : Set(Int64)
 
     # Creates an instance of `MessageGroup`
     #
@@ -35,6 +36,7 @@ class History
       @sender = sender_id
       @receivers = {sender_id => msid} of Int64 => Int64
       @sent = Time.local
+      @ratings = Set(Int64).new
     end
 
   end
@@ -54,6 +56,13 @@ class History
   def add_to_cache(hashcode : UInt64, msid : Int64, receiver_id : Int64) : Nil
     @msid_map.merge!({msid => hashcode})
     @message_history[hashcode].receivers.merge!({receiver_id => msid})
+  end
+
+  # Update the ratings set in the associated `MessageGroup`
+  #
+  # Returns true if the user was added to the ratings set; false if the user was already in it.
+  def add_rating(msid : Int64, uid : Int64) : Bool
+    @message_history[@msid_map[msid]].ratings.add?(uid)
   end
 
   # Returns the receivers hash found in the associated `MessageGroup`

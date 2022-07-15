@@ -177,6 +177,46 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Upvotes a message.
+  @[Command(["1"], prefix: ["+"])]
+  def karma_command(ctx)
+    if info = ctx.message.from.not_nil!
+      if user = database.get_user(info.id)
+        if reply = ctx.message.reply_message
+          if(@history.get_sender_id(reply.message_id) == user.id)
+            return send_message(user.id, @replies.upvoted_own_message)
+          end
+          if(!@history.add_rating(reply.message_id, user.id))
+            return send_message(user.id, @replies.already_upvoted)
+          end
+
+          if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+            reply_user.increment_karma
+            database.modify_user(reply_user)
+            send_message(user.id, @replies.gave_upvote)
+            if(!reply_user.hide_karma)
+              send_message(reply_user.id, @replies.got_upvote)
+            end
+          end
+        else
+          return send_message(user.id, @replies.no_reply)
+        end
+      end
+    end
+  end
+
+  # Toggle the user's hide_karma attribute.
+  @[Command(["toggle_karma", "togglekarma"])]
+  def toggle_karma_command(ctx)
+    if info = ctx.message.from.not_nil!
+      if user = database.get_user(info.id)
+        user.toggle_karma
+        send_message(info.id, @replies.toggle_karma(user.hide_karma))
+        database.modify_user(user)
+      end
+    end
+  end
+
 
   ##################
   # ADMIN COMMANDS #
