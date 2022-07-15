@@ -145,6 +145,38 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Returns a message containing the user's OID, username, karma, warnings, etc.
+  #
+  # If this is used with a reply, returns the user info of that message if the invoker is ranked.
+  @[Command(["info"])]
+  def info_command(ctx)
+    if info = ctx.message.from.not_nil!
+      if user = database.get_user(info.id)
+        if reply = ctx.message.reply_message
+          if authorized?(user.id, Ranks::MOD)
+            if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+              return send_message(user.id, @replies.user_info_mod(
+                oid: reply_user.get_obfuscated_id,
+                karma: reply_user.get_obfuscated_karma,
+                cooldown_until: reply_user.cooldown_until
+              ))
+            end
+          end
+        end
+
+        return send_message(user.id, @replies.user_info(
+            oid: user.get_obfuscated_id,
+            username: user.get_formatted_name,
+            rank: Ranks.new(user.rank),
+            karma: user.karma,
+            warnings: user.warnings,
+            warn_expiry: user.warn_expiry,
+            cooldown_until: user.cooldown_until
+          ))
+      end
+    end
+  end
+
 
   ##################
   # ADMIN COMMANDS #

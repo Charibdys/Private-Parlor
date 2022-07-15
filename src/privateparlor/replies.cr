@@ -123,6 +123,23 @@ class Replies
     Italic.new("You have been promoted to #{rank.to_s.downcase()}!").to_md
   end
 
+  def user_info(oid : String, username : String, rank : Ranks, karma : Int32, warnings : Int32, warn_expiry : Time | Nil = nil, cooldown_until : Time | Nil = nil) : String
+    return Section.new(
+      Group.new(Bold.new("id"), ": #{oid}, ", Bold.new("username"), ": #{username}, ", Bold.new("rank"), ": #{rank.value} (#{rank.to_s})"),
+      Group.new(Bold.new("karma"), ": #{karma}"),
+      Group.new(Bold.new("warnings"), ": #{warnings}#{warn_expiry ? " (one warning will be removed on #{warn_expiry}), " : ", "}",
+      Bold.new("cooldown"), ": #{cooldown_until ? "yes, until #{cooldown_until}" : "no"}"),
+      indent: 0).to_md
+  end
+
+  def user_info_mod(oid : String, karma : Int32, cooldown_until : Time | Nil = nil)
+    return Section.new(
+      Group.new(Bold.new("id"), ": #{oid}, ", Bold.new("username"), ": anonymous, ", Bold.new("rank"), ": n/a"),
+      Group.new(Bold.new("karma"), ": #{karma}"),
+      Group.new(Bold.new("cooldown"), ": #{cooldown_until ? "yes, until #{cooldown_until}" : "no"}"),
+      indent: 0).to_md
+  end
+
   # Returns an italicized message for when a message is deleted or removed.
   def message_deleted(deleted : Bool, reason : String | Nil = nil) : String
     Italic.new("This message has been #{deleted ? 
