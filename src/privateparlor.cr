@@ -17,7 +17,8 @@ def parse_config : NamedTuple
     log_path: "", 
     lifetime: 24.hours, 
     relay_luck: false,
-    entities: ["bold", "italic", "text_link"]
+    entities: ["bold", "italic", "text_link"],
+    salt: ""
   } 
 
   begin 
@@ -74,6 +75,12 @@ def parse_config : NamedTuple
       rescue ex
         Log.notice(exception: ex){"Could not determine strip-entities; removing inline links, bold, and italic text from user messages."}
       end
+    end
+
+    if(salt = config["tripcode-salt"]?) && (salt = salt.as_s?)
+      tuple = tuple.merge({salt: salt})
+    else
+      Log.notice{"No tripcode salt specified. Using secretlounge-ng style tripcodes."}
     end
 
   rescue ex

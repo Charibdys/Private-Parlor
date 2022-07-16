@@ -148,6 +148,34 @@ class Replies
     Italic.new("You have already upvoted this message.").to_md
   end
 
+  # Return a message for when the proposed tripcode is not in the correct format.
+  def invalid_tripcode_format() : String
+    return Section.new(
+      Group.new(Italic.new("Invalid tripcode format. The format is:")),
+      Group.new(Code.new("name#pass")),
+    indent: 0).to_md
+  end
+
+  # Return a message containing the user's new tripcode.
+  def tripcode_set(name : String, tripcode : String) : String
+    return Section.new(
+      Group.new(Italic.new("Tripcode set. It will appear as:")),
+      Group.new(Bold.new(name), Code.new(tripcode)),
+    indent: 0).to_md
+  end
+
+  # Return a message containing the user's tripcode name and password.
+  def tripcode_info(tripcode : String | Nil) : String
+    message = Group.new(Bold.new("Tripcode"), ": ")
+    if tripcode
+      message << Code.new(tripcode)
+    else
+      message << "unset"
+    end
+    
+    return message.to_md
+  end
+
   def user_info(oid : String, username : String, rank : Ranks, karma : Int32, warnings : Int32, warn_expiry : Time | Nil = nil, cooldown_until : Time | Nil = nil) : String
     return Section.new(
       Group.new(Bold.new("id"), ": #{oid}, ", Bold.new("username"), ": #{username}, ", Bold.new("rank"), ": #{rank.value} (#{rank.to_s})"),

@@ -18,3 +18,7 @@ database: "Path to SQLite database"
 # Entity types specified here will be stripped from every user message
 # The defaults remove bold, italics, and inline links; it's recommended to keep these
 # strip-format: ["bold", "italic", "text_link"]
+
+# Secure Tripcode toggle
+# Uncomment (and change the value of the salt) to generate secure tripcodes
+# tripcode-salt: "abcdefghijklmnopqrstuvwxyz0123456789"

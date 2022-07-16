@@ -1,3 +1,11 @@
+require "digest"
+
+# Bind to libcrypt 
+@[Link("crypt")]
+lib LibCrypt
+  fun crypt(password : UInt8*, salt : UInt8*) : UInt8*
+end
+
 class PrivateParlor < Tourmaline::Client
   property database : Database
   property history : History
@@ -12,7 +20,8 @@ class PrivateParlor < Tourmaline::Client
     log_path: String,
     lifetime: Time::Span,
     relay_luck: Bool,
-    entities: Array(String)
+    entities: Array(String),
+    salt: String
     )
 
   struct QueuedMessage
@@ -217,6 +226,64 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Set/modify/view the user's tripcode.
+  @[Command(["tripcode"])]
+  def tripcode_command(ctx)
+    if info = ctx.message.from.not_nil!
+      if user = database.get_user(info.id)
+        if arg = get_args(ctx.message)
+          if !((index = arg.index('#')) && (0 < index < arg.size - 1)) || arg.includes?('\n')|| arg.size > 30
+            return send_message(info.id, @replies.invalid_tripcode_format)
+          end
+
+          user.tripcode = arg
+          database.modify_user(user)
+
+          results = generate_tripcode(arg)
+          return send_message(info.id, @replies.tripcode_set(results[:name], results[:tripcode]))
+          
+        else
+          return send_message(info.id, @replies.tripcode_info(user.tripcode))
+        end
+      end
+    end
+  end
+
+
+  # Generate a 8chan or Secretlounge-ng style tripcode from a given string in the format `name#pass`.
+  #
+  # Returns a named tuple containing the tripname and tripcode.
+  def generate_tripcode(tripkey : String) : NamedTuple
+    split = tripkey.split('#', 2)
+    name = split[0]
+    pass = split[1]
+
+    if !@config[:salt].empty?
+      # Based on 8chan's secure tripcodes
+      salt = @config[:salt]
+      pass = String.new(pass.encode("Shift_JIS"), "Shift_JIS") 
+      tripcode = "!#{Digest::SHA1.base64digest(pass + salt)[0...10]}"
+    else
+      salt = (pass[...8] + "H.")[1...3]
+      salt = String.build do |s|
+        salt.each_char do |c|
+          if ':' <= c <= '@'
+            s << c + 7
+          elsif '[' <= c <= '`'
+            s << c + 6
+          elsif '.' <= c <= 'Z'
+            s << c
+          else
+            s << '.'
+          end
+        end
+      end
+
+      tripcode = "!#{String.new(LibCrypt.crypt(pass[...8], salt))[-10...]}"
+    end
+
+    return {name: name, tripcode: tripcode}
+  end
 
   ##################
   # ADMIN COMMANDS #
