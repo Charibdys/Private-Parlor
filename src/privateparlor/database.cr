@@ -7,17 +7,15 @@ class Database
     ensure_schema()
   end
 
-  # Array of symbols used for making hashes.
-  ATTRIBUTES = %i(id username realname rank joined 
-  left lastActive cooldownUntil blacklistReason warnings 
-  warnExpiry karma hideKarma debugEnabled tripcode)
+  ATTRIBUTES = ["id", "username", "realname", "rank", "joined", "left", "lastActive", "cooldownUntil",
+                "blacklistReason", "warnings", "warnExpiry", "karma", "hideKarma", "debugEnabled", "tripcode"]
 
   struct User
-    getter id : Int64
-    property rank : Int32, warnings : Int32, karma : Int32 
-    property username : String?, realname : String, blacklist_text : String?, tripcode : String?
-    property joined : Time, left : Time?, last_active : Time, cooldown_until : Time?, warn_expiry : Time?
-    property hide_karma : Bool, debug_enabled : Bool 
+    DB.mapping({id: Int64, username: String?, realname: String, rank: Int32, joined: Time,
+                left: Time?, lastActive: Time, cooldownUntil: Time?, blacklistReason: String?,
+                warnings: Int32, warnExpiry: Time?, karma: Int32, hideKarma: Bool, debugEnabled: Bool,
+                tripcode: String?,
+    })
 
     # Create an instance of `User` from a hash with an `:id` key.
     #
@@ -25,8 +23,8 @@ class Database
     #
     # Keys not found in `defaults` will default to `nil`.
     def initialize(user = {:id})
-      defaults = {realname: "", rank: 0, joined: Time.local, last_active: Time.local, warnings: 0, 
-      karma: 0, hide_karma: false, debug_enabled: false}
+      defaults = {realname: "", rank: 0, joined: Time.utc, lastActive: Time.utc, warnings: 0,
+                  karma: 0, hideKarma: false, debugEnabled: false}
 
       defaults = defaults.merge(user)
 
@@ -36,14 +34,14 @@ class Database
       @rank = defaults[:rank]
       @joined = defaults[:joined]
       @left = defaults[:left]?
-      @last_active = defaults[:last_active]
-      @cooldown_until = defaults[:cooldown_until]?
-      @blacklist_text = defaults[:blacklist_text]?
+      @lastActive = defaults[:lastActive]
+      @cooldownUntil = defaults[:cooldownUntil]?
+      @blacklistReason = defaults[:blacklistReason]?
       @warnings = defaults[:warnings]
-      @warn_expiry = defaults[:warn_expiry]?
+      @warnExpiry = defaults[:warnExpiry]?
       @karma = defaults[:karma]
-      @hide_karma = defaults[:hide_karma]
-      @debug_enabled = defaults[:debug_enabled]
+      @hideKarma = defaults[:hideKarma]
+      @debugEnabled = defaults[:debugEnabled]
       @tripcode = defaults[:tripcode]?
     end
 
@@ -51,8 +49,8 @@ class Database
     #
     # Values in the array must be in order according to the attributes in the database schema.
     def to_array : Array
-      [@id, @username, @realname, @rank, @joined, @left, @last_active, @cooldown_until, @blacklist_text,
-       @warnings, @warn_expiry, @karma, @hide_karma, @debug_enabled, @tripcode]
+      [@id, @username, @realname, @rank, @joined, @left, @lastActive, @cooldownUntil, @blacklistReason,
+       @warnings, @warnExpiry, @karma, @hideKarma, @debugEnabled, @tripcode]
     end
 
     # Returns a string containing the username with an "@" appended to it if the user has a username.
@@ -68,35 +66,42 @@ class Database
 
     # Get the user's obfuscated ID
     def get_obfuscated_id : String
-      return Random.new(@id + Time.local.at_beginning_of_day.to_unix).base64(3)
+      return Random.new(@id + Time.utc.at_beginning_of_day.to_unix).base64(3)
     end
 
     # Get the user's obfuscated karma
     def get_obfuscated_karma : Int32
-      offset = ((@karma * 0.2).abs + 2).round.to_i 
+      offset = ((@karma * 0.2).abs + 2).round.to_i
       return @karma + Random.rand(0..(offset + 1)) - offset
     end
 
     # Set *left* to nil, meaning that User has joined the chat.
     def rejoin : Nil
       @left = nil
-      Log.info{"User #{@id}, aka #{self.get_formatted_name}, rejoined the chat."}
     end
 
-    # Set *last_active* to the current time.
+    # Set *lastActive* to the current time.
     def set_active : Nil
-      @last_active = Time.local
+      @lastActive = Time.utc
     end
-    
+
     # Set *left* to the current time; user has left the chat.
     def set_left : Nil
-      @left = Time.local
-      Log.info{"User #{@id}, aka #{self.get_formatted_name}, left the chat."}
+      @left = Time.utc
     end
 
-    # Set *hide_karma* to its opposite value.
+    # Set *rank* to the given `Ranks` value.
+    def set_rank(rank : Ranks) : Nil
+      if @rank <= rank.value
+        @rank = rank.value
+      else
+        @rank = rank.value
+      end
+    end
+
+    # Set *hideKarma* to its opposite value.
     def toggle_karma
-      @hide_karma = !hide_karma
+      @hideKarma = !hideKarma
     end
 
     # Increment the user's karma by a given amount (1 by default)
@@ -112,97 +117,50 @@ class Database
     def blacklist(reason : String | Nil) : Nil
       @rank = -10
       self.set_left
-      @blacklist_text = reason
-      Log.info{"User #{@id}, aka #{self.get_formatted_name}, has been blacklisted#{reason ? " for: #{reason}" : "."}"}
+      @blacklistReason = reason
     end
-
-    def set_rank(rank : Ranks) : Nil
-      if @rank <= rank.value
-        @rank = rank.value
-        Log.info{"User #{@id}, aka #{self.get_formatted_name}, has been promoted to #{rank.to_s.downcase()}."}
-      else
-        @rank = rank.value
-        Log.info{"User #{@id}, aka #{self.get_formatted_name}, has been demoted."}
-      end
-    end
-
-    #####################
-    # Predicate methods #
-    #####################
 
     # Returns `true` if *rank* is -10; user is blacklisted.
     #
     # Returns `false` otherwise.
-    def blacklisted?
+    def blacklisted? : Bool
       @rank == -10
     end
 
     # Returns `true` if *left* is not nil; user has left the chat.
     #
     # Returns `false` otherwise.
-    def left?
+    def left? : Bool
       @left != nil
     end
-
   end
 
   # Queries the database for a user record with the given *id*.
   #
   # Returns a `User` object.
   def get_user(id) : User | Nil
-    # This query returns a NamedTuple, the keys must be in order according to the attributes in the schema.
-    if result = db.query_one?("SELECT * FROM users WHERE id = ?", id, as: {
-        id: Int64, username: String?, realname: String, rank: Int32, joined: Time, left: Time?, 
-        last_active: Time, cooldown_until: Time?, blacklist_text: String?, warnings: Int32, 
-        warn_expiry: Time?, karma: Int32, hide_karma: Bool, debug_enabled: Bool, tripcode: String?
-      })
-
-      User.new(result)
-    end
+    db.query_one?("SELECT * FROM users WHERE id = ?", id, as: User)
   end
 
   # Queries the database for blacklisted users who have been banned within the past 48 hours.
   #
   # Returns an array of `User` or `Nil` if no users were found.
-  def get_blacklisted_users() : Array(User) | Nil
-    users = [] of User
-    if result = db.query_all("SELECT * FROM users WHERE rank = -10 AND left > (?)", (Time.local - 48.hours), as: {
-      id: Int64, username: String?, realname: String, rank: Int32, joined: Time, left: Time?, 
-      last_active: Time, cooldown_until: Time?, blacklist_text: String?, warnings: Int32, 
-      warn_expiry: Time?, karma: Int32, hide_karma: Bool, debug_enabled: Bool, tripcode: String?
-    }) 
-      result.each do |output|
-        users << User.new(output)
-      end
-    end
-
-    return users
+  def get_blacklisted_users : Array(User) | Nil
+    db.query_all("SELECT * FROM users WHERE rank = -10 AND left > (?)", (Time.utc - 48.hours), as: User)
   end
 
   # Queries the database for a user with a given *username*.
   #
   # Returns a `User` object or Nil if no user was found.
   def get_user_by_name(username) : User | Nil
-    if result = db.query_one?("SELECT * FROM users WHERE LOWER(username) = ?", username, as: {
-        id: Int64, username: String?, realname: String, rank: Int32, joined: Time, left: Time?, 
-        last_active: Time, cooldown_until: Time?, blacklist_text: String?, warnings: Int32, 
-        warn_expiry: Time?, karma: Int32, hide_karma: Bool, debug_enabled: Bool, tripcode: String?
-      })
-
-      User.new(result)
-    end
+    db.query_one?("SELECT * FROM users WHERE LOWER(username) = ?", username, as: User)
   end
 
   # Queries the database for all user ids, ordered by highest ranking users first then most active users.
-  def get_prioritized_users() : Array(Int64)
-    sql = "SELECT id
-    FROM users
-    WHERE left IS NULL
-    ORDER BY rank DESC, lastActive DESC"
-
-    db.query_all(sql, &.read(Int64))
+  def get_prioritized_users : Array(Int64)
+    db.query_all("SELECT id FROM users WHERE left IS NULL ORDER BY rank DESC, lastActive DESC", &.read(Int64))
   end
-  
+
   # Inserts a user with the given *id*, *username*, and *realname* into the database.
   #
   # Returns the new `User`.
@@ -211,73 +169,57 @@ class Database
     user = User.new({id: id, username: username, realname: realname, rank: rank})
     args = user.to_array
 
-    # Prepare query
-    sql = "INSERT INTO users VALUES ("
-    (args.size - 1).times do 
-      sql += "?, "
+    sql = String.build do |str|
+      str << "INSERT INTO users VALUES (" << "?, " * (args.size - 1) << "?)"
     end
-    sql += "?)"
 
     # Add user to database
     db.exec(sql, args: args)
 
-    Log.info{"User #{user.id}, aka #{user.get_formatted_name}, joined the chat."}
     user
   end
 
   # Updates a user record in the database with the current state of *user*.
-  def modify_user(user : User)
-    # Make a hash with ATTRIBUTES as keys to user values
-    args = Hash.zip(ATTRIBUTES, user.to_array)
+  def modify_user(user : User) : Nil
+    args = user.to_array
 
-    # Get ID, delete that key-value from the hash
-    id = args.delete(:id)
-
-    # Prepare query
-    sql = "UPDATE users SET "
-    args.each_key do |key|
-      sql += key.to_s + " = ?"
-      if key != args.last_key
-        sql += ", " 
+    sql = String.build do |str|
+      str << "UPDATE users SET "
+      ATTRIBUTES.each(within: 1..-2) do |atr|
+        str << atr << " = ?, "
       end
+      str << ATTRIBUTES.last << " = ? WHERE id = ?"
     end
-    sql += " WHERE id = ?"
 
     # Modify user
-    db.exec(sql, args: args.values << id)
+    db.exec(sql, args: args[1..] << args[0])
   end
 
-  # Yields a `ResultSet` containing the ids of each user in the database.
-  def get_ids
-    db.query("SELECT id FROM users") do |rs|
-      yield rs
-    end
-  end
-
-  def no_users?
-    if(get_ids() do |set| set.move_next end)
-      return false
-    else
-      return true
+  # Queries the database for any rows in the user table
+  #
+  # Returns true if can't move to next row (table is empty). False otherwise.
+  def no_users? : Bool
+    !db.query("SELECT id FROM users") do |rs|
+      rs.move_next
     end
   end
 
   # Sets the motd/rules to the given string.
-  def set_motd(text : String)
+  def set_motd(text : String) : Nil
     db.exec("REPLACE INTO system_config VALUES ('motd', ?)", text)
   end
 
   # Retrieves the motd/rules from the database.
   #
   # Returns the motd as a string, or returns nil if the motd could not be retrieved.
-  def get_motd() : String | Nil
+  def get_motd : String | Nil
     db.query_one?("SELECT value FROM system_config WHERE name = 'motd'", as: String)
   end
-  
+
   # Ensures that the DB schema is usable by the program.
   #
   # This is the same schema used in secretlounge-ng SQLite databases.
-  def ensure_schema()
+  def ensure_schema : Nil
     db.exec("CREATE TABLE IF NOT EXISTS system_config (
       name TEXT NOT NULL,
       value TEXT NOT NULL,
@@ -302,5 +244,4 @@ class Database
       PRIMARY KEY(id)
     )")
   end
-
 end

@@ -83,11 +83,16 @@ class PrivateParlor < Tourmaline::Client
     tasks.merge!({:cache => Tasker.every(((1/4) * @history.lifespan.to_i).hours) { @history.expire }})
   end
 
-  # Updates user's record in the database.
+  # Updates user's record in the database with new, up-to-date information.
   def update_user(info, user : Database::User)
     user.username = info.username
     user.realname = info.full_name
     user.set_active
+    database.modify_user(user)
+  end
+
+  # Update user's record in database with current values.
+  def update_user(user : Database::User)
     database.modify_user(user)
   end
 
@@ -106,11 +111,12 @@ class PrivateParlor < Tourmaline::Client
       user = database.get_user(info.id)
       if user # User exists in DB; run checks
         if user.blacklisted?
-          send_message(user.id, @replies.blacklisted(user.blacklist_text))
+          send_message(user.id, @replies.blacklisted(user.blacklistReason))
         elsif user.left?
           user.rejoin
           update_user(info, user)
           send_message(user.id, @replies.rejoined)
+          Log.info { "User #{user.id}, aka #{user.get_formatted_name}, rejoined the chat." }
         else # user is already in the chat
           update_user(info, user)
           send_message(user.id, @replies.already_in_chat)
@@ -124,8 +130,9 @@ class PrivateParlor < Tourmaline::Client
 
         send_message(user.id, @replies.joined)
         if motd = @database.get_motd
-          send_message(info.id, @replies.custom(motd))
+          send_message(user.id, @replies.custom(motd))
         end
+        Log.info { "User #{user.id}, aka #{user.get_formatted_name}, joined the chat." }
       end
     end
   end
@@ -139,7 +146,8 @@ class PrivateParlor < Tourmaline::Client
       if (user = database.get_user(info.id)) && !user.left?
         user.set_left
         send_message(info.id, @replies.left)
-        database.modify_user(user)
+        update_user(user)
+        Log.info { "User #{user.id}, aka #{user.get_formatted_name}, left the chat." }
       end
     end
   end
@@ -157,7 +165,7 @@ class PrivateParlor < Tourmaline::Client
               return send_message(user.id, @replies.user_info_mod(
                 oid: reply_user.get_obfuscated_id,
                 karma: reply_user.get_obfuscated_karma,
-                cooldown_until: reply_user.cooldown_until
+                cooldown_until: reply_user.cooldownUntil
               ))
             end
           end
@@ -169,8 +177,8 @@ class PrivateParlor < Tourmaline::Client
           rank: Ranks.new(user.rank),
           karma: user.karma,
           warnings: user.warnings,
-          warn_expiry: user.warn_expiry,
-          cooldown_until: user.cooldown_until
+          warn_expiry: user.warnExpiry,
+          cooldown_until: user.cooldownUntil
         ))
       end
     end
@@ -191,9 +199,9 @@ class PrivateParlor < Tourmaline::Client
 
           if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
             reply_user.increment_karma
-            database.modify_user(reply_user)
+            update_user(reply_user)
             send_message(user.id, @replies.gave_upvote)
-            if (!reply_user.hide_karma)
+            if (!reply_user.hideKarma)
               send_message(reply_user.id, @replies.got_upvote)
             end
           end
@@ -210,8 +218,8 @@ class PrivateParlor < Tourmaline::Client
     if info = ctx.message.from.not_nil!
       if user = database.get_user(info.id)
         user.toggle_karma
-        send_message(info.id, @replies.toggle_karma(user.hide_karma))
-        database.modify_user(user)
+        send_message(info.id, @replies.toggle_karma(user.hideKarma))
+        update_user(user)
       end
     end
   end
@@ -227,7 +235,7 @@ class PrivateParlor < Tourmaline::Client
           end
 
           user.tripcode = arg
-          database.modify_user(user)
+          update_user(user)
 
           results = generate_tripcode(arg)
           return send_message(info.id, @replies.tripcode_set(results[:name], results[:tripcode]))
@@ -304,9 +312,10 @@ class PrivateParlor < Tourmaline::Client
               return
             else
               user.set_rank(Ranks::MOD)
-              @database.modify_user(user)
+              update_user(user)
 
               send_message(user.id, @replies.promoted(Ranks::MOD))
+              Log.info { "User #{user.id}, aka #{user.get_formatted_name}, has been promoted to #{user.rank.to_s.downcase}." }
               return send_message(info.id, @replies.success)
             end
           end
@@ -331,7 +340,7 @@ class PrivateParlor < Tourmaline::Client
               return
             else
               user.set_rank(Ranks::ADMIN)
-              @database.modify_user(user)
+              update_user(user)
 
               send_message(user.id, @replies.promoted(Ranks::ADMIN))
               return send_message(info.id, @replies.success)
@@ -352,8 +361,8 @@ class PrivateParlor < Tourmaline::Client
         if arg = get_args(ctx.message)
           if user = database.get_user_by_name(arg)
             user.set_rank(Ranks::USER)
-            @database.modify_user(user)
-
+            update_user(user)
+            Log.info { "User #{user.id}, aka #{user.get_formatted_name}, has been demoted." }
             return send_message(info.id, @replies.success)
           end
         else
@@ -447,10 +456,12 @@ class PrivateParlor < Tourmaline::Client
       if authorized?(info.id, Ranks::ADMIN)
         if reply = ctx.message.reply_message
           if user = database.get_user(@history.get_sender_id(reply.message_id))
-            user.blacklist(get_args(ctx.message))
-            @database.modify_user(user)
+            reason = get_args(ctx.message)
+            user.blacklist(reason)
+            update_user(user)
 
             send_message(user.id, @replies.blacklisted(get_args(ctx.message)), reply_to_message: @history.get_msid(reply.message_id, user.id))
+            Log.info { "User #{user.id}, aka #{user.get_formatted_name}, has been blacklisted#{reason ? " for: #{reason}" : "."}" }
 
             return send_message(info.id, @replies.success)
           end
