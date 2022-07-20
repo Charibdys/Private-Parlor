@@ -16,7 +16,7 @@ class PrivateParlor < Tourmaline::Client
   getter config : Configuration::Config
 
   struct QueuedMessage
-    getter hashcode : UInt64 | Array(UInt64)
+    getter origin_msid : Int64 | Array(Int64)
     getter receiver : Int64
     getter reply_to : Int64 | Nil
     getter function : Proc(Int64, Int64 | Nil, Tourmaline::Message) | Proc(Int64, Int64 | Nil, Array(Tourmaline::Message))
@@ -36,8 +36,8 @@ class PrivateParlor < Tourmaline::Client
     #
     # `function`
     # :     a proc that points to a Tourmaline CoreMethod send function and takes a user ID and MSID as its arguments
-    def initialize(hash : UInt64 | Array(UInt64), receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
-      @hashcode = hash
+    def initialize(msid : Int64 | Array(Int64), receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
+      @origin_msid = msid
       @receiver = receiver_id
       @reply_to = reply_msid
       @function = func
@@ -62,7 +62,7 @@ class PrivateParlor < Tourmaline::Client
   # :     the bot token given by `@BotFather`
   #
   # `config`
-  # :     a `Hash(Symbol, String)` from parsing the `config.yaml` file
+  # :     a `Configuration::Config` from parsing the `config.yaml` file
   #
   # `connection`
   # :     the `DB::Databse` object obtained from the database path in the `config.yaml` file
@@ -80,7 +80,7 @@ class PrivateParlor < Tourmaline::Client
   def register_tasks : Hash
     tasks = {} of Symbol => Tasker::Task
     # Handle cache expiration
-    tasks.merge!({:cache => Tasker.every(((1/4) * @history.lifespan.to_i).hours) { @history.expire }})
+    tasks.merge!({:cache => Tasker.every(@history.lifespan * (1/4)) { @history.expire }})
   end
 
   # Updates user's record in the database with new, up-to-date information.
@@ -217,6 +217,7 @@ class PrivateParlor < Tourmaline::Client
   def toggle_karma_command(ctx)
     if info = ctx.message.from.not_nil!
       if user = database.get_user(info.id)
+        @history.get_all_object_ids
         user.toggle_karma
         send_message(info.id, @replies.toggle_karma(user.hideKarma))
         update_user(user)
@@ -504,8 +505,8 @@ class PrivateParlor < Tourmaline::Client
           # NOTE: If a user sends too many messages at once, this may lock the database when relaying messages
           update_user(info, user)
           if (check_message_type(message, info))
-            hash = @history.new_message(info.id, message.message_id)
-            relay(message, info, hash)
+            cached_msid = @history.new_message(info.id, message.message_id)
+            relay(message, info, cached_msid)
           end
         end
       else # Either user has left or is not in the database
@@ -556,12 +557,12 @@ class PrivateParlor < Tourmaline::Client
 
         # Wait an arbitrary amount of time for Telegram MediaGroup updates to come in before relaying the album.
         Tasker.at(2.seconds.from_now) {
-          hash = Array(UInt64).new
+          cached_msids = Array(Int64).new
           @albums[album].message_ids.each do |msid|
-            hash << @history.new_message(info.id, msid)
+            cached_msids << @history.new_message(info.id, msid)
           end
 
-          relay(message, info, hash)
+          relay(message, info, cached_msids)
         }
       end
       return false
@@ -641,19 +642,19 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Relay message to every joined user except for the sender.
-  def relay(message, info, hash)
+  def relay(message, info, cached_msid)
     if proc = type_to_proc(message)
       if !(reply = message.reply_message)                     # Message was NOT a reply
         @database.get_prioritized_users.each do |receiver_id| # No need for a left? check here
           if receiver_id != info.id
-            add_to_queue(hash, receiver_id, nil, proc)
+            add_to_queue(cached_msid, receiver_id, nil, proc)
           end
         end
       else # Message was a reply
         reply_msids = @history.get_all_msids(reply.message_id)
         @database.get_prioritized_users.each do |receiver_id|
           if receiver_id != info.id
-            add_to_queue(hash, receiver_id, reply_msids[receiver_id], proc)
+            add_to_queue(cached_msid, receiver_id, reply_msids[receiver_id], proc)
           end
         end
       end
@@ -680,8 +681,8 @@ class PrivateParlor < Tourmaline::Client
   ###################
 
   # Creates a new `Message` and sends it to the `queue` channel to be sent later.
-  def add_to_queue(hashcode : UInt64 | Array(UInt64), receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
-    @queue.send(QueuedMessage.new(hashcode, receiver_id, reply_msid, func))
+  def add_to_queue(cached_msid : Int64 | Array(Int64), receiver_id : Int64, reply_msid : Int64 | Nil, func : Proc)
+    @queue.send(QueuedMessage.new(cached_msid, receiver_id, reply_msid, func))
   end
 
   # Receives a `Message` from the `queue` channel, calls its proc, and adds the
@@ -695,12 +696,12 @@ class PrivateParlor < Tourmaline::Client
     success = msg.function.call(msg.receiver, msg.reply_to)
 
     if !success.is_a?(Array(Tourmaline::Message))
-      @history.add_to_cache(msg.hashcode.as(UInt64), success.message_id, msg.receiver)
+      @history.add_to_cache(msg.origin_msid.as(Int64), success.message_id, msg.receiver)
     else
       sent_msids = success.map { |msg| msg.message_id }
 
-      sent_msids.zip(msg.hashcode.as(Array(UInt64))) do |msid, hashcode|
-        @history.add_to_cache(hashcode, msid, msg.receiver)
+      sent_msids.zip(msg.origin_msid.as(Array(Int64))) do |msid, origin_msid|
+        @history.add_to_cache(origin_msid, msid, msg.receiver)
       end
     end
   end
