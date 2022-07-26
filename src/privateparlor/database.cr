@@ -10,7 +10,7 @@ class Database
   ATTRIBUTES = ["id", "username", "realname", "rank", "joined", "left", "lastActive", "cooldownUntil",
                 "blacklistReason", "warnings", "warnExpiry", "karma", "hideKarma", "debugEnabled", "tripcode"]
 
-  struct User
+  class User
     DB.mapping({id: Int64, username: String?, realname: String, rank: Int32, joined: Time,
                 left: Time?, lastActive: Time, cooldownUntil: Time?, blacklistReason: String?,
                 warnings: Int32, warnExpiry: Time?, karma: Int32, hideKarma: Bool, debugEnabled: Bool,
@@ -133,6 +133,13 @@ class Database
     def left? : Bool
       @left != nil
     end
+
+    # Returns `true` if user's rank is greater than or equal to the given rank; user is authorized.
+    #
+    # Returns `false` otherwise.
+    def authorized?(rank : Ranks) : Bool
+      @rank >= rank.value
+    end
   end
 
   # Queries the database for a user record with the given *id*.
@@ -153,7 +160,7 @@ class Database
   #
   # Returns a `User` object or Nil if no user was found.
   def get_user_by_name(username) : User | Nil
-    db.query_one?("SELECT * FROM users WHERE LOWER(username) = ?", username, as: User)
+    db.query_one?("SELECT * FROM users WHERE LOWER(username) = ?", username.downcase, as: User)
   end
 
   # Queries the database for all user ids, ordered by highest ranking users first then most active users.

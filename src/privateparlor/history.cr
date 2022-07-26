@@ -63,27 +63,35 @@ class History
 
   # Set the warned variable in the associated `MessageGroup`.
   def add_warning(msid : Int64) : Nil
-    @msid_map[msid].warned = true
+    @msid_map[msid]?.warned = true
   end
 
   # Returns true if the associated `MessageGroup` was warned; false otherwise.
-  def get_warning(msid : Int64) : Bool
-    @msid_map[msid].warned
+  def get_warning(msid : Int64) : Bool | Nil
+    @msid_map[msid]?.warned
   end
 
   # Returns the receivers hash found in the associated `MessageGroup`
   def get_all_msids(msid : Int64) : Hash
-    @msid_map[msid].receivers
+    if msg = @msid_map[msid]?
+      msg.receivers
+    else
+      {} of Int64 => Int64
+    end
   end
 
   # Returns the receivers *msid* found in the associated `MessageGroup`
-  def get_msid(msid : Int64, receiver_id : Int64) : Int64
-    @msid_map[msid].receivers[receiver_id]
+  def get_msid(msid : Int64, receiver_id : Int64) : Int64 | Nil
+    if msg = @msid_map[msid]?
+      msg.receivers[receiver_id]?
+    end
   end
 
   # Returns the *sender* of a specific `MessageGroup`
-  def get_sender_id(msid : Int64) : Int64
-    @msid_map[msid].sender
+  def get_sender_id(msid : Int64) : Int64 | Nil
+    if msg = @msid_map[msid]?
+      msg.sender
+    end
   end
 
   def get_msids_from_user(uid : Int64) : Set(Int64)
