@@ -112,6 +112,11 @@ class Replies
     Italic.new("You need to give an input to use this command").to_md
   end
 
+  # Returns an italicized message for when a command is disabled
+  def command_disabled : String
+    Italic.new("This command is disabled.").to_md
+  end
+
   # Returns an italicized message for when a command is used without a reply.
   def no_reply : String
     Italic.new("You need to reply to a message to use this command").to_md
@@ -122,6 +127,11 @@ class Replies
     Italic.new("That message could not be found in the cache.").to_md
   end
 
+  # Returns an italicized command for when there is no tripcode set.
+  def no_tripcode_set : String
+    Italic.new("You do not have a tripcode set. Use the /tripcode command to set one.").to_md
+  end
+
   # Returns an italicized message for when a user could not be found when searching by name.
   def no_user_found : String
     Italic.new("There was no user found with that name.").to_md
@@ -130,6 +140,16 @@ class Replies
   # Returns an italicized message for when a user is promoted to a given rank.
   def promoted(rank : Ranks) : String
     Italic.new("You have been promoted to #{rank.to_s.downcase}!").to_md
+  end
+
+  # Returns a link to the given user's account.
+  def format_user_sign(id : Int64, name : String) : String
+    return Link.new("~~#{name}", "tg://user?id=#{id}").to_md
+  end
+
+  # Returns a tripcode (Name!Tripcode) segment.
+  def format_tripcode_sign(name : String, tripcode : String) : String
+    Group.new(Bold.new(name), Code.new(tripcode)).to_md
   end
 
   # Returns a message for when a user disables or enables karma notifications.

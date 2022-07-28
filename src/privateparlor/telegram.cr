@@ -487,6 +487,49 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Checks if the text contains a special font or starts a sign command.
+  #
+  # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
+  def check_text(text : String, user : Database::User, msid : Int64) : String?
+    if !@replies.allow_text?(text)
+      relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.rejected_message, reply_to_message: reply) })
+      return
+    end
+
+    case
+    when !text.starts_with?('/')
+      return text
+    when text.starts_with?("/s"), text.starts_with?("/sign")
+      if config.allow_signing # NOTE: Since we cannot check if user has private forwards enabled, signing will not work as intendend
+        return String.build do |str|
+          str << get_args(text)
+          str << @replies.format_user_sign(user.id, user.get_formatted_name)
+        end
+      else
+        relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.command_disabled, reply_to_message: reply) })
+      end
+    when text.starts_with?("/t"), text.starts_with?("/tsign")
+      if config.allow_tripcodes
+        if tripkey = user.tripcode
+          pair = generate_tripcode(tripkey, config.salt)
+          return String.build do |str|
+            str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
+            str << "\n"
+            str << get_args(text)
+          end
+        else
+          relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_tripcode_set, reply_to_message: reply) })
+        end
+      else
+        relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.command_disabled, reply_to_message: reply) })
+      end
+    else
+      return
+    end
+
+    return
+  end
+
   # Prepares a text message for relaying.
   @[On(:text)]
   def handle_text(update)
@@ -496,15 +539,13 @@ class PrivateParlor < Tourmaline::Client
       end
 
       if user = check_user(info)
-        if text = message.text
-          if !@replies.allow_text?(text)
-            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.rejected_message, reply_to_message: reply) })
-          elsif !text.starts_with?('/')
+        if raw_text = message.text
+          if text = check_text(@replies.strip_format(raw_text, message.entities), user, message.message_id)
             relay(
               message.reply_message,
               user,
               @history.new_message(user.id, message.message_id),
-              ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.strip_format(text, message.entities), reply_to_message: reply) }
+              ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, reply_to_message: reply) }
             )
           end
         end
@@ -527,8 +568,11 @@ class PrivateParlor < Tourmaline::Client
       {% end %}
 
       if user = check_user(info)
-        if caption = message.caption
-          caption = @replies.strip_format(caption, message.caption_entities)
+        if raw_caption = message.caption
+          caption = check_text(@replies.strip_format(raw_caption, message.entities), user, message.message_id)
+          if caption.nil? # Caption contained a special font or used a disabled command
+            return 
+          end
         end
 
         relay(
@@ -695,7 +739,7 @@ class PrivateParlor < Tourmaline::Client
         end
       end
     else
-      @database.get_prioritized_users.each do |receiver_id| # No need for a left? check here
+      @database.get_prioritized_users.each do |receiver_id|
         if receiver_id != user.id
           add_to_queue(cached_msid, user.id, receiver_id, nil, proc)
         end

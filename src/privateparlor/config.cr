@@ -27,6 +27,12 @@ module Configuration
     @[YAML::Field(key: "relay-luck")]
     getter relay_luck : Bool = true
 
+    @[YAML::Field(key: "allow_signing")]
+    getter allow_signing : Bool = false
+
+    @[YAML::Field(key: "allow_tripcodes")]
+    getter allow_tripcodes : Bool = false
+
     @[YAML::Field(key: "strip-format")]
     getter entities : Array(String) = ["bold", "italic", "text_link"]
 
