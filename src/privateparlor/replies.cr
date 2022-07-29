@@ -139,7 +139,7 @@ class Replies
 
   # Returns an italicized message for when a user is promoted to a given rank.
   def promoted(rank : Ranks) : String
-    Italic.new("You have been promoted to #{rank.to_s.downcase}!").to_md
+    Italic.new("You have been promoted to #{rank.to_s.downcase}! Type /help to view the commands available to you.").to_md
   end
 
   # Returns a link to the given user's account.
@@ -180,6 +180,53 @@ class Replies
   # Returns an italicized message for when a user tries to upvote a message they already upvoted.
   def already_upvoted : String
     Italic.new("You have already upvoted this message.").to_md
+  end
+
+  # Returns a message containing the commands the a moderator can use.
+  def mod_help : String
+    return Section.new(
+      Italic.new("The following commands are available to moderators:"),
+      "    /help - Show this text",
+      Italic.new("The commands below must be used with a reply:"),
+      "    /info - Get the user info from this message",
+      "    /delete [reason] - Delete a message and give a cooldown",
+      "    /remove [reason] - Delete a message without giving a cooldown",
+      indent: 0
+    ).to_md
+  end
+
+  # Returns a message containing the commands the an admin can use.
+  def admin_help : String
+    return Section.new(
+      Italic.new("The following commands are available to admins:"),
+      "    /help - Show this text",
+      "    /purge - Delete all messages from a blacklisted user",
+      Italic.new("The commands below must be used with a reply:"),
+      "    /info - Get the user info from this message",
+      "    /blacklist [reason] - Ban a user from the chat",
+      "    /delete [reason] - Delete a message and give a cooldown",
+      "    /remove [reason] - Delete a message without giving a cooldown",
+      indent: 0
+    ).to_md
+  end
+
+  # Returns a message containing the commands the a host can use.
+  def host_help : String
+    return Section.new(
+      Italic.new("The following commands are available to hosts:"),
+      "    /help - Show this text",
+      "    /purge - Delete all messages from a blacklisted user",
+      "    /mod [username] - Promote a user to moderator",
+      "    /admin [username] - Promote a user to admin",
+      "    /demote [username] - Demote a user",
+      "    /motd [text] - Set the motd (users will see this when joining)",
+      Italic.new("The commands below must be used with a reply:"),
+      "    /info - Get the user info from this message",
+      "    /blacklist [reason] - Ban a user from the chat",
+      "    /delete [reason] - Delete a message and give a cooldown",
+      "    /remove [reason] - Delete a message without giving a cooldown",
+      indent: 0
+    ).to_md
   end
 
   # Return a message for when the proposed tripcode is not in the correct format.

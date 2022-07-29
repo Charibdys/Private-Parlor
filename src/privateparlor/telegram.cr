@@ -509,6 +509,23 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Returns a message containing all the commands that a user can use, according to the user's rank.
+  @[Command(["help"])]
+  def help_command(ctx)
+    if (message = ctx.message) && (info = message.from)
+      if user = check_user(info)
+        case user.rank
+        when Ranks::Moderator.value
+          relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.mod_help, reply_to_message: reply) })
+        when Ranks::Admin.value
+          relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.admin_help, reply_to_message: reply) })
+        when Ranks::Host.value
+          relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.host_help, reply_to_message: reply) })
+        end
+      end
+    end
+  end
+
   # Checks if the user can send a message.
   #
   # Returns the user if the user can send a message; nil otherwise.
