@@ -184,6 +184,27 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Return a message containing the number of users in the bot.
+  #
+  # If the user is not ranked, or `full_usercount` is false, show the total numbers users.
+  # Otherwise, return a message containing the number of joined, left, and blacklisted users.
+  @[Command(["users"])]
+  def users_command(ctx)
+    if (message = ctx.message) && (info = message.from)
+      if user = check_user(info)
+        counts = database.get_user_counts
+
+        if user.authorized?(Ranks::Moderator) || config.full_usercount
+          text = @replies.user_count((counts[:total] - counts[:left]), counts[:left], counts[:blacklisted], counts[:total], true)
+        else
+          text = @replies.user_count(counts[:total] - counts[:left], counts[:left], counts[:blacklisted], counts[:total], false)
+        end
+
+        relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text) })
+      end
+    end
+  end
+
   # Upvotes a message.
   @[Command(["1"], prefix: ["+"])]
   def karma_command(ctx)

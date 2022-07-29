@@ -27,6 +27,9 @@ module Configuration
     @[YAML::Field(key: "relay-luck")]
     getter relay_luck : Bool = true
 
+    @[YAML::Field(key: "full-usercount")]
+    getter full_usercount : Bool = false
+
     @[YAML::Field(key: "allow_signing")]
     getter allow_signing : Bool = false
 

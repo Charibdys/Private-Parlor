@@ -154,6 +154,11 @@ class Database
     db.query_one?("SELECT * FROM users WHERE id = ?", id, as: User)
   end
 
+  def get_user_counts : NamedTuple
+    db.query_one("SELECT COUNT(id), COUNT(left), (SELECT COUNT(id) FROM users WHERE rank = -10) FROM users",
+      as: {total: Int32, left: Int32, blacklisted: Int32})
+  end
+
   # Queries the database for blacklisted users who have been banned within the past 48 hours.
   #
   # Returns an array of `User` or `Nil` if no users were found.

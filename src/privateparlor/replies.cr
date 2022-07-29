@@ -227,6 +227,19 @@ class Replies
       indent: 0).to_md
   end
 
+  def user_count(joined : Int32, left : Int32, blacklisted : Int32, total : Int32, full : Bool) : String
+    if full
+      Group.new(
+        Bold.new("#{joined}"), Italic.new(" joined, "),
+        Bold.new("#{left}"), Italic.new(" left, "),
+        Bold.new("#{blacklisted}"), Italic.new(" blacklisted users "),
+        "(", Italic.new("total"), ": ", Bold.new("#{total}"), ")"
+      ).to_md
+    else
+      Group.new(Bold.new("#{total}"), Italic.new(" users")).to_md
+    end
+  end
+
   # Returns an italicized message for when a message is deleted or removed.
   def message_deleted(deleted : Bool, reason : String | Nil = nil) : String
     Italic.new("This message has been #{deleted ? "deleted#{reason ? " for: #{reason}." : "."} You are on cooldown for some amount of time" : "removed#{reason ? " for: #{reason}." : "."} No cooldown has been given, but please refrain from posting the same message again."}").to_md

@@ -16,6 +16,9 @@ database: "Path to SQLite database"
 #allow_signing: false
 #allow_tripcodes: true
 
+# Toggle whether or not users can see the full count of joined, left, and blacklisted users.
+#full-usercount: false
+
 # Relaying toggles
 #relay-luck: true
 

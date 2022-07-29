@@ -108,7 +108,7 @@ class History
     return user_msgs
   end
 
-  # Deletes a `MessageGroup` from `msid_map`, 
+  # Deletes a `MessageGroup` from `msid_map`,
   # including any msids that reference this `MessageGroup`
   #
   # Returns the `origin_msid` of the given `MessageGroup`
