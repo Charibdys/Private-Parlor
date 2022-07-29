@@ -16,6 +16,7 @@ class History
 
   class MessageGroup
     getter sender : Int64
+    getter origin_msid : Int64
     property receivers : Hash(Int64, Int64)
     property sent : Time
     property ratings : Set(Int64)
@@ -32,7 +33,8 @@ class History
     # :     the messaage ID returned when the new message was sent successfully
     def initialize(sender_id : Int64, msid : Int64)
       @sender = sender_id
-      @receivers = {sender_id => msid} of Int64 => Int64
+      @origin_msid = msid
+      @receivers = {} of Int64 => Int64
       @sent = Time.utc
       @ratings = Set(Int64).new
       @warned = false
@@ -106,12 +108,19 @@ class History
     return user_msgs
   end
 
-  def del_message_group(msid : Int64) : Nil
+  # Deletes a `MessageGroup` from `msid_map`, 
+  # including any msids that reference this `MessageGroup`
+  #
+  # Returns the `origin_msid` of the given `MessageGroup`
+  def del_message_group(msid : Int64) : Int64
     message = @msid_map[msid]
 
     message.receivers.each_value do |cached_msid|
       @msid_map.delete(cached_msid)
     end
+    @msid_map.delete(message.origin_msid)
+
+    message.origin_msid
   end
 
   # Returns `true` if message is currently older than the given `lifespan`.

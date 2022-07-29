@@ -157,6 +157,11 @@ class Replies
     Group.new(Bold.new("Karma notifications"), ": #{hide_karma ? "disabled" : "enabled"}").to_md
   end
 
+  # Returns a message for when a user disables or enables debug mode.
+  def toggle_debug(toggle : Bool) : String
+    Group.new(Bold.new("Debug mode"), ": #{toggle ? "enabled" : "disabled"}").to_md
+  end
+
   # Returns an italicized message for when a user upvotes a message.
   def gave_upvote : String
     Italic.new("You upvoted this message!").to_md

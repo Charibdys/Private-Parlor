@@ -104,6 +104,11 @@ class Database
       @hideKarma = !hideKarma
     end
 
+    # Set *debugEnabled* to its opposite value.
+    def toggle_debug
+      @debugEnabled = !debugEnabled
+    end
+
     # Increment the user's karma by a given amount (1 by default)
     def increment_karma(amount : Int32 = 1)
       @karma += amount

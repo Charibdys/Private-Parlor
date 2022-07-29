@@ -224,6 +224,18 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Toggle the user's toggle_debug attribute.
+  @[Command(["toggle_debug", "toggledebug"])]
+  def toggle_debug_command(ctx)
+    if (message = ctx.message) && (info = message.from)
+      if user = database.get_user(info.id)
+        user.toggle_debug
+        update_user(user)
+        relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.toggle_debug(user.debugEnabled)) })
+      end
+    end
+  end
+
   # Set/modify/view the user's tripcode.
   @[Command(["tripcode"])]
   def tripcode_command(ctx)
@@ -440,12 +452,9 @@ class PrivateParlor < Tourmaline::Client
   def delete_messages(msid : Int64, user_id : Int64) : Int64?
     if reply_msids = @history.get_all_msids(msid)
       reply_msids.each do |receiver_id, cached_msid|
-        if receiver_id != user_id
-          delete_message(receiver_id, reply_msids[receiver_id])
-        end
+        delete_message(receiver_id, reply_msids[receiver_id])
       end
-      @history.del_message_group(msid)
-      reply_msids[user_id]
+      return @history.del_message_group(msid)
     end
   end
 
@@ -726,7 +735,7 @@ class PrivateParlor < Tourmaline::Client
     if reply_message
       if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
         @database.get_prioritized_users.each do |receiver_id|
-          if receiver_id != user.id
+          if receiver_id != user.id || user.debugEnabled
             add_to_queue(cached_msid, user.id, receiver_id, reply_msids[receiver_id], proc)
           end
         end
@@ -740,7 +749,7 @@ class PrivateParlor < Tourmaline::Client
       end
     else
       @database.get_prioritized_users.each do |receiver_id|
-        if receiver_id != user.id
+        if (receiver_id != user.id) || user.debugEnabled
           add_to_queue(cached_msid, user.id, receiver_id, nil, proc)
         end
       end
