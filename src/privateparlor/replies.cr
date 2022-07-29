@@ -147,6 +147,11 @@ class Replies
     return Link.new("~~#{name}", "tg://user?id=#{id}").to_md
   end
 
+  # Returns a bolded signature showing which type of user sent this message.
+  def format_user_say(signature : String) : String
+    return Bold.new("~~#{signature}").to_md
+  end
+
   # Returns a tripcode (Name!Tripcode) segment.
   def format_tripcode_sign(name : String, tripcode : String) : String
     Group.new(Bold.new(name), Code.new(tripcode)).to_md
@@ -187,6 +192,7 @@ class Replies
     return Section.new(
       Italic.new("The following commands are available to moderators:"),
       "    /help - Show this text",
+      "    /modsay [text] - Send an offical moderator message",
       Italic.new("The commands below must be used with a reply:"),
       "    /info - Get the user info from this message",
       "    /delete [reason] - Delete a message and give a cooldown",
@@ -201,6 +207,7 @@ class Replies
       Italic.new("The following commands are available to admins:"),
       "    /help - Show this text",
       "    /purge - Delete all messages from a blacklisted user",
+      "    /adminsay [text] - Send an official admin message",
       Italic.new("The commands below must be used with a reply:"),
       "    /info - Get the user info from this message",
       "    /blacklist [reason] - Ban a user from the chat",
@@ -220,6 +227,7 @@ class Replies
       "    /admin [username] - Promote a user to admin",
       "    /demote [username] - Demote a user",
       "    /motd [text] - Set the motd (users will see this when joining)",
+      "    /hostsay [text] - Send an official host message",
       Italic.new("The commands below must be used with a reply:"),
       "    /info - Get the user info from this message",
       "    /blacklist [reason] - Ban a user from the chat",

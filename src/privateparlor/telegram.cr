@@ -558,9 +558,11 @@ class PrivateParlor < Tourmaline::Client
       return text
     when text.starts_with?("/s"), text.starts_with?("/sign")
       if config.allow_signing # NOTE: Since we cannot check if user has private forwards enabled, signing will not work as intendend
-        return String.build do |str|
-          str << get_args(text)
-          str << @replies.format_user_sign(user.id, user.get_formatted_name)
+        if (args = get_args(text)) && args.size > 0
+          return String.build do |str|
+            str << args
+            str << @replies.format_user_sign(user.id, user.get_formatted_name)
+          end
         end
       else
         relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.command_disabled, reply_to_message: reply) })
@@ -568,17 +570,49 @@ class PrivateParlor < Tourmaline::Client
     when text.starts_with?("/t"), text.starts_with?("/tsign")
       if config.allow_tripcodes
         if tripkey = user.tripcode
-          pair = generate_tripcode(tripkey, config.salt)
-          return String.build do |str|
-            str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
-            str << "\n"
-            str << get_args(text)
+          if (args = get_args(text)) && args.size > 0
+            pair = generate_tripcode(tripkey, config.salt)
+            return String.build do |str|
+              str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
+              str << "\n"
+              str << args
+            end
           end
         else
           relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_tripcode_set, reply_to_message: reply) })
         end
       else
         relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.command_disabled, reply_to_message: reply) })
+      end
+    when text.starts_with?("/modsay")
+      if user.authorized?(Ranks::Moderator)
+        if (args = get_args(text)) && args.size > 0
+          Log.info { "User #{user.id}, aka #{user.get_formatted_name} sent mod message: #{args}" }
+          return String.build do |str|
+            str << args
+            str << @replies.format_user_say("mod")
+          end
+        end
+      end
+    when text.starts_with?("/adminsay")
+      if user.authorized?(Ranks::Admin)
+        if (args = get_args(text)) && args.size > 0
+          Log.info { "User #{user.id}, aka #{user.get_formatted_name} sent admin message: #{args}" }
+          return String.build do |str|
+            str << args
+            str << @replies.format_user_say("admin")
+          end
+        end
+      end
+    when text.starts_with?("/hostsay")
+      if user.authorized?(Ranks::Host)
+        if (args = get_args(text)) && args.size > 0
+          Log.info { "User #{user.id}, aka #{user.get_formatted_name} sent host message: #{args}" }
+          return String.build do |str|
+            str << args
+            str << @replies.format_user_say("host")
+          end
+        end
       end
     else
       return
