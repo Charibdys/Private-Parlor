@@ -205,6 +205,16 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Returns a message containing the progam's version.
+  @[Command(["version"])]
+  def version_command(ctx)
+    if (message = ctx.message) && (info = message.from)
+      if user = check_user(info)
+        relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.version, link_preview: true, reply_to_message: reply) })
+      end
+    end
+  end
+
   # Upvotes a message.
   @[Command(["1"], prefix: ["+"])]
   def karma_command(ctx)

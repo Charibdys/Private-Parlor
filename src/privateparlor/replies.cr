@@ -190,6 +190,13 @@ class Replies
       indent: 0).to_md
   end
 
+  # Returns a message containing the program version and a link to its Git repo.
+  #
+  # Feel free to edit this if you fork the code.
+  def version : String
+    return Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://gitlab.com/Charibdys/private-parlor")).to_md
+  end
+
   # Return a message containing the user's new tripcode.
   def tripcode_set(name : String, tripcode : String) : String
     return Section.new(
