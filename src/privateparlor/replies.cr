@@ -272,6 +272,7 @@ class Replies
     return message.to_md
   end
 
+  # Returns a message containing the user's obfuscated ID, username, rank, karma, warnings, warn expiry and cooldown duration (if present).
   def user_info(oid : String, username : String, rank : Ranks, karma : Int32, warnings : Int32, warn_expiry : Time | Nil = nil, cooldown_until : Time | Nil = nil) : String
     return Section.new(
       Group.new(Bold.new("id"), ": #{oid}, ", Bold.new("username"), ": #{username}, ", Bold.new("rank"), ": #{rank.value} (#{rank.to_s})"),
@@ -281,6 +282,7 @@ class Replies
       indent: 0).to_md
   end
 
+  # Invoked by a ranked user. Returns a message containing the obfuscated id, obfuscated karma, and cooldown duration of the selected user.
   def user_info_mod(oid : String, karma : Int32, cooldown_until : Time | Nil = nil)
     return Section.new(
       Group.new(Bold.new("id"), ": #{oid}, ", Bold.new("username"), ": anonymous, ", Bold.new("rank"), ": n/a"),
@@ -289,6 +291,8 @@ class Replies
       indent: 0).to_md
   end
 
+  # Returns a message containing the count of all users in the bot.
+  # If full is true, returns the number of joined, left, and blacklisted users. Otherwise, returns the total.
   def user_count(joined : Int32, left : Int32, blacklisted : Int32, total : Int32, full : Bool) : String
     if full
       Group.new(

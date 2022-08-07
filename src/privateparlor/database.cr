@@ -119,6 +119,7 @@ class Database
       @karma -= amount
     end
 
+    # Set user's rank to blacklisted, force leave, and update blacklist reason.
     def blacklist(reason : String | Nil) : Nil
       @rank = -10
       self.set_left

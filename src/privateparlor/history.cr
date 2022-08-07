@@ -96,6 +96,7 @@ class History
     end
   end
 
+  # Retuns a set containing all msids sent by a given user.
   def get_msids_from_user(uid : Int64) : Set(Int64)
     user_msgs = Set(Int64).new
     @msid_map.each_value do |msg|
