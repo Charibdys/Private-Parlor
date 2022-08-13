@@ -1,12 +1,77 @@
 image: "crystallang/crystal:latest"
 
-before_script:
-  - shards install
-  - crystal -v
+stages:
+  - build
+  - release
+  - deploy
 
 cache:
   paths:
   - lib/
+
+variables:
+  DEPENDENCIES: build-base yaml-static sqlite-static sqlite-dev libxml2-dev icu-static zlib-static xz-dev openssl-dev openssl-libs-static pcre-dev gc-dev libevent-static crystal shards
+
+build-x86_64:
+  stage: build
+  image: 
+    name: "alpine:latest"
+    entrypoint: [""]
+  script:
+    - apk add --update --no-cache --force-overwrite $DEPENDENCIES
+    - shards install
+    - crystal -v
+    - shards build --static --no-debug --release --stats --time
+    - mkdir bin-x86_64 && mv bin/privateparlor bin-x86_64/privateparlor
+    - echo "BUILD_x86_64_ID=$CI_JOB_ID" >> ids.env
+  artifacts:
+    paths:
+      - bin-x86_64/*
+    reports:
+      dotenv: ids.env
+
+build-arm64:
+  stage: build
+  image: 
+    name: "arm64v8/alpine:latest"
+    entrypoint: [""]
+  script:
+    - apk add --update --no-cache --force-overwrite $DEPENDENCIES
+    - shards install
+    - crystal -v
+    - shards build --static --no-debug --release --stats --time
+    - mkdir bin-arm64 && mv bin/privateparlor bin-arm64/privateparlor
+    - echo "BUILD_ARM64_ID=$CI_JOB_ID" >> ids.env
+  artifacts:
+    paths:
+      - bin-arm64/*
+    reports:
+      dotenv: ids.env
+
+release-tag:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  script:
+    - echo $CI_JOB_ID
+    - echo $BUILD_x86_64_ID
+    - echo $BUILD_ARM64_ID
+  needs:
+    - job: "build-x86_64"
+    - job: "build-arm64"
+      artifacts: true
+  release:
+    name: "$CI_COMMIT_TAG"
+    description: "Release for $CI_COMMIT_TAG"
+    tag_name: $CI_COMMIT_TAG
+    assets:
+      links:
+        - name: "Linux x86_64"
+          url: "https://gitlab.com/Charibdys/private-parlor-pipeline2/-/jobs/$BUILD_x86_64_ID/artifacts/file/bin-x86_64/privateparlor"
+        - name: "Linux arm64"
+          url: "https://gitlab.com/Charibdys/private-parlor-pipeline2/-/jobs/$BUILD_ARM64_ID/artifacts/file/bin-arm64/privateparlor"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master" && $CI_COMMIT_TAG'
+    - when: on_success
 
 pages:
   stage: deploy
