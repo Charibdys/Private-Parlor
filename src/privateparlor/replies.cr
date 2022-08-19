@@ -65,7 +65,7 @@ class Replies
       text = replace_links(text, entities)
       entities = remove_entities(entities)
     end
-    unparse_text(text, entities, Tourmaline::ParseMode::MarkdownV2, escape: true)
+    unparse_text(text, entities, Tourmaline::ParseMode::MarkdownV2)
   end
 
   ###################
