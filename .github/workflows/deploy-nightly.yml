@@ -1,0 +1,102 @@
+name: Deploy nightly release
+
+on:
+  push:
+    branches: [ "master" ]
+    # Ignore any created tags; run only on push/pull
+    tags-ignore:
+      - '**'
+    paths:
+      - 'src/*'
+      - 'config.yaml.copy'
+      - 'shard.yml'
+  pull_request:
+    branches: [ "master" ]
+    tags-ignore:
+      - '**'
+    paths:
+      - 'src/*'
+      - 'config.yaml.copy'
+      - 'shard.yml'
+
+jobs:
+  build-x86_64:
+    runs-on: ubuntu-latest
+
+    container:
+      image: alpine:latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: |
+        apk add --update --upgrade --no-cache --force-overwrite build-base yaml-static sqlite-static sqlite-dev libxml2-dev icu-static zlib-static xz-dev openssl-dev openssl-libs-static pcre-dev gc-dev libevent-static crystal shards
+        shards install
+    - name: Build
+      run: |
+        crystal -v
+        shards build --static --stats --time
+        strip ./bin/privateparlor
+        mkdir privateparlor
+        mv ./bin/privateparlor privateparlor/ && mv config.yaml.copy privateparlor/
+        tar -cvf privateparlor-x86_64.tar privateparlor/
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: privateparlor-x86_64
+        path: privateparlor-x86_64.tar
+          
+  build-arm64:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Create arm64 container and build
+      uses: uraimo/run-on-arch-action@v2.2.0
+      with:
+        arch: aarch64
+        distro: alpine_latest
+        githubToken: ${{ github.token }}
+        setup: mkdir -p "${PWD}/artifacts"
+        dockerRunArgs: --volume "${PWD}/artifacts:/privateparlor"
+        shell: /bin/sh
+        install: | 
+          apk add --update --upgrade --no-cache --force-overwrite build-base yaml-static sqlite-static sqlite-dev libxml2-dev icu-static zlib-static xz-dev openssl-dev openssl-libs-static pcre-dev gc-dev libevent-static crystal shards
+        run: |
+          shards install
+          crystal -v
+          shards build --static --stats --time
+          strip ./bin/privateparlor
+          mv ./bin/privateparlor /privateparlor && mv config.yaml.copy /privateparlor
+          tar -cvf privateparlor-arm64.tar /privateparlor
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: privateparlor-arm64
+        path: privateparlor-arm64.tar
+          
+  release-nightly:
+    needs: [build-arm64, build-x86_64]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Declare some variables
+      id: vars
+      shell: bash
+      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v3.0.0
+      with:
+        path: downloads
+    - name: GH Release
+      uses: softprops/action-gh-release@v0.1.14
+      with:
+        name: Private Parlor Nightly
+        tag_name: v0.3.X
+        body: |
+          Nightly builds for Private Parlor, updated on every commit. Current build based on ${{ steps.vars.outputs.sha_short }}
+          Note, these are not optimized builds; see prior releases for more stable production builds.
+        files: |
+          ./downloads/privateparlor-x86_64/*
+          ./downloads/privateparlor-arm64/*
+        prerelease: true
