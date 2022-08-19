@@ -21,6 +21,8 @@ database: "Path to SQLite database"
 
 # Relaying toggles
 #relay-luck: true
+#relay-venue: true
+#relay-location: true
 
 # MessageEntity toggles
 # Entity types specified here will be stripped from every user message

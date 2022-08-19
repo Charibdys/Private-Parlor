@@ -813,6 +813,62 @@ class PrivateParlor < Tourmaline::Client
   end
   {% end %}
 
+  @[On(:venue)]
+  def handle_venue(update)
+    if config.relay_venue
+      if (message = update.message) && (info = message.from)
+        if (message.forward_from || message.forward_from_chat)
+          return
+        end
+        if user = check_user(info)
+          venue = message.venue.not_nil!
+          relay(
+            message.reply_message,
+            user,
+            @history.new_message(user.id, message.message_id),
+            ->(receiver : Int64, reply : Int64 | Nil) { send_venue(
+              receiver,
+              venue.location.latitude,
+              venue.location.longitude,
+              venue.title,
+              venue.address,
+              venue.foursquare_id,
+              venue.foursquare_type,
+              venue.google_place_id,
+              venue.google_place_type,
+              reply_to_message: reply
+            ) }
+          )
+        end
+      end
+    end
+  end
+
+  @[On(:location)]
+  def handle_location(update)
+    if config.relay_location
+      if (message = update.message) && (info = message.from)
+        if (message.forward_from || message.forward_from_chat) || message.venue
+          return
+        end
+        if user = check_user(info)
+          location = message.location.not_nil!
+          relay(
+            message.reply_message,
+            user,
+            @history.new_message(user.id, message.message_id),
+            ->(receiver : Int64, reply : Int64 | Nil) { send_location(
+              receiver,
+              location.latitude,
+              location.longitude,
+              reply_to_message: reply
+            ) }
+          )
+        end
+      end
+    end
+  end
+
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64 | Array(Int64), proc : MessageProc)
     if reply_message
       if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)

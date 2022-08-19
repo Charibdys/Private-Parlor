@@ -27,6 +27,12 @@ module Configuration
     @[YAML::Field(key: "relay-luck")]
     getter relay_luck : Bool = true
 
+    @[YAML::Field(key: "relay-venue")]
+    getter relay_venue : Bool = false
+
+    @[YAML::Field(key: "relay-location")]
+    getter relay_location : Bool = false
+
     @[YAML::Field(key: "full-usercount")]
     getter full_usercount : Bool = false
 
