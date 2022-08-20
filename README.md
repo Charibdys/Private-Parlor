@@ -7,7 +7,7 @@ Written in Crystal with the aim of being a fast, memory efficient, and featurefu
 ## Installation
 
 ~~~
-git clone https://gitlab.com/Charibdys/privateparlor.git
+git clone https://github.com/Charibdys/Private-Parlor.git
 cd privateparlor
 shards install
 shards build --release
@@ -25,7 +25,18 @@ shards build --release
 ~~~
 start - Join the chat (start receiving messages)
 stop - Leave the chat (stop receiving messages)
-leave - alias of stop
+leave - Alias of stop
+info - Get info about your account
+users - Show the number of users in the chat
+version - Get the version and a link to the source code
+togglekarma - Toggle karma notifications
+toggledebug - Toggle debug mode (sends messages back to you)
+tripcode - Set or view your tripcode
+rules - Show the rules of this chat
+sign - Sign a message with your username
+tsign - Sign a message with your tripcode
+s - Alias of sign
+t - Alias of tsign
 ~~~
 
 ## Usage
@@ -47,15 +58,16 @@ The following features are planned and being worked on:
 	- [x] GIFs
 	- [x] Stickers
 	- [x] Polls
-	- [ ] Venues/Contacts
+	- [x] Locations/Venues
+	- [ ] Contacts
 	- [x] Forwards
 - [ ] Admin commands
 	- [X] Delete
 	- [X] Delete all
 	- [X] Remove
-	- [ ] Warn
-	- [ ] Setting rules
-	- [ ] User info
+	- [X] Warn
+	- [X] Setting rules
+	- [X] User info
 	- [X] Blacklist
 	- [X] Promotion 
 	- [X]	Demotion 
@@ -64,6 +76,8 @@ The following features are planned and being worked on:
 	- [ ] Configurable cache contents
 	- [x] Configurable cache life
 - [ ] Karma
+	- [X] Upvotes
+	- [ ] Downvotes
 - [x] Message queue
 - [ ] Spam prevention
 	- [ ] Configurable time and content limits
@@ -76,7 +90,7 @@ This project has a [Trello board](https://trello.com/b/6W5ZX7BD/private-parlor-d
 
 If you would like to make a contribution, follow these steps:
 
-1. Fork it (<https://gitlab.com/Charibdys/private-parlor/-/forks/new>)
+1. Fork it (<https://github.com/Charibdys/Private-Parlor/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
