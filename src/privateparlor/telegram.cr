@@ -936,6 +936,8 @@ class PrivateParlor < Tourmaline::Client
       end
     rescue Tourmaline::Error::BotBlocked | Tourmaline::Error::UserDeactivated
       force_leave(msg.receiver)
+    rescue ex
+      Log.error(exception: ex) { "Error occured when relaying message." }
     end
   end
 
