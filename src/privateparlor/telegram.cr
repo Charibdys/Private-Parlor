@@ -6,6 +6,7 @@ class PrivateParlor < Tourmaline::Client
   getter tasks : Hash(Symbol, Tasker::Task)
   getter config : Configuration::Config
   getter albums : Hash(String, Album)
+  getter spam : SpamScoreHandler
 
   # Creates a new instance of PrivateParlor.
   #
@@ -27,6 +28,7 @@ class PrivateParlor < Tourmaline::Client
     @history = History.new(config.lifetime.hours)
     @queue = Deque(QueuedMessage).new
     @replies = Replies.new(config.entities)
+    @spam = SpamScoreHandler.new()
     @tasks = register_tasks()
     @albums = {} of String => Album
   end
@@ -76,11 +78,58 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  class SpamScoreHandler
+    property scores : Hash(Int64, Float32)
+
+    def initialize()
+      @scores = {} of Int64 => Float32
+    end
+
+    def spammy?(user : Int64, increment : Float32) : Bool
+      if score = @scores[user]?
+        if score > SPAM_LIMIT
+          return true
+        elsif score + increment > SPAM_LIMIT
+          @scores[user] = SPAM_LIMIT_HIT
+          return score + increment >= SPAM_LIMIT_HIT
+        end
+
+        @scores[user] = score + increment
+      else
+        @scores[user] = increment
+      end
+
+      return false
+    end
+
+    def calculate_spam_score(type : String) : Float32
+      score = SCORE_BASE_MESSAGE
+
+      if type.in?("animation", "audio", "document", "video", "video_note", "voice", "photo")
+        score += SCORE_CAPTIONED_TYPE
+      end
+
+      score
+    end
+
+    def expire
+      @scores.each do |user, score|
+        if (score - 1) <= 0
+          @scores.delete(user)
+        else
+          @scores[user] = score -1
+        end
+      end
+    end
+  end
+
   # Starts various background tasks and stores them in a hash.
   def register_tasks : Hash
     tasks = {} of Symbol => Tasker::Task
     # Handle cache expiration
     tasks.merge!({:cache => Tasker.every(@history.lifespan * (1/4)) { @history.expire }})
+    # Handle spam score expiration
+    tasks.merge!({:spam => Tasker.every(SPAM_INTERVAL_SECONDS.seconds) { @spam.expire }})
   end
 
   # Updates user's record in the database with new, up-to-date information.
@@ -666,6 +715,10 @@ class PrivateParlor < Tourmaline::Client
           if caption.nil? # Caption contained a special font or used a disabled command
             return 
           end
+        end
+        
+        if @spam.spammy?(info.id, @spam.calculate_spam_score({{captioned_type}}))
+          return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
         end
 
         relay(

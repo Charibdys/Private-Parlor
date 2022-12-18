@@ -187,6 +187,10 @@ class Replies
     Italic.new("You have already upvoted this message.").to_md
   end
 
+  def is_spamming : String
+    Italic.new("Your message has not been sent, avoid sending messages too fast. Try again later.").to_md
+  end
+
   # Returns a message containing the commands the a moderator can use.
   def mod_help : String
     return Section.new(
