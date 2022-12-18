@@ -20,7 +20,9 @@ class PrivateParlor < Tourmaline::Client
   # `connection`
   # :     the `DB::Databse` object obtained from the database path in the `config.yaml` file
   def initialize(@config : Configuration::Config, parse_mode)
-    super(bot_token: config.token, default_parse_mode: parse_mode)
+    super(bot_token: config.token)
+    Client.default_parse_mode=(parse_mode)
+
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
     @history = History.new(config.lifetime.hours)
     @queue = Deque(QueuedMessage).new
@@ -743,7 +745,7 @@ class PrivateParlor < Tourmaline::Client
         return
       end
       if user = check_user(info)
-        if message.poll.not_nil!.is_anonymous == false
+        if message.poll.not_nil!.anonymous? == false
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.deanon_poll, reply_to_message: reply) })
         else
           relay(
