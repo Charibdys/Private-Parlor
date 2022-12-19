@@ -86,30 +86,33 @@ class PrivateParlor < Tourmaline::Client
     end
 
     def spammy?(user : Int64, increment : Float32) : Bool
-      if score = @scores[user]?
-        if score > SPAM_LIMIT
-          return true
-        elsif score + increment > SPAM_LIMIT
-          @scores[user] = SPAM_LIMIT_HIT
-          return score + increment >= SPAM_LIMIT_HIT
-        end
+      score = 0 unless score = @scores[user]?
 
-        @scores[user] = score + increment
-      else
-        @scores[user] = increment
+      if score > SPAM_LIMIT
+        return true
+      elsif score + increment > SPAM_LIMIT
+        @scores[user] = SPAM_LIMIT_HIT
+        return score + increment >= SPAM_LIMIT_HIT
       end
+
+      @scores[user] = score + increment
 
       return false
     end
 
-    def calculate_spam_score(type : String) : Float32
-      score = SCORE_BASE_MESSAGE
-
-      if type.in?("animation", "audio", "document", "video", "video_note", "voice", "photo")
-        score += SCORE_CAPTIONED_TYPE
+    def calculate_spam_score(type : Symbol) : Float32
+      case type
+      when :forward
+        SCORE_BASE_FORWARD
+      when :sticker
+        SCORE_STICKER
+      else
+        SCORE_BASE_MESSAGE
       end
+    end
 
-      score
+    def calculate_spam_score_text(text : String) : Float32
+      SCORE_BASE_MESSAGE + (text.size * SCORE_TEXT_CHARACTER) + (text.count('\n') * SCORE_TEXT_LINEBREAK)
     end
 
     def expire
@@ -683,12 +686,16 @@ class PrivateParlor < Tourmaline::Client
       if user = check_user(info)
         if raw_text = message.text
           if text = check_text(@replies.strip_format(raw_text, message.entities), user, message.message_id)
-            relay(
-              message.reply_message,
-              user,
-              @history.new_message(user.id, message.message_id),
-              ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, reply_to_message: reply) }
+            unless @spam.spammy?(info.id, @spam.calculate_spam_score_text(text))
+              relay(
+                message.reply_message,
+                user,
+                @history.new_message(user.id, message.message_id),
+                ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, reply_to_message: reply) }
             )
+            else
+              return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+            end
           end
         end
       end
@@ -716,8 +723,8 @@ class PrivateParlor < Tourmaline::Client
             return 
           end
         end
-        
-        if @spam.spammy?(info.id, @spam.calculate_spam_score({{captioned_type}}))
+
+        if @spam.spammy?(info.id, @spam.calculate_spam_score(:{{captioned_type}}))
           return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
         end
 
@@ -817,12 +824,16 @@ class PrivateParlor < Tourmaline::Client
   def handle_forward(update)
     if (message = update.message) && (info = message.from)
       if user = check_user(info)
-        relay(
-          message.reply_message,
-          user,
-          @history.new_message(user.id, message.message_id),
-          ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
-        )
+        unless @spam.spammy?(info.id, @spam.calculate_spam_score(:forward))
+          relay(
+            message.reply_message,
+            user,
+            @history.new_message(user.id, message.message_id),
+            ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+          )
+        else
+          return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+        end
       end
     end
   end
@@ -836,12 +847,16 @@ class PrivateParlor < Tourmaline::Client
       end
 
       if user = check_user(info)
-        relay(
-          message.reply_message,
-          user,
-          @history.new_message(user.id, message.message_id),
-          ->(receiver : Int64, reply : Int64 | Nil) { send_sticker(receiver, message.sticker.not_nil!.file_id, reply_to_message: reply) }
-        )
+        unless @spam.spammy?(info.id, @spam.calculate_spam_score(:sticker))
+          relay(
+            message.reply_message,
+            user,
+            @history.new_message(user.id, message.message_id),
+            ->(receiver : Int64, reply : Int64 | Nil) { send_sticker(receiver, message.sticker.not_nil!.file_id, reply_to_message: reply) }
+          )
+        else
+          return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+        end
       end
     end
   end
