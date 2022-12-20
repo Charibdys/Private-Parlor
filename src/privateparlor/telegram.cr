@@ -106,6 +106,8 @@ class PrivateParlor < Tourmaline::Client
         SCORE_BASE_FORWARD
       when :sticker
         SCORE_STICKER
+      when :album
+        SCORE_ALBUM
       else
         SCORE_BASE_MESSAGE
       end
@@ -724,20 +726,20 @@ class PrivateParlor < Tourmaline::Client
           end
         end
 
-        if @spam.spammy?(info.id, @spam.calculate_spam_score(:{{captioned_type}}))
+        unless @spam.spammy?(info.id, @spam.calculate_spam_score(:{{captioned_type}}))
+          relay(
+            message.reply_message, 
+            user, 
+            @history.new_message(user.id, message.message_id),
+            {% if captioned_type == "photo" %}
+              ->(receiver : Int64, reply : Int64 | Nil) { send_photo(receiver, (message.photo.last).file_id, caption, reply_to_message: reply) }
+            {% else %}
+              ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, message.{{captioned_type.id}}.not_nil!.file_id, caption: caption, reply_to_message: reply) }
+            {% end %}
+          )
+        else
           return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
         end
-
-        relay(
-          message.reply_message, 
-          user, 
-          @history.new_message(user.id, message.message_id),
-          {% if captioned_type == "photo" %}
-            ->(receiver : Int64, reply : Int64 | Nil) { send_photo(receiver, (message.photo.last).file_id, caption, reply_to_message: reply) }
-          {% else %}
-            ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, message.{{captioned_type.id}}.not_nil!.file_id, caption: caption, reply_to_message: reply) }
-          {% end %}
-        )
       end
     end
   end
@@ -781,16 +783,20 @@ class PrivateParlor < Tourmaline::Client
           Tasker.at(2.seconds.from_now) {
             cached_msids = Array(Int64).new
             temp_album = @albums.delete(album)
-            temp_album.not_nil!.message_ids.each do |msid|
-              cached_msids << @history.new_message(info.id, msid)
-            end
+            unless @spam.spammy?(info.id, @spam.calculate_spam_score(:album))
+              temp_album.not_nil!.message_ids.each do |msid|
+                cached_msids << @history.new_message(info.id, msid)
+              end
 
-            relay(
-              message.reply_message,
-              user,
-              cached_msids,
-              ->(receiver : Int64, reply : Int64 | Nil) { send_media_group(receiver, temp_album.not_nil!.media_ids, reply_to_message: reply) }
-            )
+              relay(
+                message.reply_message,
+                user,
+                cached_msids,
+                ->(receiver : Int64, reply : Int64 | Nil) { send_media_group(receiver, temp_album.not_nil!.media_ids, reply_to_message: reply) }
+              )
+            else
+              relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+            end
           }
         end
       end
@@ -808,12 +814,16 @@ class PrivateParlor < Tourmaline::Client
         if message.poll.not_nil!.anonymous? == false
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.deanon_poll, reply_to_message: reply) })
         else
-          relay(
-            message.reply_message,
-            user,
-            @history.new_message(user.id, message.message_id),
-            ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
-          )
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:poll))
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
         end
       end
     end
@@ -871,12 +881,16 @@ class PrivateParlor < Tourmaline::Client
           return
         end
         if user = check_user(info)
-          relay(
-            message.reply_message, 
-            user, 
-            @history.new_message(user.id, message.message_id),
-            ->(receiver : Int64, reply : Int64 | Nil) { send_{{luck_type.id}}(receiver, reply_to_message: reply) }
-          )
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:{{luck_type}}))
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { send_{{luck_type.id}}(receiver, reply_to_message: reply) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
         end
       end
     end
@@ -891,24 +905,28 @@ class PrivateParlor < Tourmaline::Client
           return
         end
         if user = check_user(info)
-          venue = message.venue.not_nil!
-          relay(
-            message.reply_message,
-            user,
-            @history.new_message(user.id, message.message_id),
-            ->(receiver : Int64, reply : Int64 | Nil) { send_venue(
-              receiver,
-              venue.location.latitude,
-              venue.location.longitude,
-              venue.title,
-              venue.address,
-              venue.foursquare_id,
-              venue.foursquare_type,
-              venue.google_place_id,
-              venue.google_place_type,
-              reply_to_message: reply
-            ) }
-          )
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:venue))
+            venue = message.venue.not_nil!
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { send_venue(
+                receiver,
+                venue.location.latitude,
+                venue.location.longitude,
+                venue.title,
+                venue.address,
+                venue.foursquare_id,
+                venue.foursquare_type,
+                venue.google_place_id,
+                venue.google_place_type,
+                reply_to_message: reply
+              ) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
         end
       end
     end
@@ -922,18 +940,22 @@ class PrivateParlor < Tourmaline::Client
           return
         end
         if user = check_user(info)
-          location = message.location.not_nil!
-          relay(
-            message.reply_message,
-            user,
-            @history.new_message(user.id, message.message_id),
-            ->(receiver : Int64, reply : Int64 | Nil) { send_location(
-              receiver,
-              location.latitude,
-              location.longitude,
-              reply_to_message: reply
-            ) }
-          )
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:location))
+            location = message.location.not_nil!
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { send_location(
+                receiver,
+                location.latitude,
+                location.longitude,
+                reply_to_message: reply
+              ) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
         end
       end
     end
