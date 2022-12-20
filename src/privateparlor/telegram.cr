@@ -23,6 +23,7 @@ class PrivateParlor < Tourmaline::Client
   def initialize(@config : Configuration::Config, parse_mode)
     super(bot_token: config.token)
     Client.default_parse_mode=(parse_mode)
+    default_parse_mode=(parse_mode)
 
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
     @history = History.new(config.lifetime.hours)
