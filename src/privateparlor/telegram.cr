@@ -962,6 +962,35 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  @[On(:contact)]
+  def handle_contact(update)
+    if config.relay_contact
+      if (message = update.message) && (info = message.from)
+        if (message.forward_from || message.forward_from_chat)
+          return
+        end
+        if user = check_user(info)
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:contact))
+            contact = message.contact.not_nil!
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { send_contact(
+                receiver,
+                contact.phone_number,
+                contact.first_name,
+                last_name: contact.last_name,
+              ) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
+        end
+      end
+    end
+  end
+
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64 | Array(Int64), proc : MessageProc)
     if reply_message
       if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)

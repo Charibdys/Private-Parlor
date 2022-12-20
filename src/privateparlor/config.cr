@@ -33,6 +33,9 @@ module Configuration
     @[YAML::Field(key: "relay-location")]
     getter relay_location : Bool = false
 
+    @[YAML::Field(key: "relay-contact")]
+    getter relay_contact : Bool = false
+
     @[YAML::Field(key: "full-usercount")]
     getter full_usercount : Bool = false
 
