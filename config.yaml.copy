@@ -12,7 +12,6 @@ database: "Path to SQLite database"
 #lifetime: 24
 
 # Enable signing messages using /sign or /tsign
-# NOTE: Consider keeping signs disabled. If enabled, legitimate signs may appear fake due to the user's privacy settings
 #allow_signing: false
 #allow_tripcodes: true
 

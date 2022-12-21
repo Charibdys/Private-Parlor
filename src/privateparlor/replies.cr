@@ -187,6 +187,11 @@ class Replies
     Italic.new("You have already upvoted this message.").to_md
   end
 
+  # Returns an italicized message for when a user signs but has private forward enabled.
+  def private_sign : String
+    Italic.new("Your account's forward privacy must be set to \"Everybody\" for the sign feature to work.").to_md
+  end
+
   def is_spamming : String
     Italic.new("Your message has not been sent, avoid sending messages too fast. Try again later.").to_md
   end

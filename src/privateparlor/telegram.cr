@@ -614,12 +614,16 @@ class PrivateParlor < Tourmaline::Client
     when !text.starts_with?('/')
       return text
     when text.starts_with?("/s"), text.starts_with?("/sign")
-      if config.allow_signing # NOTE: Since we cannot check if user has private forwards enabled, signing will not work as intendend
-        if (args = get_args(text)) && args.size > 0
-          return String.build do |str|
-            str << args
-            str << @replies.format_user_sign(user.id, user.get_formatted_name)
+      if config.allow_signing
+        unless (chat = get_chat(user.id)) && chat.has_private_forwards
+          if (args = get_args(text)) && args.size > 0
+            return String.build do |str|
+              str << args
+              str << @replies.format_user_sign(user.id, user.get_formatted_name)
+            end
           end
+        else
+          relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.private_sign, reply_to_message: reply) })
         end
       else
         relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.command_disabled, reply_to_message: reply) })
