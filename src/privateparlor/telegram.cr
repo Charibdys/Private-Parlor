@@ -431,6 +431,37 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  @[Command(["warn"])]
+  def warn_message(ctx)
+    if (message = ctx.message) && (info = message.from)
+      if user = database.get_user(info.id)
+        if user.authorized?(Ranks::Moderator)
+          if reply = message.reply_message
+            if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+              unless @history.get_warning(reply.message_id) == true
+                reason = get_args(ctx.message.text)
+
+                duration = format_timespan(reply_user.cooldown_and_warn)
+                @history.add_warning(reply.message_id)
+                update_user(reply_user)
+                
+                relay_to_one(@history.get_origin_msid(reply.message_id), reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.cooldown_given(duration, reason), reply_to_message: reply) })
+                Log.info { "User #{user.id}, aka #{user.get_formatted_name}, Warned user [#{reply_user.get_obfuscated_id}] with #{duration} cooldown#{reason ? " for: #{reason}" : "."}" }
+                relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
+              else
+                relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.already_warned, reply_to_message: reply) })
+              end
+            else
+              relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.not_in_cache, reply_to_message: reply) })
+            end
+          else
+            relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_reply, reply_to_message: reply) })
+          end
+        end
+      end
+    end
+  end
+
   # Delete a message from a user, give a warning and a cooldown.
   # TODO: Implement warning/cooldown system
   @[Command(["delete"])]
@@ -590,7 +621,11 @@ class PrivateParlor < Tourmaline::Client
     user = database.get_user(info.id)
     if (user && !user.left?)
       update_user(info, user)
-      # TODO: Add spam and warning checks
+      if user.cooldownUntil
+        relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.on_cooldown(user.cooldownUntil.not_nil!)) })
+        return
+      end
+
       return user
     elsif user && user.blacklisted?
       relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.blacklisted(user.blacklistReason)) })

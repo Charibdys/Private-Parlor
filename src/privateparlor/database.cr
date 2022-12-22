@@ -119,6 +119,20 @@ class Database
       @karma -= amount
     end
 
+    # Sets user's cooldown and increments total warnings
+    def cooldown_and_warn
+      if @warnings < COOLDOWN_TIME_BEGIN.size
+        cooldown_time = COOLDOWN_TIME_BEGIN[@warnings]
+      else
+        cooldown_time = COOLDOWN_TIME_LINEAR_M * (@warnings - COOLDOWN_TIME_BEGIN.size) + COOLDOWN_TIME_LINEAR_B
+      end
+
+      @cooldownUntil = Time.utc + cooldown_time.minutes
+      @warnings += 1
+      @warnExpiry = Time.utc + WARN_EXPIRE_HOURS.hours
+      cooldown_time.minutes
+    end
+
     # Set user's rank to blacklisted, force leave, and update blacklist reason.
     def blacklist(reason : String | Nil) : Nil
       @rank = -10

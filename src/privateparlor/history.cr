@@ -65,12 +65,23 @@ class History
 
   # Set the warned variable in the associated `MessageGroup`.
   def add_warning(msid : Int64) : Nil
-    @msid_map[msid]?.warned = true
+    if msg = @msid_map[msid]
+      msg.warned = true
+    end
   end
 
   # Returns true if the associated `MessageGroup` was warned; false otherwise.
   def get_warning(msid : Int64) : Bool | Nil
-    @msid_map[msid]?.warned
+    if msg = @msid_map[msid]
+      msg.warned
+    end
+  end
+
+  # Returns the original MSID of the associated `MessageGroup`
+  def get_origin_msid(msid : Int64) : Int64 | Nil
+    if msg = @msid_map[msid]
+      msg.origin_msid
+    end
   end
 
   # Returns the receivers hash found in the associated `MessageGroup`

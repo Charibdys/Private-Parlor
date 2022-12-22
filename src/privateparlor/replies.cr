@@ -187,6 +187,11 @@ class Replies
     Italic.new("You have already upvoted this message.").to_md
   end
 
+  # Returns an italicized message for when a user tries to warn a message again.
+  def already_warned : String
+    Italic.new("This message has already been warned.").to_md
+  end
+
   # Returns an italicized message for when a user signs but has private forward enabled.
   def private_sign : String
     Italic.new("Your account's forward privacy must be set to \"Everybody\" for the sign feature to work.").to_md
@@ -318,6 +323,16 @@ class Replies
   # Returns an italicized message for when a message is deleted or removed.
   def message_deleted(deleted : Bool, reason : String | Nil = nil) : String
     Italic.new("This message has been #{deleted ? "deleted#{reason ? " for: #{reason}." : "."} You are on cooldown for some amount of time" : "removed#{reason ? " for: #{reason}." : "."} No cooldown has been given, but please refrain from posting the same message again."}").to_md
+  end
+
+  # Returns an italicized message when user is given a cooldown.
+  def cooldown_given(duration : String, reason : String | Nil = nil) : String
+    Italic.new("You've been given a cooldown of #{duration}#{reason ? " for: #{reason}." : "."}").to_md
+  end
+
+  # Returns an italicized message when user is currently cooldown and displays time until cooldown expires.
+  def on_cooldown(time : Time)
+    Italic.new("You're on cooldown until #{time}").to_md
   end
 
   # Returns an italicized message for when the user is blacklisted.
