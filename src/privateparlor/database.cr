@@ -120,7 +120,7 @@ class Database
     end
 
     # Sets user's cooldown and increments total warnings
-    def cooldown_and_warn
+    def cooldown_and_warn : Time::Span
       if @warnings < COOLDOWN_TIME_BEGIN.size
         cooldown_time = COOLDOWN_TIME_BEGIN[@warnings]
       else
@@ -130,6 +130,7 @@ class Database
       @cooldownUntil = Time.utc + cooldown_time.minutes
       @warnings += 1
       @warnExpiry = Time.utc + WARN_EXPIRE_HOURS.hours
+      self.decrement_karma(KARMA_WARN_PENALTY)
       cooldown_time.minutes
     end
 
