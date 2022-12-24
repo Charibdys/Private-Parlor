@@ -471,10 +471,14 @@ class PrivateParlor < Tourmaline::Client
         if user.authorized?(Ranks::Moderator)
           if reply = message.reply_message
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+              reason = get_args(message.text)
               cached_msid = delete_messages(reply.message_id, reply_user.id)
 
-              relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.message_deleted(true, get_args(message.text)), reply_to_message: reply) })
+              duration = format_timespan(reply_user.cooldown_and_warn)
+              update_user(reply_user)
 
+              relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.message_deleted(true, reason, duration), reply_to_message: reply) })
+              Log.info { "User #{user.id}, aka #{user.get_formatted_name}, deleted message [#{cached_msid}] by user [#{reply_user.get_obfuscated_id}] with a #{duration} cooldown#{reason ? " for: #{reason}" : "."}" }
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
             else
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.not_in_cache, reply_to_message: reply) })
