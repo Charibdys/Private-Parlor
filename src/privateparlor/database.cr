@@ -134,6 +134,32 @@ class Database
       cooldown_time.minutes
     end
 
+    # Removes a cooldown from a user if it has expired.
+    #
+    # Returns true if the cooldown can be expired, false otherwise
+    def remove_cooldown : Bool
+      if cooldown = @cooldownUntil
+        if cooldown < Time.utc
+          @cooldownUntil = nil
+        else
+          return false
+        end
+      end
+
+      true
+    end
+    
+    # Removes one or multiple warnings from a user and resets the `warnExpiry`
+    def remove_warning(amount : Int32 = 1) : Nil
+      @warnings -= amount
+
+      if @warnings > 0
+        @warnExpiry = Time.utc + WARN_EXPIRE_HOURS.hours
+      else
+        @warnExpiry = nil
+      end
+    end
+
     # Set user's rank to blacklisted, force leave, and update blacklist reason.
     def blacklist(reason : String | Nil) : Nil
       @rank = -10
@@ -180,6 +206,13 @@ class Database
   # Returns an array of `User` or `Nil` if no users were found.
   def get_blacklisted_users : Array(User) | Nil
     db.query_all("SELECT * FROM users WHERE rank = -10 AND left > (?)", (Time.utc - 48.hours), as: User)
+  end
+
+  # Queries the database for all warned users that are in the chat.
+  #
+  # Returns an array of `User` or `Nil` if no users were found.
+  def get_warned_users : Array(User) | Nil
+    db.query_all("SELECT * FROM users WHERE warnings > 0 AND left is NULL", as: User)
   end
 
   # Queries the database for a user with a given *username*.
@@ -234,6 +267,18 @@ class Database
   def no_users? : Bool
     !db.query("SELECT id FROM users") do |rs|
       rs.move_next
+    end
+  end
+
+  # Queries the database for warned users and removes warnings they have expired.
+  def expire_warnings : Nil
+    get_warned_users.each do |user|
+      if expiry = user.warnExpiry
+        if expiry <= Time.utc
+          user.remove_warning
+          modify_user(user)
+        end
+      end
     end
   end
 

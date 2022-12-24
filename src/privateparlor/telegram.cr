@@ -136,6 +136,8 @@ class PrivateParlor < Tourmaline::Client
     tasks.merge!({:cache => Tasker.every(@history.lifespan * (1/4)) { @history.expire }})
     # Handle spam score expiration
     tasks.merge!({:spam => Tasker.every(SPAM_INTERVAL_SECONDS.seconds) { @spam.expire }})
+    # Handle warning expiration
+    tasks.merge!({:warnings => Tasker.every(15.minutes) { @database.expire_warnings }})
   end
 
   # Updates user's record in the database with new, up-to-date information.
@@ -624,12 +626,12 @@ class PrivateParlor < Tourmaline::Client
   def check_user(info : Tourmaline::User) : Database::User | Nil
     user = database.get_user(info.id)
     if (user && !user.left?)
-      update_user(info, user)
-      if user.cooldownUntil
+      unless user.remove_cooldown
         relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.on_cooldown(user.cooldownUntil.not_nil!)) })
         return
       end
 
+      update_user(info, user)
       return user
     elsif user && user.blacklisted?
       relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.blacklisted(user.blacklistReason)) })
