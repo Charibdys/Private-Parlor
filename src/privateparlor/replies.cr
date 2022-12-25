@@ -97,6 +97,11 @@ class Replies
     Italic.new("You're not in this chat! Type /start to join.").to_md
   end
 
+  # Returns an italicized message when invoking /uncooldown, when the selected user is not in cooldown.
+  def not_in_cooldown : String
+    Italic.new("User found, but the user was not in cooldown!").to_md
+  end
+
   # Returns an italicized message for when a sent message was rejected.
   def rejected_message : String
     Italic.new("Your message was not relayed because it contained a special font.").to_md
@@ -135,6 +140,11 @@ class Replies
   # Returns an italicized message for when a user could not be found when searching by name.
   def no_user_found : String
     Italic.new("There was no user found with that name.").to_md
+  end
+
+  # Returns an italicized message for when a user could not be found when searching by oid.
+  def no_user_oid_found : String
+    Italic.new("There was no user found with that OID.").to_md
   end
 
   # Returns an italicized message for when a user is promoted to a given rank.

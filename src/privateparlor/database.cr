@@ -222,6 +222,14 @@ class Database
     db.query_one?("SELECT * FROM users WHERE LOWER(username) = ?", username.downcase, as: User)
   end
 
+  def get_user_by_oid(oid : String) : User | Nil
+    db.query_all("SELECT * FROM users WHERE left IS NULL ORDER BY lastActive DESC", as: User).each do |user|
+      if user.get_obfuscated_id == oid
+        return user
+      end
+    end
+  end
+
   # Queries the database for all user ids, ordered by highest ranking users first then most active users.
   def get_prioritized_users : Array(Int64)
     db.query_all("SELECT id FROM users WHERE left IS NULL ORDER BY rank DESC, lastActive DESC", &.read(Int64))

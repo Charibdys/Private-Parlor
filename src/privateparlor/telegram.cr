@@ -493,6 +493,43 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Promote a user to the administrator rank.
+  @[Command(["uncooldown"])]
+  def uncooldown_command(ctx)
+    if (message = ctx.message) && (info = message.from)
+      if user = database.get_user(info.id)
+        if user.authorized?(Ranks::Admin)
+          if arg = get_args(message.text)
+            if arg.size < 5
+              if uncooldown_user = database.get_user_by_oid(arg)
+              else
+                return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_user_oid_found, reply_to_message: reply) })
+              end
+            else
+              if uncooldown_user = database.get_user_by_name(arg)
+              else
+                return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_user_found, reply_to_message: reply) })
+              end
+            end
+
+            if !(cooldown_until = uncooldown_user.cooldownUntil)
+              return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.not_in_cooldown, reply_to_message: reply) })
+            end
+
+            uncooldown_user.cooldownUntil = nil
+            uncooldown_user.remove_warning
+            update_user(uncooldown_user)
+
+            Log.info { "User #{user.id}, aka #{user.get_formatted_name}, removed cooldown from user [#{uncooldown_user.get_obfuscated_id}] (was until #{cooldown_until})." }
+            relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
+          else
+            relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.missing_args, reply_to_message: reply) })
+          end
+        end
+      end
+    end
+  end
+
   # Remove a message from a user without giving a warning or cooldown.
   @[Command(["remove"])]
   def remove_message(ctx)
