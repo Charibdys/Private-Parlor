@@ -65,7 +65,7 @@ class Replies
       text = replace_links(text, entities)
       entities = remove_entities(entities)
     end
-    unparse_text(text, entities, Tourmaline::ParseMode::MarkdownV2)
+    unparse_text(text, entities, Tourmaline::ParseMode::MarkdownV2, escape: true)
   end
 
   ###################
@@ -95,6 +95,11 @@ class Replies
   # Returns an italicized message for when a user sends a message, but is not in the chat.
   def not_in_chat : String
     Italic.new("You're not in this chat! Type /start to join.").to_md
+  end
+
+  # Returns an italicized message when invoking /uncooldown, when the selected user is not in cooldown.
+  def not_in_cooldown : String
+    Italic.new("User found, but the user was not in cooldown!").to_md
   end
 
   # Returns an italicized message for when a sent message was rejected.
@@ -135,6 +140,11 @@ class Replies
   # Returns an italicized message for when a user could not be found when searching by name.
   def no_user_found : String
     Italic.new("There was no user found with that name.").to_md
+  end
+
+  # Returns an italicized message for when a user could not be found when searching by oid.
+  def no_user_oid_found : String
+    Italic.new("There was no user found with that OID.").to_md
   end
 
   # Returns an italicized message for when a user is promoted to a given rank.
@@ -185,6 +195,26 @@ class Replies
   # Returns an italicized message for when a user tries to upvote a message they already upvoted.
   def already_upvoted : String
     Italic.new("You have already upvoted this message.").to_md
+  end
+
+  # Returns an italicized message for when a user tries to warn a message again.
+  def already_warned : String
+    Italic.new("This message has already been warned.").to_md
+  end
+
+  # Returns an italicized message for when a user signs but has private forward enabled.
+  def private_sign : String
+    Italic.new("Your account's forward privacy must be set to \"Everybody\" for the sign feature to work.").to_md
+  end
+
+  # Returns an italicized message when a user hits the spam limit.
+  def is_spamming : String
+    Italic.new("Your message has not been sent, avoid sending messages too fast. Try again later.").to_md
+  end
+
+  # Returns an italicized message when a user signs too often.
+  def sign_spam : String
+    Italic.new("Your message has not been sent, avoid signing too often. Try again later.").to_md
   end
 
   # Returns a message containing the commands the a moderator can use.
@@ -307,8 +337,18 @@ class Replies
   end
 
   # Returns an italicized message for when a message is deleted or removed.
-  def message_deleted(deleted : Bool, reason : String | Nil = nil) : String
-    Italic.new("This message has been #{deleted ? "deleted#{reason ? " for: #{reason}." : "."} You are on cooldown for some amount of time" : "removed#{reason ? " for: #{reason}." : "."} No cooldown has been given, but please refrain from posting the same message again."}").to_md
+  def message_deleted(warned : Bool, reason : String | Nil = nil, duration : String | Nil = nil) : String
+    Italic.new("This message has been #{warned ? "deleted#{reason ? " for: #{reason}." : "."} You are on cooldown for #{duration}." : "removed#{reason ? " for: #{reason}." : "."} No cooldown has been given, but please refrain from posting the same message again."}").to_md
+  end
+
+  # Returns an italicized message when user is given a cooldown.
+  def cooldown_given(duration : String, reason : String | Nil = nil) : String
+    Italic.new("You've been given a cooldown of #{duration}#{reason ? " for: #{reason}." : "."}").to_md
+  end
+
+  # Returns an italicized message when user is currently cooldown and displays time until cooldown expires.
+  def on_cooldown(time : Time)
+    Italic.new("You're on cooldown until #{time}").to_md
   end
 
   # Returns an italicized message for when the user is blacklisted.

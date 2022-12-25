@@ -12,9 +12,12 @@ database: "Path to SQLite database"
 #lifetime: 24
 
 # Enable signing messages using /sign or /tsign
-# NOTE: Consider keeping signs disabled. If enabled, legitimate signs may appear fake due to the user's privacy settings
 #allow_signing: false
 #allow_tripcodes: true
+
+# Limit usage of /sign and /tsign for once every interval (seconds)
+# Set to 0 to disable, defaults to 600 seconds
+#sign_limit_interval: 600
 
 # Toggle whether or not users can see the full count of joined, left, and blacklisted users.
 #full-usercount: false
@@ -23,6 +26,7 @@ database: "Path to SQLite database"
 #relay-luck: true
 #relay-venue: true
 #relay-location: true
+#relay-contact: true
 
 # MessageEntity toggles
 # Entity types specified here will be stripped from every user message

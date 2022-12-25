@@ -119,6 +119,47 @@ class Database
       @karma -= amount
     end
 
+    # Sets user's cooldown and increments total warnings
+    def cooldown_and_warn : Time::Span
+      if @warnings < COOLDOWN_TIME_BEGIN.size
+        cooldown_time = COOLDOWN_TIME_BEGIN[@warnings]
+      else
+        cooldown_time = COOLDOWN_TIME_LINEAR_M * (@warnings - COOLDOWN_TIME_BEGIN.size) + COOLDOWN_TIME_LINEAR_B
+      end
+
+      @cooldownUntil = Time.utc + cooldown_time.minutes
+      @warnings += 1
+      @warnExpiry = Time.utc + WARN_EXPIRE_HOURS.hours
+      self.decrement_karma(KARMA_WARN_PENALTY)
+      cooldown_time.minutes
+    end
+
+    # Removes a cooldown from a user if it has expired.
+    #
+    # Returns true if the cooldown can be expired, false otherwise
+    def remove_cooldown : Bool
+      if cooldown = @cooldownUntil
+        if cooldown < Time.utc
+          @cooldownUntil = nil
+        else
+          return false
+        end
+      end
+
+      true
+    end
+
+    # Removes one or multiple warnings from a user and resets the `warnExpiry`
+    def remove_warning(amount : Int32 = 1) : Nil
+      @warnings -= amount
+
+      if @warnings > 0
+        @warnExpiry = Time.utc + WARN_EXPIRE_HOURS.hours
+      else
+        @warnExpiry = nil
+      end
+    end
+
     # Set user's rank to blacklisted, force leave, and update blacklist reason.
     def blacklist(reason : String | Nil) : Nil
       @rank = -10
@@ -167,11 +208,26 @@ class Database
     db.query_all("SELECT * FROM users WHERE rank = -10 AND left > (?)", (Time.utc - 48.hours), as: User)
   end
 
+  # Queries the database for all warned users that are in the chat.
+  #
+  # Returns an array of `User` or `Nil` if no users were found.
+  def get_warned_users : Array(User) | Nil
+    db.query_all("SELECT * FROM users WHERE warnings > 0 AND left is NULL", as: User)
+  end
+
   # Queries the database for a user with a given *username*.
   #
   # Returns a `User` object or Nil if no user was found.
   def get_user_by_name(username) : User | Nil
     db.query_one?("SELECT * FROM users WHERE LOWER(username) = ?", username.downcase, as: User)
+  end
+
+  def get_user_by_oid(oid : String) : User | Nil
+    db.query_all("SELECT * FROM users WHERE left IS NULL ORDER BY lastActive DESC", as: User).each do |user|
+      if user.get_obfuscated_id == oid
+        return user
+      end
+    end
   end
 
   # Queries the database for all user ids, ordered by highest ranking users first then most active users.
@@ -219,6 +275,18 @@ class Database
   def no_users? : Bool
     !db.query("SELECT id FROM users") do |rs|
       rs.move_next
+    end
+  end
+
+  # Queries the database for warned users and removes warnings they have expired.
+  def expire_warnings : Nil
+    get_warned_users.each do |user|
+      if expiry = user.warnExpiry
+        if expiry <= Time.utc
+          user.remove_warning
+          modify_user(user)
+        end
+      end
     end
   end
 

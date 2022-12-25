@@ -33,6 +33,9 @@ module Configuration
     @[YAML::Field(key: "relay-location")]
     getter relay_location : Bool = false
 
+    @[YAML::Field(key: "relay-contact")]
+    getter relay_contact : Bool = false
+
     @[YAML::Field(key: "full-usercount")]
     getter full_usercount : Bool = false
 
@@ -41,6 +44,9 @@ module Configuration
 
     @[YAML::Field(key: "allow_tripcodes")]
     getter allow_tripcodes : Bool = false
+
+    @[YAML::Field(key: "sign_limit_interval")]
+    getter sign_limit_interval : Int32 = 600
 
     @[YAML::Field(key: "strip-format")]
     getter entities : Array(String) = ["bold", "italic", "text_link"]

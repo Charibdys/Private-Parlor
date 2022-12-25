@@ -6,6 +6,7 @@ class PrivateParlor < Tourmaline::Client
   getter tasks : Hash(Symbol, Tasker::Task)
   getter config : Configuration::Config
   getter albums : Hash(String, Album)
+  getter spam : SpamScoreHandler
 
   # Creates a new instance of PrivateParlor.
   #
@@ -22,11 +23,13 @@ class PrivateParlor < Tourmaline::Client
   def initialize(@config : Configuration::Config, parse_mode)
     super(bot_token: config.token)
     Client.default_parse_mode=(parse_mode)
+    default_parse_mode = (parse_mode)
 
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
     @history = History.new(config.lifetime.hours)
     @queue = Deque(QueuedMessage).new
     @replies = Replies.new(config.entities)
+    @spam = SpamScoreHandler.new
     @tasks = register_tasks()
     @albums = {} of String => Album
   end
@@ -76,11 +79,89 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  class SpamScoreHandler
+    getter scores : Hash(Int64, Float32)
+    getter sign_last_used : Hash(Int64, Time)
+
+    def initialize
+      @scores = {} of Int64 => Float32
+      @sign_last_used = {} of Int64 => Time
+    end
+
+    # Check if user's spam score triggers the spam filter
+    #
+    # Returns true if score is greater than spam limit, false otherwise.
+    def spammy?(user : Int64, increment : Float32) : Bool
+      score = 0 unless score = @scores[user]?
+
+      if score > SPAM_LIMIT
+        return true
+      elsif score + increment > SPAM_LIMIT
+        @scores[user] = SPAM_LIMIT_HIT
+        return score + increment >= SPAM_LIMIT_HIT
+      end
+
+      @scores[user] = score + increment
+
+      return false
+    end
+
+    # Check if user has signed within an interval of time
+    #
+    # Returns true if so (user is sign spamming), false otherwise.
+    def spammy_sign?(user : Int64, interval : Int32) : Bool
+      unless interval == 0
+        if last_used = @sign_last_used[user]?
+          if (Time.utc - last_used) < interval.seconds
+            return true
+          else
+            @sign_last_used[user] = Time.utc
+          end
+        else
+          @sign_last_used[user] = Time.utc
+        end
+      end
+
+      return false
+    end
+
+    def calculate_spam_score(type : Symbol) : Float32
+      case type
+      when :forward
+        SCORE_BASE_FORWARD
+      when :sticker
+        SCORE_STICKER
+      when :album
+        SCORE_ALBUM
+      else
+        SCORE_BASE_MESSAGE
+      end
+    end
+
+    def calculate_spam_score_text(text : String) : Float32
+      SCORE_BASE_MESSAGE + (text.size * SCORE_TEXT_CHARACTER) + (text.count('\n') * SCORE_TEXT_LINEBREAK)
+    end
+
+    def expire
+      @scores.each do |user, score|
+        if (score - 1) <= 0
+          @scores.delete(user)
+        else
+          @scores[user] = score - 1
+        end
+      end
+    end
+  end
+
   # Starts various background tasks and stores them in a hash.
   def register_tasks : Hash
     tasks = {} of Symbol => Tasker::Task
     # Handle cache expiration
     tasks.merge!({:cache => Tasker.every(@history.lifespan * (1/4)) { @history.expire }})
+    # Handle spam score expiration
+    tasks.merge!({:spam => Tasker.every(SPAM_INTERVAL_SECONDS.seconds) { @spam.expire }})
+    # Handle warning expiration
+    tasks.merge!({:warnings => Tasker.every(15.minutes) { @database.expire_warnings }})
   end
 
   # Updates user's record in the database with new, up-to-date information.
@@ -376,8 +457,39 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Warns a message without deleting it. Gives the user who sent the message a warning and a cooldown.
+  @[Command(["warn"])]
+  def warn_message(ctx)
+    if (message = ctx.message) && (info = message.from)
+      if user = database.get_user(info.id)
+        if user.authorized?(Ranks::Moderator)
+          if reply = message.reply_message
+            if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+              unless @history.get_warning(reply.message_id) == true
+                reason = get_args(ctx.message.text)
+
+                duration = format_timespan(reply_user.cooldown_and_warn)
+                @history.add_warning(reply.message_id)
+                update_user(reply_user)
+
+                relay_to_one(@history.get_origin_msid(reply.message_id), reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.cooldown_given(duration, reason), reply_to_message: reply) })
+                Log.info { "User #{user.id}, aka #{user.get_formatted_name}, Warned user [#{reply_user.get_obfuscated_id}] with #{duration} cooldown#{reason ? " for: #{reason}" : "."}" }
+                relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
+              else
+                relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.already_warned, reply_to_message: reply) })
+              end
+            else
+              relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.not_in_cache, reply_to_message: reply) })
+            end
+          else
+            relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_reply, reply_to_message: reply) })
+          end
+        end
+      end
+    end
+  end
+
   # Delete a message from a user, give a warning and a cooldown.
-  # TODO: Implement warning/cooldown system
   @[Command(["delete"])]
   def delete_message(ctx)
     if (message = ctx.message) && (info = message.from)
@@ -385,16 +497,55 @@ class PrivateParlor < Tourmaline::Client
         if user.authorized?(Ranks::Moderator)
           if reply = message.reply_message
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+              reason = get_args(message.text)
               cached_msid = delete_messages(reply.message_id, reply_user.id)
 
-              relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.message_deleted(true, get_args(message.text)), reply_to_message: reply) })
+              duration = format_timespan(reply_user.cooldown_and_warn)
+              update_user(reply_user)
 
+              relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.message_deleted(true, reason, duration), reply_to_message: reply) })
+              Log.info { "User #{user.id}, aka #{user.get_formatted_name}, deleted message [#{cached_msid}] by user [#{reply_user.get_obfuscated_id}] with a #{duration} cooldown#{reason ? " for: #{reason}" : "."}" }
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
             else
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.not_in_cache, reply_to_message: reply) })
             end
           else
             relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_reply, reply_to_message: reply) })
+          end
+        end
+      end
+    end
+  end
+
+  # Removes a cooldown and warning from a user if the user is in cooldown.
+  @[Command(["uncooldown"])]
+  def uncooldown_command(ctx)
+    if (message = ctx.message) && (info = message.from)
+      if user = database.get_user(info.id)
+        if user.authorized?(Ranks::Admin)
+          if arg = get_args(message.text)
+            if arg.size < 5
+              unless uncooldown_user = database.get_user_by_oid(arg)
+                return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_user_oid_found, reply_to_message: reply) })
+              end
+            else
+              unless uncooldown_user = database.get_user_by_name(arg)
+                return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_user_found, reply_to_message: reply) })
+              end
+            end
+
+            if !(cooldown_until = uncooldown_user.cooldownUntil)
+              return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.not_in_cooldown, reply_to_message: reply) })
+            end
+
+            uncooldown_user.cooldownUntil = nil
+            uncooldown_user.remove_warning
+            update_user(uncooldown_user)
+
+            Log.info { "User #{user.id}, aka #{user.get_formatted_name}, removed cooldown from user [#{uncooldown_user.get_obfuscated_id}] (was until #{cooldown_until})." }
+            relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
+          else
+            relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.missing_args, reply_to_message: reply) })
           end
         end
       end
@@ -534,8 +685,12 @@ class PrivateParlor < Tourmaline::Client
   def check_user(info : Tourmaline::User) : Database::User | Nil
     user = database.get_user(info.id)
     if (user && !user.left?)
+      unless user.remove_cooldown
+        relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.on_cooldown(user.cooldownUntil.not_nil!)) })
+        return
+      end
+
       update_user(info, user)
-      # TODO: Add spam and warning checks
       return user
     elsif user && user.blacklisted?
       relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.blacklisted(user.blacklistReason)) })
@@ -559,29 +714,41 @@ class PrivateParlor < Tourmaline::Client
     when !text.starts_with?('/')
       return text
     when text.starts_with?("/s"), text.starts_with?("/sign")
-      if config.allow_signing # NOTE: Since we cannot check if user has private forwards enabled, signing will not work as intendend
-        if (args = get_args(text)) && args.size > 0
-          return String.build do |str|
-            str << args
-            str << @replies.format_user_sign(user.id, user.get_formatted_name)
+      if config.allow_signing
+        unless (chat = get_chat(user.id)) && chat.has_private_forwards
+          unless @spam.spammy_sign?(user.id, @config.sign_limit_interval)
+            if (args = get_args(text)) && args.size > 0
+              return String.build do |str|
+                str << args
+                str << @replies.format_user_sign(user.id, user.get_formatted_name)
+              end
+            end
+          else
+            relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.sign_spam, reply_to_message: reply) })
           end
+        else
+          relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.private_sign, reply_to_message: reply) })
         end
       else
         relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.command_disabled, reply_to_message: reply) })
       end
     when text.starts_with?("/t"), text.starts_with?("/tsign")
       if config.allow_tripcodes
-        if tripkey = user.tripcode
-          if (args = get_args(text)) && args.size > 0
-            pair = generate_tripcode(tripkey, config.salt)
-            return String.build do |str|
-              str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
-              str << "\n"
-              str << args
+        unless @spam.spammy_sign?(user.id, @config.sign_limit_interval)
+          if tripkey = user.tripcode
+            if (args = get_args(text)) && args.size > 0
+              pair = generate_tripcode(tripkey, config.salt)
+              return String.build do |str|
+                str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
+                str << "\n"
+                str << args
+              end
             end
+          else
+            relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_tripcode_set, reply_to_message: reply) })
           end
         else
-          relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_tripcode_set, reply_to_message: reply) })
+          relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.sign_spam, reply_to_message: reply) })
         end
       else
         relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.command_disabled, reply_to_message: reply) })
@@ -634,12 +801,16 @@ class PrivateParlor < Tourmaline::Client
       if user = check_user(info)
         if raw_text = message.text
           if text = check_text(@replies.strip_format(raw_text, message.entities), user, message.message_id)
-            relay(
-              message.reply_message,
-              user,
-              @history.new_message(user.id, message.message_id),
-              ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, reply_to_message: reply) }
-            )
+            unless @spam.spammy?(info.id, @spam.calculate_spam_score_text(text))
+              relay(
+                message.reply_message,
+                user,
+                @history.new_message(user.id, message.message_id),
+                ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, reply_to_message: reply) }
+              )
+            else
+              return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+            end
           end
         end
       end
@@ -668,16 +839,20 @@ class PrivateParlor < Tourmaline::Client
           end
         end
 
-        relay(
-          message.reply_message, 
-          user, 
-          @history.new_message(user.id, message.message_id),
-          {% if captioned_type == "photo" %}
-            ->(receiver : Int64, reply : Int64 | Nil) { send_photo(receiver, (message.photo.last).file_id, caption, reply_to_message: reply) }
-          {% else %}
-            ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, message.{{captioned_type.id}}.not_nil!.file_id, caption: caption, reply_to_message: reply) }
-          {% end %}
-        )
+        unless @spam.spammy?(info.id, @spam.calculate_spam_score(:{{captioned_type}}))
+          relay(
+            message.reply_message, 
+            user, 
+            @history.new_message(user.id, message.message_id),
+            {% if captioned_type == "photo" %}
+              ->(receiver : Int64, reply : Int64 | Nil) { send_photo(receiver, (message.photo.last).file_id, caption, reply_to_message: reply) }
+            {% else %}
+              ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, message.{{captioned_type.id}}.not_nil!.file_id, caption: caption, reply_to_message: reply) }
+            {% end %}
+          )
+        else
+          return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+        end
       end
     end
   end
@@ -721,16 +896,20 @@ class PrivateParlor < Tourmaline::Client
           Tasker.at(2.seconds.from_now) {
             cached_msids = Array(Int64).new
             temp_album = @albums.delete(album)
-            temp_album.not_nil!.message_ids.each do |msid|
-              cached_msids << @history.new_message(info.id, msid)
-            end
+            unless @spam.spammy?(info.id, @spam.calculate_spam_score(:album))
+              temp_album.not_nil!.message_ids.each do |msid|
+                cached_msids << @history.new_message(info.id, msid)
+              end
 
-            relay(
-              message.reply_message,
-              user,
-              cached_msids,
-              ->(receiver : Int64, reply : Int64 | Nil) { send_media_group(receiver, temp_album.not_nil!.media_ids, reply_to_message: reply) }
-            )
+              relay(
+                message.reply_message,
+                user,
+                cached_msids,
+                ->(receiver : Int64, reply : Int64 | Nil) { send_media_group(receiver, temp_album.not_nil!.media_ids, reply_to_message: reply) }
+              )
+            else
+              relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+            end
           }
         end
       end
@@ -748,12 +927,16 @@ class PrivateParlor < Tourmaline::Client
         if message.poll.not_nil!.anonymous? == false
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.deanon_poll, reply_to_message: reply) })
         else
-          relay(
-            message.reply_message,
-            user,
-            @history.new_message(user.id, message.message_id),
-            ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
-          )
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:poll))
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
         end
       end
     end
@@ -764,12 +947,16 @@ class PrivateParlor < Tourmaline::Client
   def handle_forward(update)
     if (message = update.message) && (info = message.from)
       if user = check_user(info)
-        relay(
-          message.reply_message,
-          user,
-          @history.new_message(user.id, message.message_id),
-          ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
-        )
+        unless @spam.spammy?(info.id, @spam.calculate_spam_score(:forward))
+          relay(
+            message.reply_message,
+            user,
+            @history.new_message(user.id, message.message_id),
+            ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+          )
+        else
+          return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+        end
       end
     end
   end
@@ -783,12 +970,16 @@ class PrivateParlor < Tourmaline::Client
       end
 
       if user = check_user(info)
-        relay(
-          message.reply_message,
-          user,
-          @history.new_message(user.id, message.message_id),
-          ->(receiver : Int64, reply : Int64 | Nil) { send_sticker(receiver, message.sticker.not_nil!.file_id, reply_to_message: reply) }
-        )
+        unless @spam.spammy?(info.id, @spam.calculate_spam_score(:sticker))
+          relay(
+            message.reply_message,
+            user,
+            @history.new_message(user.id, message.message_id),
+            ->(receiver : Int64, reply : Int64 | Nil) { send_sticker(receiver, message.sticker.not_nil!.file_id, reply_to_message: reply) }
+          )
+        else
+          return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+        end
       end
     end
   end
@@ -803,18 +994,23 @@ class PrivateParlor < Tourmaline::Client
           return
         end
         if user = check_user(info)
-          relay(
-            message.reply_message, 
-            user, 
-            @history.new_message(user.id, message.message_id),
-            ->(receiver : Int64, reply : Int64 | Nil) { send_{{luck_type.id}}(receiver, reply_to_message: reply) }
-          )
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:{{luck_type}}))
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { send_{{luck_type.id}}(receiver, reply_to_message: reply) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
         end
       end
     end
   end
   {% end %}
 
+  # Prepares a venue message for relaying.
   @[On(:venue)]
   def handle_venue(update)
     if config.relay_venue
@@ -823,29 +1019,34 @@ class PrivateParlor < Tourmaline::Client
           return
         end
         if user = check_user(info)
-          venue = message.venue.not_nil!
-          relay(
-            message.reply_message,
-            user,
-            @history.new_message(user.id, message.message_id),
-            ->(receiver : Int64, reply : Int64 | Nil) { send_venue(
-              receiver,
-              venue.location.latitude,
-              venue.location.longitude,
-              venue.title,
-              venue.address,
-              venue.foursquare_id,
-              venue.foursquare_type,
-              venue.google_place_id,
-              venue.google_place_type,
-              reply_to_message: reply
-            ) }
-          )
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:venue))
+            venue = message.venue.not_nil!
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { send_venue(
+                receiver,
+                venue.location.latitude,
+                venue.location.longitude,
+                venue.title,
+                venue.address,
+                venue.foursquare_id,
+                venue.foursquare_type,
+                venue.google_place_id,
+                venue.google_place_type,
+                reply_to_message: reply
+              ) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
         end
       end
     end
   end
 
+  # Prepares a location message for relaying.
   @[On(:location)]
   def handle_location(update)
     if config.relay_location
@@ -854,23 +1055,58 @@ class PrivateParlor < Tourmaline::Client
           return
         end
         if user = check_user(info)
-          location = message.location.not_nil!
-          relay(
-            message.reply_message,
-            user,
-            @history.new_message(user.id, message.message_id),
-            ->(receiver : Int64, reply : Int64 | Nil) { send_location(
-              receiver,
-              location.latitude,
-              location.longitude,
-              reply_to_message: reply
-            ) }
-          )
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:location))
+            location = message.location.not_nil!
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { send_location(
+                receiver,
+                location.latitude,
+                location.longitude,
+                reply_to_message: reply
+              ) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
         end
       end
     end
   end
 
+  # Prepares a contact message for relaying.
+  @[On(:contact)]
+  def handle_contact(update)
+    if config.relay_contact
+      if (message = update.message) && (info = message.from)
+        if (message.forward_from || message.forward_from_chat)
+          return
+        end
+        if user = check_user(info)
+          unless @spam.spammy?(info.id, @spam.calculate_spam_score(:contact))
+            contact = message.contact.not_nil!
+            relay(
+              message.reply_message,
+              user,
+              @history.new_message(user.id, message.message_id),
+              ->(receiver : Int64, reply : Int64 | Nil) { send_contact(
+                receiver,
+                contact.phone_number,
+                contact.first_name,
+                last_name: contact.last_name,
+              ) }
+            )
+          else
+            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
+          end
+        end
+      end
+    end
+  end
+
+  # Caches a message and sends it to the queue for relaying.
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64 | Array(Int64), proc : MessageProc)
     if reply_message
       if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
