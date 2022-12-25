@@ -211,6 +211,11 @@ class Replies
     Italic.new("Your message has not been sent, avoid sending messages too fast. Try again later.").to_md
   end
 
+  # Returns an italicized message when a user signs too often.
+  def sign_spam : String
+    Italic.new("Your message has not been sent, avoid signing too often. Try again later.").to_md
+  end
+
   # Returns a message containing the commands the a moderator can use.
   def mod_help : String
     return Section.new(

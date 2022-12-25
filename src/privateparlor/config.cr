@@ -45,6 +45,9 @@ module Configuration
     @[YAML::Field(key: "allow_tripcodes")]
     getter allow_tripcodes : Bool = false
 
+    @[YAML::Field(key: "sign_limit_interval")]
+    getter sign_limit_interval : Int32 = 600
+
     @[YAML::Field(key: "strip-format")]
     getter entities : Array(String) = ["bold", "italic", "text_link"]
 

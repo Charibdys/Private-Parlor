@@ -80,10 +80,12 @@ class PrivateParlor < Tourmaline::Client
   end
 
   class SpamScoreHandler
-    property scores : Hash(Int64, Float32)
+    getter scores : Hash(Int64, Float32)
+    getter sign_last_used : Hash(Int64, Time)
 
     def initialize()
       @scores = {} of Int64 => Float32
+      @sign_last_used = {} of Int64 => Time
     end
 
     def spammy?(user : Int64, increment : Float32) : Bool
@@ -97,6 +99,22 @@ class PrivateParlor < Tourmaline::Client
       end
 
       @scores[user] = score + increment
+
+      return false
+    end
+
+    def spammy_sign?(user : Int64, interval : Int32) : Bool
+      unless interval == 0
+        if last_used = @sign_last_used[user]?
+          if (Time.utc - last_used) < interval.seconds
+            return true
+          else
+            @sign_last_used[user] = Time.utc
+          end
+        else
+          @sign_last_used[user] = Time.utc
+        end
+      end
 
       return false
     end
@@ -692,11 +710,15 @@ class PrivateParlor < Tourmaline::Client
     when text.starts_with?("/s"), text.starts_with?("/sign")
       if config.allow_signing
         unless (chat = get_chat(user.id)) && chat.has_private_forwards
-          if (args = get_args(text)) && args.size > 0
-            return String.build do |str|
-              str << args
-              str << @replies.format_user_sign(user.id, user.get_formatted_name)
+          unless @spam.spammy_sign?(user.id, @config.sign_limit_interval)
+            if (args = get_args(text)) && args.size > 0
+              return String.build do |str|
+                str << args
+                str << @replies.format_user_sign(user.id, user.get_formatted_name)
+              end
             end
+          else
+            relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.sign_spam, reply_to_message: reply) })
           end
         else
           relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.private_sign, reply_to_message: reply) })
@@ -706,17 +728,21 @@ class PrivateParlor < Tourmaline::Client
       end
     when text.starts_with?("/t"), text.starts_with?("/tsign")
       if config.allow_tripcodes
-        if tripkey = user.tripcode
-          if (args = get_args(text)) && args.size > 0
-            pair = generate_tripcode(tripkey, config.salt)
-            return String.build do |str|
-              str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
-              str << "\n"
-              str << args
+        unless @spam.spammy_sign?(user.id, @config.sign_limit_interval)
+          if tripkey = user.tripcode
+            if (args = get_args(text)) && args.size > 0
+              pair = generate_tripcode(tripkey, config.salt)
+              return String.build do |str|
+                str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
+                str << "\n"
+                str << args
+              end
             end
+          else
+            relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_tripcode_set, reply_to_message: reply) })
           end
         else
-          relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_tripcode_set, reply_to_message: reply) })
+          relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.sign_spam, reply_to_message: reply) })
         end
       else
         relay_to_one(msid, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.command_disabled, reply_to_message: reply) })
