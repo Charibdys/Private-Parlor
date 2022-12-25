@@ -61,7 +61,7 @@ jobs:
         dockerRunArgs: --volume "${PWD}/artifacts:/privateparlor"
         shell: /bin/sh
         install: | 
-          apk add --update --upgrade --no-cache --force-overwrite build-base yaml-static sqlite-static sqlite-dev libxml2-dev icu-static zlib-static xz-dev openssl-dev openssl-libs-static pcre-dev gc-dev libevent-static crystal shards
+          apk add --update --upgrade --no-cache --force-overwrite build-base yaml-static sqlite-static sqlite-dev libxml2-dev libxml2-static icu-static zlib-static xz-dev xz-static openssl-dev openssl-libs-static pcre-dev gc-dev libevent-static crystal shards
         run: |
           shards install
           crystal -v
