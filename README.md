@@ -6,6 +6,8 @@ Written in Crystal with the aim of being a fast, memory efficient, and featurefu
 [Updates posted on Telegram](https://t.me/privateparlor)
 ## Installation
 
+Compiling PrivateParlor requires having both `crystal` and `shards` installed.
+
 ~~~
 git clone https://github.com/Charibdys/Private-Parlor.git
 cd privateparlor
@@ -49,7 +51,7 @@ t - Alias of tsign
 
 The following features are planned and being worked on:
 
-- [ ] Relay message types
+- [x] Relay message types
 	- [x] Text
 	- [x] Photos
 	- [X] Albums
@@ -59,28 +61,30 @@ The following features are planned and being worked on:
 	- [x] Stickers
 	- [x] Polls
 	- [x] Locations/Venues
-	- [ ] Contacts
+	- [x] Contacts
 	- [x] Forwards
-- [ ] Admin commands
+- [x] Admin commands
 	- [X] Delete
 	- [X] Delete all
 	- [X] Remove
 	- [X] Warn
-	- [X] Setting rules
+	- [X] Uncooldown
+	- [X] Setting rules/MOTD
 	- [X] User info
 	- [X] Blacklist
 	- [X] Promotion 
-	- [X]	Demotion 
-	- [ ] Configurable command permissions 
-- [ ] Message history
-	- [ ] Configurable cache contents
-	- [x] Configurable cache life
+	- [X] Demotion 
+- [x] Message history/cache
 - [ ] Karma
 	- [X] Upvotes
 	- [ ] Downvotes
 - [x] Message queue
-- [ ] Spam prevention
-	- [ ] Configurable time and content limits
+- [x] Spam prevention
+- [ ] Configuration
+	- [ ] Configurable roles and command permissions 
+	- [ ] Configurable cache contents/data
+	- [x] Configurable cache life
+	- [ ] Configurable time and content limits for spam filter
 - [ ] Inactivity timeout
 - [ ] CLI tools and utility scripts
 
@@ -96,7 +100,7 @@ If you would like to make a contribution, follow these steps:
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
-Ensure that your code is documented and follows the [Crystal API coding style](https://crystal-lang.org/reference/1.2/conventions/coding_style.html).
+Ensure that your code is documented and follows the [Crystal API coding style](https://crystal-lang.org/reference/1.6/conventions/coding_style.html).
 
 ## Contributors
 
