@@ -501,13 +501,11 @@ class PrivateParlor < Tourmaline::Client
         if user.authorized?(Ranks::Admin)
           if arg = get_args(message.text)
             if arg.size < 5
-              if uncooldown_user = database.get_user_by_oid(arg)
-              else
+              unless uncooldown_user = database.get_user_by_oid(arg)
                 return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_user_oid_found, reply_to_message: reply) })
               end
             else
-              if uncooldown_user = database.get_user_by_name(arg)
-              else
+              unless uncooldown_user = database.get_user_by_name(arg)
                 return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_user_found, reply_to_message: reply) })
               end
             end
