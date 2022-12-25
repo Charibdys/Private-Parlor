@@ -207,6 +207,7 @@ class Replies
     Italic.new("Your account's forward privacy must be set to \"Everybody\" for the sign feature to work.").to_md
   end
 
+  # Returns an italicized message when a user hits the spam limit.
   def is_spamming : String
     Italic.new("Your message has not been sent, avoid sending messages too fast. Try again later.").to_md
   end

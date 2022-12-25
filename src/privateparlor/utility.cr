@@ -6,6 +6,7 @@ lib LibCrypt
   fun crypt(password : UInt8*, salt : UInt8*) : UInt8*
 end
 
+# Formats a timespan, so the duration is marked by its largest unit ("20m", "3h", "5d", etc)
 def format_timespan(cmp : Time::Span) : String
   case 
   when cmp >= Time::Span.new(days: 7)

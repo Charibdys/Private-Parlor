@@ -88,6 +88,9 @@ class PrivateParlor < Tourmaline::Client
       @sign_last_used = {} of Int64 => Time
     end
 
+    # Check if user's spam score triggers the spam filter
+    #
+    # Returns true if score is greater than spam limit, false otherwise.
     def spammy?(user : Int64, increment : Float32) : Bool
       score = 0 unless score = @scores[user]?
 
@@ -103,6 +106,9 @@ class PrivateParlor < Tourmaline::Client
       return false
     end
 
+    # Check if user has signed within an interval of time
+    #
+    # Returns true if so (user is sign spamming), false otherwise.
     def spammy_sign?(user : Int64, interval : Int32) : Bool
       unless interval == 0
         if last_used = @sign_last_used[user]?
@@ -451,6 +457,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Warns a message without deleting it. Gives the user who sent the message a warning and a cooldown.
   @[Command(["warn"])]
   def warn_message(ctx)
     if (message = ctx.message) && (info = message.from)
@@ -483,7 +490,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Delete a message from a user, give a warning and a cooldown.
-  # TODO: Implement warning/cooldown system
   @[Command(["delete"])]
   def delete_message(ctx)
     if (message = ctx.message) && (info = message.from)
@@ -511,7 +517,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
-  # Promote a user to the administrator rank.
+  # Removes a cooldown and warning from a user if the user is in cooldown.
   @[Command(["uncooldown"])]
   def uncooldown_command(ctx)
     if (message = ctx.message) && (info = message.from)
@@ -1004,6 +1010,7 @@ class PrivateParlor < Tourmaline::Client
   end
   {% end %}
 
+  # Prepares a venue message for relaying.
   @[On(:venue)]
   def handle_venue(update)
     if config.relay_venue
@@ -1039,6 +1046,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Prepares a location message for relaying.
   @[On(:location)]
   def handle_location(update)
     if config.relay_location
@@ -1068,6 +1076,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Prepares a contact message for relaying.
   @[On(:contact)]
   def handle_contact(update)
     if config.relay_contact
@@ -1097,6 +1106,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Caches a message and sends it to the queue for relaying.
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64 | Array(Int64), proc : MessageProc)
     if reply_message
       if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
