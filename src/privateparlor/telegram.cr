@@ -23,13 +23,13 @@ class PrivateParlor < Tourmaline::Client
   def initialize(@config : Configuration::Config, parse_mode)
     super(bot_token: config.token)
     Client.default_parse_mode=(parse_mode)
-    default_parse_mode=(parse_mode)
+    default_parse_mode = (parse_mode)
 
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
     @history = History.new(config.lifetime.hours)
     @queue = Deque(QueuedMessage).new
     @replies = Replies.new(config.entities)
-    @spam = SpamScoreHandler.new()
+    @spam = SpamScoreHandler.new
     @tasks = register_tasks()
     @albums = {} of String => Album
   end
@@ -83,7 +83,7 @@ class PrivateParlor < Tourmaline::Client
     getter scores : Hash(Int64, Float32)
     getter sign_last_used : Hash(Int64, Time)
 
-    def initialize()
+    def initialize
       @scores = {} of Int64 => Float32
       @sign_last_used = {} of Int64 => Time
     end
@@ -147,7 +147,7 @@ class PrivateParlor < Tourmaline::Client
         if (score - 1) <= 0
           @scores.delete(user)
         else
-          @scores[user] = score -1
+          @scores[user] = score - 1
         end
       end
     end
@@ -471,7 +471,7 @@ class PrivateParlor < Tourmaline::Client
                 duration = format_timespan(reply_user.cooldown_and_warn)
                 @history.add_warning(reply.message_id)
                 update_user(reply_user)
-                
+
                 relay_to_one(@history.get_origin_msid(reply.message_id), reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.cooldown_given(duration, reason), reply_to_message: reply) })
                 Log.info { "User #{user.id}, aka #{user.get_formatted_name}, Warned user [#{reply_user.get_obfuscated_id}] with #{duration} cooldown#{reason ? " for: #{reason}" : "."}" }
                 relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
@@ -807,7 +807,7 @@ class PrivateParlor < Tourmaline::Client
                 user,
                 @history.new_message(user.id, message.message_id),
                 ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, reply_to_message: reply) }
-            )
+              )
             else
               return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.is_spamming, reply_to_message: reply) })
             end

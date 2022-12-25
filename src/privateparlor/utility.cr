@@ -8,7 +8,7 @@ end
 
 # Formats a timespan, so the duration is marked by its largest unit ("20m", "3h", "5d", etc)
 def format_timespan(cmp : Time::Span) : String
-  case 
+  case
   when cmp >= Time::Span.new(days: 7)
     "#{cmp.total_weeks.floor.to_i}w"
   when cmp >= Time::Span.new(days: 1)

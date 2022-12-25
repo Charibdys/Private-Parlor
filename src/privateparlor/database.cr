@@ -148,7 +148,7 @@ class Database
 
       true
     end
-    
+
     # Removes one or multiple warnings from a user and resets the `warnExpiry`
     def remove_warning(amount : Int32 = 1) : Nil
       @warnings -= amount
