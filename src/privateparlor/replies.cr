@@ -279,7 +279,7 @@ class Replies
   #
   # Feel free to edit this if you fork the code.
   def version : String
-    return Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://gitlab.com/Charibdys/private-parlor")).to_md
+    return Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://github.com/Charibdys/Private-Parlor")).to_md
   end
 
   # Return a message containing the user's new tripcode.
