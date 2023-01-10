@@ -845,7 +845,7 @@ class PrivateParlor < Tourmaline::Client
             user, 
             @history.new_message(user.id, message.message_id),
             {% if captioned_type == "photo" %}
-              ->(receiver : Int64, reply : Int64 | Nil) { send_photo(receiver, (message.photo.last).file_id, caption, reply_to_message: reply) }
+              ->(receiver : Int64, reply : Int64 | Nil) { send_photo(receiver, (message.photo.last).file_id, caption: caption, reply_to_message: reply) }
             {% else %}
               ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, message.{{captioned_type.id}}.not_nil!.file_id, caption: caption, reply_to_message: reply) }
             {% end %}
