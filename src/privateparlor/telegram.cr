@@ -391,7 +391,7 @@ class PrivateParlor < Tourmaline::Client
                 update_user(promoted_user)
                 relay_to_one(nil, promoted_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.promoted(Ranks::Moderator)) })
 
-                Log.info { "User #{promoted_user.id}, aka #{promoted_user.get_formatted_name}, has been promoted to #{Ranks::Moderator}." }
+                Log.info { "User #{promoted_user.id}, aka #{promoted_user.get_formatted_name}, has been promoted to #{Ranks::Moderator} by #{user.get_formatted_name}. " }
                 relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
               end
             else
@@ -420,7 +420,7 @@ class PrivateParlor < Tourmaline::Client
                 update_user(promoted_user)
                 relay_to_one(nil, promoted_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.promoted(Ranks::Admin)) })
 
-                Log.info { "User #{promoted_user.id}, aka #{promoted_user.get_formatted_name}, has been promoted to #{Ranks::Admin}." }
+                Log.info { "User #{promoted_user.id}, aka #{promoted_user.get_formatted_name}, has been promoted to #{Ranks::Moderator} by #{user.get_formatted_name}. " }
                 relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
               end
             else
@@ -444,7 +444,7 @@ class PrivateParlor < Tourmaline::Client
             if demoted_user = database.get_user_by_name(arg)
               demoted_user.set_rank(Ranks::User)
               update_user(demoted_user)
-              Log.info { "User #{demoted_user.id}, aka #{demoted_user.get_formatted_name}, has been demoted." }
+              Log.info { "User #{demoted_user.id}, aka #{demoted_user.get_formatted_name}, has been demoted by #{user.get_formatted_name}." }
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
             else
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_user_found, reply_to_message: reply) })
@@ -563,7 +563,7 @@ class PrivateParlor < Tourmaline::Client
               cached_msid = delete_messages(reply.message_id, reply_user.id)
 
               relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.message_deleted(false, get_args(message.text)), reply_to_message: reply) })
-
+              Log.info { "User #{user.id}, aka #{user.get_formatted_name}, removed message [#{cached_msid}] by user [#{reply_user.get_obfuscated_id}]." }
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
             else
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.not_in_cache, reply_to_message: reply) })
