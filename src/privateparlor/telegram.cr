@@ -26,7 +26,7 @@ class PrivateParlor < Tourmaline::Client
     default_parse_mode = (parse_mode)
 
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
-    @history = History.new(config.lifetime.hours)
+    @history = HistoryFull.new(config.lifetime.hours)
     @queue = Deque(QueuedMessage).new
     @replies = Replies.new(config.entities)
     @spam = SpamScoreHandler.new
@@ -301,26 +301,28 @@ class PrivateParlor < Tourmaline::Client
   # Upvotes a message.
   @[Command(["1"], prefix: ["+"])]
   def karma_command(ctx)
-    if (message = ctx.message) && (info = message.from)
-      if user = database.get_user(info.id)
-        if reply = message.reply_message
-          if (@history.get_sender_id(reply.message_id) == user.id)
-            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.upvoted_own_message, reply_to_message: reply) })
-          end
-          if (!@history.add_rating(reply.message_id, user.id))
-            return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.already_upvoted, reply_to_message: reply) })
-          end
-
-          if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
-            reply_user.increment_karma
-            update_user(reply_user)
-            relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.gave_upvote, reply_to_message: reply) })
-            if (!reply_user.hideKarma)
-              relay_to_one(@history.get_msid(reply.message_id, reply_user.id), reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.got_upvote, reply_to_message: reply) })
+    if history_with_karma = @history.as?(HistoryFull)
+      if (message = ctx.message) && (info = message.from)
+        if user = database.get_user(info.id)
+          if reply = message.reply_message
+            if (history_with_karma.get_sender_id(reply.message_id) == user.id)
+              return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.upvoted_own_message, reply_to_message: reply) })
             end
+            if (!history_with_karma.add_rating(reply.message_id, user.id))
+              return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.already_upvoted, reply_to_message: reply) })
+            end
+
+            if reply_user = database.get_user(history_with_karma.get_sender_id(reply.message_id))
+              reply_user.increment_karma
+              update_user(reply_user)
+              relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.gave_upvote, reply_to_message: reply) })
+              if (!reply_user.hideKarma)
+                relay_to_one(history_with_karma.get_msid(reply.message_id, reply_user.id), reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.got_upvote, reply_to_message: reply) })
+              end
+            end
+          else
+            relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_reply, reply_to_message: reply) })
           end
-        else
-          relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_reply, reply_to_message: reply) })
         end
       end
     end
@@ -460,29 +462,31 @@ class PrivateParlor < Tourmaline::Client
   # Warns a message without deleting it. Gives the user who sent the message a warning and a cooldown.
   @[Command(["warn"])]
   def warn_message(ctx)
-    if (message = ctx.message) && (info = message.from)
-      if user = database.get_user(info.id)
-        if user.authorized?(Ranks::Moderator)
-          if reply = message.reply_message
-            if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
-              unless @history.get_warning(reply.message_id) == true
-                reason = get_args(ctx.message.text)
+    if history_with_warnings = @history.as?(HistoryFull)
+      if (message = ctx.message) && (info = message.from)
+        if user = database.get_user(info.id)
+          if user.authorized?(Ranks::Moderator)
+            if reply = message.reply_message
+              if reply_user = database.get_user(history_with_warnings.get_sender_id(reply.message_id))
+                unless history_with_warnings.get_warning(reply.message_id) == true
+                  reason = get_args(ctx.message.text)
 
-                duration = format_timespan(reply_user.cooldown_and_warn)
-                @history.add_warning(reply.message_id)
-                update_user(reply_user)
+                  duration = format_timespan(reply_user.cooldown_and_warn)
+                  history_with_warnings.add_warning(reply.message_id)
+                  update_user(reply_user)
 
-                relay_to_one(@history.get_origin_msid(reply.message_id), reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.cooldown_given(duration, reason), reply_to_message: reply) })
-                Log.info { "User #{user.id}, aka #{user.get_formatted_name}, Warned user [#{reply_user.get_obfuscated_id}] with #{duration} cooldown#{reason ? " for: #{reason}" : "."}" }
-                relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
+                  relay_to_one(history_with_warnings.get_origin_msid(reply.message_id), reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.cooldown_given(duration, reason), reply_to_message: reply) })
+                  Log.info { "User #{user.id}, aka #{user.get_formatted_name}, Warned user [#{reply_user.get_obfuscated_id}] with #{duration} cooldown#{reason ? " for: #{reason}" : "."}" }
+                  relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.success, reply_to_message: reply) })
+                else
+                  relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.already_warned, reply_to_message: reply) })
+                end
               else
-                relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.already_warned, reply_to_message: reply) })
+                relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.not_in_cache, reply_to_message: reply) })
               end
             else
-              relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.not_in_cache, reply_to_message: reply) })
+              relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_reply, reply_to_message: reply) })
             end
-          else
-            relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.no_reply, reply_to_message: reply) })
           end
         end
       end
