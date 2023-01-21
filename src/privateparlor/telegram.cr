@@ -155,17 +155,15 @@ class PrivateParlor < Tourmaline::Client
 
   # Starts various background tasks and stores them in a hash.
   def register_tasks : Hash
-    tasks = {} of Symbol => Tasker::Task
-    # Handle cache expiration
-    tasks.merge!({:cache => Tasker.every(@history.lifespan * (1/4)) { @history.expire }})
-    # Handle spam score expiration
-    tasks.merge!({:spam => Tasker.every(SPAM_INTERVAL_SECONDS.seconds) { @spam.expire }})
-    # Handle warning expiration
-    tasks.merge!({:warnings => Tasker.every(15.minutes) { @database.expire_warnings }})
+    tasks = {
+            :cache => Tasker.every(@history.lifespan * (1/4)) { @history.expire }, 
+            :spam => Tasker.every(SPAM_INTERVAL_SECONDS.seconds) { @spam.expire },
+            :warnings => Tasker.every(15.minutes) { @database.expire_warnings }
+    } of Symbol => Tasker::Task
   end
 
   # Updates user's record in the database with new, up-to-date information.
-  def update_user(info, user : Database::User)
+  def update_user(info, user : Database::User) : Nil
     user.username = info.username
     user.realname = info.full_name
     user.set_active
@@ -173,7 +171,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Update user's record in database with current values.
-  def update_user(user : Database::User)
+  def update_user(user : Database::User) : Nil
     database.modify_user(user)
   end
 
@@ -187,7 +185,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # TODO: Define the replies somwehere else and format them
   @[Command("start")]
-  def start_command(ctx)
+  def start_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       user = database.get_user(info.id)
       unless user.nil? # User exists in DB; run checks
@@ -222,7 +220,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # This will set the user status to left, meaning the user will not receive any further messages.
   @[Command(["stop", "leave"])]
-  def stop_command(ctx)
+  def stop_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if (user = database.get_user(info.id)) && !user.left?
         user.set_left
@@ -237,7 +235,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # If this is used with a reply, returns the user info of that message if the invoker is ranked.
   @[Command(["info"])]
-  def info_command(ctx)
+  def info_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if reply = message.reply_message
@@ -272,7 +270,7 @@ class PrivateParlor < Tourmaline::Client
   # If the user is not ranked, or `full_usercount` is false, show the total numbers users.
   # Otherwise, return a message containing the number of joined, left, and blacklisted users.
   @[Command(["users"])]
-  def users_command(ctx)
+  def users_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = check_user(info)
         counts = database.get_user_counts
@@ -290,7 +288,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Returns a message containing the progam's version.
   @[Command(["version"])]
-  def version_command(ctx)
+  def version_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = check_user(info)
         relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.version, link_preview: true, reply_to_message: reply) })
@@ -300,7 +298,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Upvotes a message.
   @[Command(["1"], prefix: ["+"])]
-  def karma_command(ctx)
+  def karma_command(ctx) : Nil
     if history_with_karma = @history.as?(HistoryFull)
       if (message = ctx.message) && (info = message.from)
         if user = database.get_user(info.id)
@@ -330,7 +328,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Toggle the user's hide_karma attribute.
   @[Command(["toggle_karma", "togglekarma"])]
-  def toggle_karma_command(ctx)
+  def toggle_karma_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         user.toggle_karma
@@ -342,7 +340,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Toggle the user's toggle_debug attribute.
   @[Command(["toggle_debug", "toggledebug"])]
-  def toggle_debug_command(ctx)
+  def toggle_debug_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         user.toggle_debug
@@ -354,7 +352,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Set/modify/view the user's tripcode.
   @[Command(["tripcode"])]
-  def tripcode_command(ctx)
+  def tripcode_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if arg = get_args(ctx.message.text)
@@ -380,7 +378,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Promote a user to the moderator rank.
   @[Command(["mod"])]
-  def mod_command(ctx)
+  def mod_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Host)
@@ -409,7 +407,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Promote a user to the administrator rank.
   @[Command(["admin"])]
-  def admin_command(ctx)
+  def admin_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Host)
@@ -438,7 +436,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Returns a ranked user to the user rank
   @[Command(["demote"])]
-  def demote_command(ctx)
+  def demote_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Host)
@@ -461,7 +459,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Warns a message without deleting it. Gives the user who sent the message a warning and a cooldown.
   @[Command(["warn"])]
-  def warn_message(ctx)
+  def warn_message(ctx) : Nil
     if history_with_warnings = @history.as?(HistoryFull)
       if (message = ctx.message) && (info = message.from)
         if user = database.get_user(info.id)
@@ -495,7 +493,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Delete a message from a user, give a warning and a cooldown.
   @[Command(["delete"])]
-  def delete_message(ctx)
+  def delete_message(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Moderator)
@@ -523,7 +521,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Removes a cooldown and warning from a user if the user is in cooldown.
   @[Command(["uncooldown"])]
-  def uncooldown_command(ctx)
+  def uncooldown_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Admin)
@@ -558,7 +556,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Remove a message from a user without giving a warning or cooldown.
   @[Command(["remove"])]
-  def remove_message(ctx)
+  def remove_message(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Moderator)
@@ -582,7 +580,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Delete all messages from recently blacklisted users.
   @[Command(["purge"])]
-  def delete_all_messages(ctx)
+  def delete_all_messages(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Admin)
@@ -604,7 +602,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Blacklists a user from the chat, deletes the reply, and removes all the user's incoming and outgoing messages from the queue.
   @[Command(["blacklist", "ban"])]
-  def blacklist(ctx)
+  def blacklist(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Admin)
@@ -649,7 +647,7 @@ class PrivateParlor < Tourmaline::Client
   # Replies with the motd/rules associated with this bot.
   # If the host invokes this command, the motd/rules can be set or modified.
   @[Command(["motd", "rules"])]
-  def motd(ctx)
+  def motd(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if arg = get_args(ctx.message.text)
@@ -668,7 +666,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Returns a message containing all the commands that a user can use, according to the user's rank.
   @[Command(["help"])]
-  def help_command(ctx)
+  def help_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = check_user(info)
         case user.rank
@@ -824,7 +822,7 @@ class PrivateParlor < Tourmaline::Client
   {% for captioned_type in ["animation", "audio", "document", "video", "video_note", "voice", "photo"] %}
   # Prepares a {{captioned_type}} message for relaying.
   @[On(:{{captioned_type.id}})]
-  def handle_{{captioned_type.id}}(update)
+  def handle_{{captioned_type.id}}(update) : Nil
     if (message = update.message) && (info = message.from)
       if message.media_group_id || (message.forward_from || message.forward_from_chat)
         return
@@ -864,7 +862,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a album message for relaying.
   @[On(:media_group)]
-  def handle_albums(update)
+  def handle_albums(update) : Nil
     if (message = update.message) && (info = message.from)
       if message.forward_from || message.forward_from_chat
         return
@@ -922,7 +920,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a poll for relaying.
   @[On(:poll)]
-  def handle_poll(update)
+  def handle_poll(update) : Nil
     if (message = update.message) && (info = message.from)
       if message.forward_from || message.forward_from_chat
         return
@@ -948,7 +946,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a poll message for relaying.
   @[On(:forwarded_message)]
-  def handle_forward(update)
+  def handle_forward(update) : Nil
     if (message = update.message) && (info = message.from)
       if user = check_user(info)
         unless @spam.spammy?(info.id, @spam.calculate_spam_score(:forward))
@@ -967,7 +965,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a sticker message for relaying.
   @[On(:sticker)]
-  def handle_sticker(update)
+  def handle_sticker(update) : Nil
     if (message = update.message) && (info = message.from)
       if message.forward_from || message.forward_from_chat
         return
@@ -991,7 +989,7 @@ class PrivateParlor < Tourmaline::Client
   {% for luck_type in ["dice", "dart", "basketball", "soccerball", "slot_machine", "bowling"] %}
   # Prepares a {{luck_type}} message for relaying.
   @[On(:{{luck_type.id}})]
-  def handle_{{luck_type.id}}(update)
+  def handle_{{luck_type.id}}(update) : Nil
     if config.relay_luck
       if (message = update.message) && (info = message.from)
         if (message.forward_from || message.forward_from_chat)
@@ -1016,7 +1014,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a venue message for relaying.
   @[On(:venue)]
-  def handle_venue(update)
+  def handle_venue(update) : Nil
     if config.relay_venue
       if (message = update.message) && (info = message.from)
         if (message.forward_from || message.forward_from_chat)
@@ -1052,7 +1050,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a location message for relaying.
   @[On(:location)]
-  def handle_location(update)
+  def handle_location(update) : Nil
     if config.relay_location
       if (message = update.message) && (info = message.from)
         if (message.forward_from || message.forward_from_chat) || message.venue
@@ -1082,7 +1080,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a contact message for relaying.
   @[On(:contact)]
-  def handle_contact(update)
+  def handle_contact(update) : Nil
     if config.relay_contact
       if (message = update.message) && (info = message.from)
         if (message.forward_from || message.forward_from_chat)
@@ -1111,7 +1109,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Caches a message and sends it to the queue for relaying.
-  def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64 | Array(Int64), proc : MessageProc)
+  def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64 | Array(Int64), proc : MessageProc) : Nil
     if reply_message
       if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
         @database.get_prioritized_users.each do |receiver_id|
@@ -1137,7 +1135,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Relay a message to a single user. Used for system messages.
-  def relay_to_one(reply_message : Int64?, user : Int64, proc : MessageProc)
+  def relay_to_one(reply_message : Int64?, user : Int64, proc : MessageProc) : Nil
     if reply_message
       add_to_queue_priority(user, reply_message, proc)
     else
@@ -1150,19 +1148,19 @@ class PrivateParlor < Tourmaline::Client
   ###################
 
   # Creates a new `QueuedMessage` and pushes it to the back of the queue.
-  def add_to_queue(cached_msid : Int64 | Array(Int64), sender_id : Int64 | Nil, receiver_id : Int64, reply_msid : Int64 | Nil, func : MessageProc)
+  def add_to_queue(cached_msid : Int64 | Array(Int64), sender_id : Int64 | Nil, receiver_id : Int64, reply_msid : Int64 | Nil, func : MessageProc) : Nil
     @queue.push(QueuedMessage.new(cached_msid, sender_id, receiver_id, reply_msid, func))
   end
 
   # Creates a new `QueuedMessage` and pushes it to the front of the queue.
-  def add_to_queue_priority(receiver_id : Int64, reply_msid : Int64 | Nil, func : MessageProc)
+  def add_to_queue_priority(receiver_id : Int64, reply_msid : Int64 | Nil, func : MessageProc) : Nil
     @queue.unshift(QueuedMessage.new(nil, nil, receiver_id, reply_msid, func))
   end
 
   # Receives a `Message` from the `queue`, calls its proc, and adds the returned message id to the History
   #
   # This function should be invoked in a Fiber.
-  def send_messages(msg : QueuedMessage)
+  def send_messages(msg : QueuedMessage) : Nil
     begin
       success = msg.function.call(msg.receiver, msg.reply_to)
       if msg.origin_msid != nil

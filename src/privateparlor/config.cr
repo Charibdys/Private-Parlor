@@ -3,8 +3,8 @@ require "yaml"
 module Configuration
   extend self
 
-  MESSAGE_ENTITIES = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold",
-                      "italic", "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention"]
+  MESSAGE_ENTITIES = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold", "italic", 
+                      "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention", "custom_emoji"]
 
   class Config
     include YAML::Serializable

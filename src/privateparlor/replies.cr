@@ -313,7 +313,7 @@ class Replies
   end
 
   # Invoked by a ranked user. Returns a message containing the obfuscated id, obfuscated karma, and cooldown duration of the selected user.
-  def user_info_mod(oid : String, karma : Int32, cooldown_until : Time | Nil = nil)
+  def user_info_mod(oid : String, karma : Int32, cooldown_until : Time | Nil = nil) : String
     return Section.new(
       Group.new(Bold.new("id"), ": #{oid}, ", Bold.new("username"), ": anonymous, ", Bold.new("rank"), ": n/a"),
       Group.new(Bold.new("karma"), ": #{karma}"),
@@ -347,7 +347,7 @@ class Replies
   end
 
   # Returns an italicized message when user is currently cooldown and displays time until cooldown expires.
-  def on_cooldown(time : Time)
+  def on_cooldown(time : Time) : String
     Italic.new("You're on cooldown until #{time}").to_md
   end
 

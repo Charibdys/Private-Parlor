@@ -100,22 +100,22 @@ class Database
     end
 
     # Set *hideKarma* to its opposite value.
-    def toggle_karma
+    def toggle_karma : Nil
       @hideKarma = !hideKarma
     end
 
     # Set *debugEnabled* to its opposite value.
-    def toggle_debug
+    def toggle_debug : Nil
       @debugEnabled = !debugEnabled
     end
 
     # Increment the user's karma by a given amount (1 by default)
-    def increment_karma(amount : Int32 = 1)
+    def increment_karma(amount : Int32 = 1) : Nil
       @karma += amount
     end
 
     # Decrement the user's karma by a given amount (1 by default)
-    def decrement_karma(amount : Int32 = 1)
+    def decrement_karma(amount : Int32 = 1) : Nil
       @karma -= amount
     end
 
