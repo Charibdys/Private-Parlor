@@ -2,6 +2,9 @@ api-token: API token received from @BotFather
 
 database: "Path to SQLite database"
 
+# Two letter abbreviation for Private Parlor's language/locale
+locale: "en"
+
 # Path to an optional log file
 # Where info is any of the following: TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, FATAL
 #log-level: "info"

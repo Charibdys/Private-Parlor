@@ -6,22 +6,6 @@ lib LibCrypt
   fun crypt(password : UInt8*, salt : UInt8*) : UInt8*
 end
 
-# Formats a timespan, so the duration is marked by its largest unit ("20m", "3h", "5d", etc)
-def format_timespan(cmp : Time::Span) : String
-  case
-  when cmp >= Time::Span.new(days: 7)
-    "#{cmp.total_weeks.floor.to_i}w"
-  when cmp >= Time::Span.new(days: 1)
-    "#{cmp.total_days.floor.to_i}d"
-  when cmp >= Time::Span.new(hours: 1)
-    "#{cmp.total_hours.floor.to_i}h"
-  when cmp >= Time::Span.new(minutes: 1)
-    "#{cmp.total_minutes.floor.to_i}m"
-  else
-    "#{cmp.to_i}s"
-  end
-end
-
 # Generate a 8chan or Secretlounge-ng style tripcode from a given string in the format `name#pass`.
 #
 # Returns a named tuple containing the tripname and tripcode.

@@ -120,9 +120,9 @@ end
 class HistoryFull < History
   def initialize(message_life : Time::Span)
     @lifespan = message_life
-    
+
     # Covariance is not fully supported in Crystal yet, so we must do this:
-    @msid_map = {0 => MessageGroupFull.new(0, 0) } of Int64 => MessageGroup
+    @msid_map = {0 => MessageGroupFull.new(0, 0)} of Int64 => MessageGroup
     @msid_map.delete(0)
   end
 

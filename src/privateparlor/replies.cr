@@ -2,7 +2,11 @@ class Replies
   include Tourmaline::Format
   include Tourmaline::Helpers
 
-  getter entity_types : Array(String)
+  getter entity_types : Array(String) # TODO: See if this attribute can be removed entirely
+
+  getter replies : Hash(Symbol, String) = {} of Symbol => String
+  getter time_units : Array(String)
+  getter toggle : Array(String)
 
   # Creates an instance of `Replies`.
   #
@@ -10,8 +14,81 @@ class Replies
   #
   # `entities`
   # :     an array of strings refering to one or more of the possible message entity types
-  def initialize(entities : Array(String))
+  def initialize(entities : Array(String), locale : String)
+    begin
+      yaml = File.open("./locales/#{locale}.yaml") do |file|
+        YAML.parse(file)
+      end
+    rescue ex : YAML::ParseException
+      Log.error(exception: ex) { "Could not parse the given value at row #{ex.line_number}. This could be because a required value was not set or the wrong type was given." }
+      exit
+    rescue ex : File::NotFoundError | File::AccessDeniedError
+      Log.error(exception: ex) { "Could not open \"./locales/#{locale}.yaml\". Exiting..." }
+      exit
+    end
+
+    reply_keys = %i(
+      joined rejoined left already_in_chat not_in_chat not_in_cooldown rejected_message deanon_poll missing_args
+      command_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found promoted
+      toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_upvoted already_warned
+      private_sign spamming sign_spam invalid_tripcode_format tripcode_set tripcode_info tripcode_unset
+      user_info ranked_info cooldown_true cooldown_false user_count user_count_full message_deleted message_removed
+      reason_prefix cooldown_given on_cooldown blacklisted purge_complete success
+    )
+
     @entity_types = entities
+    @time_units = yaml["time_units"].as_a.map { |str| str.as_s }
+    @toggle = yaml["toggle"].as_a.map { |str| str.as_s }
+    @replies = Hash.zip(reply_keys, yaml["replies"].as_a.map { |str| str.as_s })
+  end
+
+  # Globally substitutes placeholders in text with the given variables
+  def substitute_text(key : Symbol, variables : LocaleParameters = {"" => ""}) : String
+    if @replies[key].nil?
+      Log.warn { "There was no reply available with key #{key.to_s}" }
+      return ""
+    end
+
+    unless @replies[key].scan(/\#{\w*}/).size == 0
+      if variables.size == 1 && variables[""]? == ""
+        Log.warn { "\"#{key.to_s}\" reply has placeholders, but no parameters were available!" }
+      end
+
+      @replies[key].gsub(/\#{\w*}/) do |match|
+        placeholder = match.strip("\#{}")
+        case placeholder
+        when "toggle"
+          replace = variables[placeholder] ? @toggle[1] : @toggle[0]
+        when "rank"
+          replace = variables[placeholder]?.to_s.downcase
+        when "cooldown_until"
+          if variables[placeholder]
+            replace = "#{@replies[:cooldown_true]} #{variables[placeholder]}"
+          else
+            replace = @replies[:cooldown_false]
+          end
+        when "reason"
+          if variables[placeholder]
+            replace = "#{@replies[:reason_prefix]}#{variables[placeholder]}"
+          end
+        when "tripcode"
+          if variables[placeholder]
+            replace = variables[placeholder].to_s
+          else
+            replace = @replies[:tripcode_unset]
+          end
+        else
+          replace = variables[placeholder]?.to_s
+        end
+
+        if replace
+          replace = replace.to_md
+        end
+        replace
+      end
+    else
+      @replies[key]
+    end
   end
 
   # Takes the URL found in an inline link and appends it to the message text.
@@ -68,90 +145,6 @@ class Replies
     unparse_text(text, entities, Tourmaline::ParseMode::MarkdownV2, escape: true)
   end
 
-  ###################
-  # SYSTEM MESSAGES #
-  ###################
-
-  # Returns an italicized message for when the user rejoins the chat.
-  def rejoined : String
-    Italic.new("You rejoined the chat!").to_md
-  end
-
-  # Returns an italicized message for when a new user joins the chat.
-  def joined : String
-    Italic.new("Welcome to the chat!").to_md
-  end
-
-  # Returns an italicized message for when the user leaves the chat.
-  def left : String
-    Italic.new("You left the chat.").to_md
-  end
-
-  # Returns an italicized message for when the user tries to join the chat, but is already in it.
-  def already_in_chat : String
-    Italic.new("You're already in the chat.").to_md
-  end
-
-  # Returns an italicized message for when a user sends a message, but is not in the chat.
-  def not_in_chat : String
-    Italic.new("You're not in this chat! Type /start to join.").to_md
-  end
-
-  # Returns an italicized message when invoking /uncooldown, when the selected user is not in cooldown.
-  def not_in_cooldown : String
-    Italic.new("User found, but the user was not in cooldown!").to_md
-  end
-
-  # Returns an italicized message for when a sent message was rejected.
-  def rejected_message : String
-    Italic.new("Your message was not relayed because it contained a special font.").to_md
-  end
-
-  # Returns an italicized message for when a poll is sent without anonymous voting.
-  def deanon_poll : String
-    Italic.new("Your poll was not sent because it does not allow anonymous voting.").to_md
-  end
-
-  # Returns an italicized message for when a command is used without an argument.
-  def missing_args : String
-    Italic.new("You need to give an input to use this command").to_md
-  end
-
-  # Returns an italicized message for when a command is disabled
-  def command_disabled : String
-    Italic.new("This command is disabled.").to_md
-  end
-
-  # Returns an italicized message for when a command is used without a reply.
-  def no_reply : String
-    Italic.new("You need to reply to a message to use this command").to_md
-  end
-
-  # Returns an italicized message for when a message could not be found in the message history.
-  def not_in_cache : String
-    Italic.new("That message could not be found in the cache.").to_md
-  end
-
-  # Returns an italicized command for when there is no tripcode set.
-  def no_tripcode_set : String
-    Italic.new("You do not have a tripcode set. Use the /tripcode command to set one.").to_md
-  end
-
-  # Returns an italicized message for when a user could not be found when searching by name.
-  def no_user_found : String
-    Italic.new("There was no user found with that name.").to_md
-  end
-
-  # Returns an italicized message for when a user could not be found when searching by oid.
-  def no_user_oid_found : String
-    Italic.new("There was no user found with that OID.").to_md
-  end
-
-  # Returns an italicized message for when a user is promoted to a given rank.
-  def promoted(rank : Ranks) : String
-    Italic.new("You have been promoted to #{rank.to_s.downcase}! Type /help to view the commands available to you.").to_md
-  end
-
   # Returns a link to the given user's account.
   def format_user_sign(id : Int64, name : String) : String
     return Link.new("~~#{name}", "tg://user?id=#{id}").to_md
@@ -167,56 +160,37 @@ class Replies
     Group.new(Bold.new(name), Code.new(tripcode)).to_md
   end
 
-  # Returns a message for when a user disables or enables karma notifications.
-  def toggle_karma(hide_karma : Bool) : String
-    Group.new(Bold.new("Karma notifications"), ": #{hide_karma ? "disabled" : "enabled"}").to_md
+  # Formats a timespan, so the duration is marked by its largest unit ("20m", "3h", "5d", etc)
+  def format_timespan(cmp : Time::Span) : String
+    case
+    when cmp >= Time::Span.new(days: 7)
+      "#{cmp.total_weeks.floor.to_i}#{@time_units[0]}"
+    when cmp >= Time::Span.new(days: 1)
+      "#{cmp.total_days.floor.to_i}#{@time_units[1]}"
+    when cmp >= Time::Span.new(hours: 1)
+      "#{cmp.total_hours.floor.to_i}#{@time_units[2]}"
+    when cmp >= Time::Span.new(minutes: 1)
+      "#{cmp.total_minutes.floor.to_i}#{@time_units[3]}"
+    else
+      "#{cmp.to_i}#{@time_units[4]}"
+    end
   end
 
-  # Returns a message for when a user disables or enables debug mode.
-  def toggle_debug(toggle : Bool) : String
-    Group.new(Bold.new("Debug mode"), ": #{toggle ? "enabled" : "disabled"}").to_md
+  # Returns a message containing the program version and a link to its Git repo.
+  #
+  # Feel free to edit this if you fork the code.
+  def version : String
+    return Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://github.com/Charibdys/Private-Parlor")).to_md
   end
 
-  # Returns an italicized message for when a user upvotes a message.
-  def gave_upvote : String
-    Italic.new("You upvoted this message!").to_md
+  # Returns a custom text from a given string.
+  def custom(text : String) : String
+    message = Section.new
+    message << text
+    return message.to_md
   end
 
-  # Returns an italicized message for when a user was upvoted.
-  def got_upvote : String
-    Italic.new("You've just been upvoted! (check /info to see your karma or /toggleKarma to turn these notifications off)").to_md
-  end
-
-  # Returns an italicized message for when a user tries to upvote their own message.
-  def upvoted_own_message : String
-    Italic.new("You can't upvote your own message!").to_md
-  end
-
-  # Returns an italicized message for when a user tries to upvote a message they already upvoted.
-  def already_upvoted : String
-    Italic.new("You have already upvoted this message.").to_md
-  end
-
-  # Returns an italicized message for when a user tries to warn a message again.
-  def already_warned : String
-    Italic.new("This message has already been warned.").to_md
-  end
-
-  # Returns an italicized message for when a user signs but has private forward enabled.
-  def private_sign : String
-    Italic.new("Your account's forward privacy must be set to \"Everybody\" for the sign feature to work.").to_md
-  end
-
-  # Returns an italicized message when a user hits the spam limit.
-  def is_spamming : String
-    Italic.new("Your message has not been sent, avoid sending messages too fast. Try again later.").to_md
-  end
-
-  # Returns an italicized message when a user signs too often.
-  def sign_spam : String
-    Italic.new("Your message has not been sent, avoid signing too often. Try again later.").to_md
-  end
-
+  # TODO: Move command descriptions to locale
   # Returns a message containing the commands the a moderator can use.
   def mod_help : String
     return Section.new(
@@ -231,6 +205,7 @@ class Replies
     ).to_md
   end
 
+  # TODO: Move command descriptions to locale
   # Returns a message containing the commands the an admin can use.
   def admin_help : String
     return Section.new(
@@ -247,6 +222,7 @@ class Replies
     ).to_md
   end
 
+  # TODO: Move command descriptions to locale
   # Returns a message containing the commands the a host can use.
   def host_help : String
     return Section.new(
@@ -265,113 +241,5 @@ class Replies
       "    /remove [reason] - Delete a message without giving a cooldown",
       indent: 0
     ).to_md
-  end
-
-  # Return a message for when the proposed tripcode is not in the correct format.
-  def invalid_tripcode_format : String
-    return Section.new(
-      Group.new(Italic.new("Invalid tripcode format. The format is:")),
-      Group.new(Code.new("name#pass")),
-      indent: 0).to_md
-  end
-
-  # Returns a message containing the program version and a link to its Git repo.
-  #
-  # Feel free to edit this if you fork the code.
-  def version : String
-    return Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://github.com/Charibdys/Private-Parlor")).to_md
-  end
-
-  # Return a message containing the user's new tripcode.
-  def tripcode_set(name : String, tripcode : String) : String
-    return Section.new(
-      Group.new(Italic.new("Tripcode set. It will appear as:")),
-      Group.new(Bold.new(name), Code.new(tripcode)),
-      indent: 0).to_md
-  end
-
-  # Return a message containing the user's tripcode name and password.
-  def tripcode_info(tripcode : String | Nil) : String
-    message = Group.new(Bold.new("Tripcode"), ": ")
-    if tripcode
-      message << Code.new(tripcode)
-    else
-      message << "unset"
-    end
-
-    return message.to_md
-  end
-
-  # Returns a message containing the user's obfuscated ID, username, rank, karma, warnings, warn expiry and cooldown duration (if present).
-  def user_info(oid : String, username : String, rank : Ranks, karma : Int32, warnings : Int32, warn_expiry : Time | Nil = nil, cooldown_until : Time | Nil = nil) : String
-    return Section.new(
-      Group.new(Bold.new("id"), ": #{oid}, ", Bold.new("username"), ": #{username}, ", Bold.new("rank"), ": #{rank.value} (#{rank.to_s})"),
-      Group.new(Bold.new("karma"), ": #{karma}"),
-      Group.new(Bold.new("warnings"), ": #{warnings}#{warn_expiry ? " (one warning will be removed on #{warn_expiry}), " : ", "}",
-        Bold.new("cooldown"), ": #{cooldown_until ? "yes, until #{cooldown_until}" : "no"}"),
-      indent: 0).to_md
-  end
-
-  # Invoked by a ranked user. Returns a message containing the obfuscated id, obfuscated karma, and cooldown duration of the selected user.
-  def user_info_mod(oid : String, karma : Int32, cooldown_until : Time | Nil = nil) : String
-    return Section.new(
-      Group.new(Bold.new("id"), ": #{oid}, ", Bold.new("username"), ": anonymous, ", Bold.new("rank"), ": n/a"),
-      Group.new(Bold.new("karma"), ": #{karma}"),
-      Group.new(Bold.new("cooldown"), ": #{cooldown_until ? "yes, until #{cooldown_until}" : "no"}"),
-      indent: 0).to_md
-  end
-
-  # Returns a message containing the count of all users in the bot.
-  # If full is true, returns the number of joined, left, and blacklisted users. Otherwise, returns the total.
-  def user_count(joined : Int32, left : Int32, blacklisted : Int32, total : Int32, full : Bool) : String
-    if full
-      Group.new(
-        Bold.new("#{joined}"), Italic.new(" joined, "),
-        Bold.new("#{left}"), Italic.new(" left, "),
-        Bold.new("#{blacklisted}"), Italic.new(" blacklisted users "),
-        "(", Italic.new("total"), ": ", Bold.new("#{total}"), ")"
-      ).to_md
-    else
-      Group.new(Bold.new("#{total}"), Italic.new(" users")).to_md
-    end
-  end
-
-  # Returns an italicized message for when a message is deleted or removed.
-  def message_deleted(warned : Bool, reason : String | Nil = nil, duration : String | Nil = nil) : String
-    Italic.new("This message has been #{warned ? "deleted#{reason ? " for: #{reason}." : "."} You are on cooldown for #{duration}." : "removed#{reason ? " for: #{reason}." : "."} No cooldown has been given, but please refrain from posting the same message again."}").to_md
-  end
-
-  # Returns an italicized message when user is given a cooldown.
-  def cooldown_given(duration : String, reason : String | Nil = nil) : String
-    Italic.new("You've been given a cooldown of #{duration}#{reason ? " for: #{reason}." : "."}").to_md
-  end
-
-  # Returns an italicized message when user is currently cooldown and displays time until cooldown expires.
-  def on_cooldown(time : Time) : String
-    Italic.new("You're on cooldown until #{time}").to_md
-  end
-
-  # Returns an italicized message for when the user is blacklisted.
-  #
-  # Includes the user's `blacklist_text` if one was given.
-  def blacklisted(reason : String | Nil = nil) : String
-    Italic.new("You have been blacklisted#{reason ? " for: #{reason}" : "."}").to_md
-  end
-
-  # Returns an italicized message and the number of messages deleted after a purge command was successful.
-  def purge_complete(msgs_deleted : Int32) : String
-    Italic.new("#{msgs_deleted} messages were matched and deleted.").to_md
-  end
-
-  # Returns a custom text from a given string.
-  def custom(text : String) : String
-    message = Section.new
-    message << text
-    return message.to_md
-  end
-
-  # Returns a checkmark for when a command executed successfully.
-  def success : String
-    "✅".to_md
   end
 end

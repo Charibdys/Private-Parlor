@@ -3,7 +3,7 @@ require "yaml"
 module Configuration
   extend self
 
-  MESSAGE_ENTITIES = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold", "italic", 
+  MESSAGE_ENTITIES = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold", "italic",
                       "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention", "custom_emoji"]
 
   class Config
@@ -14,6 +14,9 @@ module Configuration
 
     @[YAML::Field(key: "database")]
     getter database : String
+
+    @[YAML::Field(key: "locale")]
+    getter locale : String = "en"
 
     @[YAML::Field(key: "log-level")]
     getter log_level : Log::Severity = Log::Severity::Info
