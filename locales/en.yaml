@@ -5,10 +5,9 @@ time_units: ['w', 'd', 'h', 'm', 's']
 # Term for off and on, respectively
 toggle: ["disabled", "enabled"]
 
-# Parameters are enclosed by #{text}, where text is any of the parameters next to the comment
+# Parameters are enclosed by a placeholder, #{text}, where text is any of the parameters next to the comment
 # Placeholders should not be escaped
 # Special characters in MarkdownV2 must be escaped
-# TODO: time, reason, msgs_deleted, rank, toggle, tripcode, name, duration, warned, oid, karma, warnings, warn_expiry, cooldown_until
 
 replies:
 # joined
@@ -193,4 +192,63 @@ replies:
 # success
  - |-
    ✅ 
+
+# Parameters are enclosed by a placeholder, #{text}, where text is any of the parameters next to the comment
+
+logs:
+# start: version
+ - |-
+   Starting Private Parlor v#{version}...
+
+# joined: id, name
+ - |-
+   User #{id}, aka #{name}, joined the chat.
+
+# rejoined: id, name
+ - |-
+   User #{id}, aka #{name}, rejoined the chat.
+
+# left: id, name
+ - |-
+   User #{id}, aka #{name}, joined the chat.
+
+# promoted: id, name, rank, invoker
+ - |-
+   User #{id}, aka #{name}, has been promoted to #{rank} by #{invoker}.
+
+# demoted: id, name, invoker
+ - |-
+   User #{id}, aka #{name}, has been demoted by #{invoker}.
+
+# warned: id, name, oid, duration, reason
+ - |-
+   User #{id}, aka #{name}, warned user [#{oid}] with #{duration} cooldown #{reason}
+
+# message_deleted: id, name, msid, oid, duration, reason
+ - |-
+   User #{id}, aka #{name}, deleted message [#{msid}] by user [#{oid}] with a #{duration} cooldown #{reason}
+
+# message_removed: id, name, msid, oid, reason
+ - |-
+   User #{id}, aka #{name}, removed message [#{msid}] by user [#{oid}] #{reason}
+
+# removed_cooldown: id, name, oid, cooldown_until
+ - |-
+   User #{id}, aka #{name}, removed cooldown from user [#{oid}] (was until #{cooldown_until})
+
+# blacklisted: id, name, invoker, reason
+ - |-
+   User #{id}, aka #{name}, has been blacklisted by #{invoker} #{reason}
+
+# reason_prefix
+ - |-
+   for: 
+
+# ranked_message: id, name, rank, text
+ - |-
+   User #{id}, aka #{name}, sent #{rank} message: #{text}
+
+# force_leave: id
+ - |-
+   Force leaving user #{id} because bot is blocked.
 ---

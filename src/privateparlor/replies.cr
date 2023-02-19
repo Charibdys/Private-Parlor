@@ -5,6 +5,7 @@ class Replies
   getter entity_types : Array(String) # TODO: See if this attribute can be removed entirely
 
   getter replies : Hash(Symbol, String) = {} of Symbol => String
+  getter logs : Hash(Symbol, String) = {} of Symbol => String
   getter time_units : Array(String)
   getter toggle : Array(String)
 
@@ -36,14 +37,20 @@ class Replies
       reason_prefix cooldown_given on_cooldown blacklisted purge_complete success
     )
 
+    log_keys = %i(
+      start joined rejoined left promoted demoted warned message_deleted message_removed removed_cooldown
+      blacklisted reason_prefix ranked_message force_leave
+    )
+
     @entity_types = entities
     @time_units = yaml["time_units"].as_a.map { |str| str.as_s }
     @toggle = yaml["toggle"].as_a.map { |str| str.as_s }
     @replies = Hash.zip(reply_keys, yaml["replies"].as_a.map { |str| str.as_s })
+    @logs = Hash.zip(log_keys, yaml["logs"].as_a.map { |str| str.as_s })
   end
 
-  # Globally substitutes placeholders in text with the given variables
-  def substitute_text(key : Symbol, variables : LocaleParameters = {"" => ""}) : String
+  # Globally substitutes placeholders in reply with the given variables
+  def substitute_reply(key : Symbol, variables : LocaleParameters = {"" => ""}) : String
     if @replies[key].nil?
       Log.warn { "There was no reply available with key #{key.to_s}" }
       return ""
@@ -88,6 +95,36 @@ class Replies
       end
     else
       @replies[key]
+    end
+  end
+
+  # Globally substitutes placeholders in log message with the given variables
+  def substitute_log(key : Symbol, variables : LocaleParameters = {"" => ""}) : String
+    if @logs[key].nil?
+      Log.warn { "There was no log message available with key #{key.to_s}" }
+      return ""
+    end
+
+    unless @logs[key].scan(/\#{\w*}/).size == 0
+      if variables.size == 1 && variables[""]? == ""
+        Log.warn { "\"#{key.to_s}\" log message has placeholders, but no parameters were available!" }
+      end
+
+      @logs[key].gsub(/\#{\w*}/) do |match|
+        placeholder = match.strip("\#{}")
+        case placeholder
+        when "rank"
+          replace = variables[placeholder]?.to_s.downcase
+        when "reason"
+          if variables[placeholder]?
+            "#{@logs[:reason_prefix]}#{variables[placeholder]}"
+          end
+        else
+          variables[placeholder]?.to_s
+        end
+      end
+    else
+      @logs[key]
     end
   end
 
