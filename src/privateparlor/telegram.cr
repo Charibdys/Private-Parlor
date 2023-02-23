@@ -355,7 +355,7 @@ class PrivateParlor < Tourmaline::Client
   def tripcode_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
-        if arg = get_args(ctx.message.text)
+        if arg = @replies.get_args(ctx.message.text)
           if !((index = arg.index('#')) && (0 < index < arg.size - 1)) || arg.includes?('\n') || arg.size > 30
             return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:invalid_tripcode_format), reply_to_message: reply) })
           end
@@ -363,7 +363,7 @@ class PrivateParlor < Tourmaline::Client
           user.set_tripcode(arg)
           @database.modify_user(user)
 
-          results = generate_tripcode(arg, @config.salt)
+          results = @replies.generate_tripcode(arg, @config.salt)
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:tripcode_set, {"name" => results[:name], "tripcode" => results[:tripcode]}), reply_to_message: reply) })
         else
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:tripcode_sinfo, {"tripcode" => user.tripcode}), reply_to_message: reply) })
@@ -382,7 +382,7 @@ class PrivateParlor < Tourmaline::Client
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Host)
-          if arg = get_args(message.text)
+          if arg = @replies.get_args(message.text)
             if promoted_user = database.get_user_by_name(arg)
               if promoted_user.left? || promoted_user.rank >= Ranks::Moderator.value
                 return
@@ -416,7 +416,7 @@ class PrivateParlor < Tourmaline::Client
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Host)
-          if arg = get_args(message.text)
+          if arg = @replies.get_args(message.text)
             if promoted_user = database.get_user_by_name(arg)
               if promoted_user.left? || promoted_user.rank >= Ranks::Admin.value
                 return
@@ -450,7 +450,7 @@ class PrivateParlor < Tourmaline::Client
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Host)
-          if arg = get_args(message.text)
+          if arg = @replies.get_args(message.text)
             if demoted_user = database.get_user_by_name(arg)
               demoted_user.set_rank(Ranks::User)
               @database.modify_user(demoted_user)
@@ -481,7 +481,7 @@ class PrivateParlor < Tourmaline::Client
             if reply = message.reply_message
               if reply_user = database.get_user(history_with_warnings.get_sender_id(reply.message_id))
                 unless history_with_warnings.get_warning(reply.message_id) == true
-                  reason = get_args(ctx.message.text)
+                  reason = @replies.get_args(ctx.message.text)
 
                   duration = @replies.format_timespan(reply_user.cooldown_and_warn)
                   history_with_warnings.add_warning(reply.message_id)
@@ -519,7 +519,7 @@ class PrivateParlor < Tourmaline::Client
         if user.authorized?(Ranks::Moderator)
           if reply = message.reply_message
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
-              reason = get_args(message.text)
+              reason = @replies.get_args(message.text)
               cached_msid = delete_messages(reply.message_id, reply_user.id)
 
               duration = @replies.format_timespan(reply_user.cooldown_and_warn)
@@ -552,7 +552,7 @@ class PrivateParlor < Tourmaline::Client
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         if user.authorized?(Ranks::Admin)
-          if arg = get_args(message.text)
+          if arg = @replies.get_args(message.text)
             if arg.size < 5
               unless uncooldown_user = database.get_user_by_oid(arg)
                 return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:no_user_oid_found), reply_to_message: reply) })
@@ -596,13 +596,13 @@ class PrivateParlor < Tourmaline::Client
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
               cached_msid = delete_messages(reply.message_id, reply_user.id)
 
-              relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:message_removed, {"reason" => get_args(message.text)}), reply_to_message: reply) })
+              relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:message_removed, {"reason" => @replies.get_args(message.text)}), reply_to_message: reply) })
               Log.info { @replies.substitute_log(:message_removed, {
                 "id"     => user.id.to_s,
                 "name"   => user.get_formatted_name,
                 "msid"   => cached_msid.to_s,
                 "oid"    => reply_user.get_obfuscated_id,
-                "reason" => get_args(message.text),
+                "reason" => @replies.get_args(message.text),
               }) }
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
             else
@@ -646,7 +646,7 @@ class PrivateParlor < Tourmaline::Client
         if user.authorized?(Ranks::Admin)
           if reply = ctx.message.reply_message
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
-              reason = get_args(ctx.message.text)
+              reason = @replies.get_args(ctx.message.text)
               reply_user.blacklist(reason)
               @database.modify_user(reply_user)
 
@@ -681,7 +681,7 @@ class PrivateParlor < Tourmaline::Client
   def motd(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
-        if arg = get_args(ctx.message.text)
+        if arg = @replies.get_args(ctx.message.text)
           if user.authorized?(Ranks::Host)
             @database.set_motd(arg)
             relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
@@ -734,7 +734,7 @@ class PrivateParlor < Tourmaline::Client
       if config.allow_signing
         unless (chat = get_chat(user.id)) && chat.has_private_forwards
           unless @spam.spammy_sign?(user.id, @config.sign_limit_interval)
-            if (args = get_args(text)) && args.size > 0
+            if (args = @replies.get_args(text)) && args.size > 0
               return String.build do |str|
                 str << args
                 str << @replies.format_user_sign(user.id, user.get_formatted_name)
@@ -753,8 +753,8 @@ class PrivateParlor < Tourmaline::Client
       if config.allow_tripcodes
         unless @spam.spammy_sign?(user.id, @config.sign_limit_interval)
           if tripkey = user.tripcode
-            if (args = get_args(text)) && args.size > 0
-              pair = generate_tripcode(tripkey, config.salt)
+            if (args = @replies.get_args(text)) && args.size > 0
+              pair = @replies.generate_tripcode(tripkey, config.salt)
               return String.build do |str|
                 str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
                 str << "\n"
@@ -772,7 +772,7 @@ class PrivateParlor < Tourmaline::Client
       end
     when text.starts_with?("/modsay")
       if user.authorized?(Ranks::Moderator)
-        if (args = get_args(text)) && args.size > 0
+        if (args = @replies.get_args(text)) && args.size > 0
           Log.info { @replies.substitute_log(:ranked_message, {
             "id"   => user.id.to_s,
             "name" => user.get_formatted_name,
@@ -787,7 +787,7 @@ class PrivateParlor < Tourmaline::Client
       end
     when text.starts_with?("/adminsay")
       if user.authorized?(Ranks::Admin)
-        if (args = get_args(text)) && args.size > 0
+        if (args = @replies.get_args(text)) && args.size > 0
           Log.info { @replies.substitute_log(:ranked_message, {
             "id"   => user.id.to_s,
             "name" => user.get_formatted_name,
@@ -802,7 +802,7 @@ class PrivateParlor < Tourmaline::Client
       end
     when text.starts_with?("/hostsay")
       if user.authorized?(Ranks::Host)
-        if (args = get_args(text)) && args.size > 0
+        if (args = @replies.get_args(text)) && args.size > 0
           Log.info { @replies.substitute_log(:ranked_message, {
             "id"   => user.id.to_s,
             "name" => user.get_formatted_name,
