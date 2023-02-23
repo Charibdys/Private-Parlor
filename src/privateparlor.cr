@@ -6,7 +6,7 @@ require "./privateparlor/*"
 
 bot = PrivateParlor.new(Configuration.parse_config, parse_mode: Tourmaline::ParseMode::MarkdownV2)
 
-Log.info { bot.replies.substitute_log(:start, {"version" => VERSION})}
+Log.info { bot.replies.substitute_log(:start, {"version" => VERSION}) }
 
 # Start message sending routine
 spawn(name: "SendingQueue") do

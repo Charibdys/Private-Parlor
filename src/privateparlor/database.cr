@@ -7,15 +7,30 @@ class Database
     ensure_schema()
   end
 
-  ATTRIBUTES = ["id", "username", "realname", "rank", "joined", "left", "lastActive", "cooldownUntil",
-                "blacklistReason", "warnings", "warnExpiry", "karma", "hideKarma", "debugEnabled", "tripcode"]
-
   class User
-    DB.mapping({id: Int64, username: String?, realname: String, rank: Int32, joined: Time,
-                left: Time?, lastActive: Time, cooldownUntil: Time?, blacklistReason: String?,
-                warnings: Int32, warnExpiry: Time?, karma: Int32, hideKarma: Bool, debugEnabled: Bool,
-                tripcode: String?,
-    })
+    include DB::Serializable
+
+    getter id : Int64
+    getter username : String?
+    getter realname : String
+    getter rank : Int32
+    getter joined : Time
+    getter left : Time?
+    @[DB::Field(key: "lastActive")]
+    getter last_active : Time
+    @[DB::Field(key: "cooldownUntil")]
+    getter cooldown_until : Time?
+    @[DB::Field(key: "blacklistReason")]
+    getter blacklist_reason : String?
+    getter warnings : Int32
+    @[DB::Field(key: "warnExpiry")]
+    getter warn_expiry : Time?
+    getter karma : Int32
+    @[DB::Field(key: "hideKarma")]
+    getter hide_karma : Bool
+    @[DB::Field(key: "debugEnabled")]
+    getter debug_enabled : Bool
+    getter tripcode : String?
 
     # Create an instance of `User` from a hash with an `:id` key.
     #
@@ -23,8 +38,8 @@ class Database
     #
     # Keys not found in `defaults` will default to `nil`.
     def initialize(user = {:id})
-      defaults = {realname: "", rank: 0, joined: Time.utc, lastActive: Time.utc, warnings: 0,
-                  karma: 0, hideKarma: false, debugEnabled: false}
+      defaults = {realname: "", rank: 0, joined: Time.utc, last_active: Time.utc, warnings: 0,
+                  karma: 0, hide_karma: false, debug_enabled: false}
 
       defaults = defaults.merge(user)
 
@@ -34,23 +49,27 @@ class Database
       @rank = defaults[:rank]
       @joined = defaults[:joined]
       @left = defaults[:left]?
-      @lastActive = defaults[:lastActive]
-      @cooldownUntil = defaults[:cooldownUntil]?
-      @blacklistReason = defaults[:blacklistReason]?
+      @last_active = defaults[:last_active]
+      @cooldown_until = defaults[:cooldown_until]?
+      @blacklist_reason = defaults[:blacklist_reason]?
       @warnings = defaults[:warnings]
-      @warnExpiry = defaults[:warnExpiry]?
+      @warn_expiry = defaults[:warn_expiry]?
       @karma = defaults[:karma]
-      @hideKarma = defaults[:hideKarma]
-      @debugEnabled = defaults[:debugEnabled]
+      @hide_karma = defaults[:hide_karma]
+      @debug_enabled = defaults[:debug_enabled]
       @tripcode = defaults[:tripcode]?
     end
 
     # Returns an array with all the values in `User`. Used for Database query arguments.
-    #
-    # Values in the array must be in order according to the attributes in the database schema.
-    def to_array : Array
-      [@id, @username, @realname, @rank, @joined, @left, @lastActive, @cooldownUntil, @blacklistReason,
-       @warnings, @warnExpiry, @karma, @hideKarma, @debugEnabled, @tripcode]
+    def to_array
+      {% begin %}
+        [
+        {% for var in User.instance_vars[0..-2] %}
+          @{{var.id}},
+        {% end %}
+          @{{User.instance_vars.last.id}}
+        ]
+      {% end %}
     end
 
     # Returns a string containing the username with an "@" appended to it if the user has a username.
@@ -80,9 +99,11 @@ class Database
       @left = nil
     end
 
-    # Set *lastActive* to the current time.
-    def set_active : Nil
-      @lastActive = Time.utc
+    # Set *last_active* to the current time and update names
+    def set_active(username : String | Nil, fullname : String) : Nil
+      @username = username
+      @realname = fullname
+      @last_active = Time.utc
     end
 
     # Set *left* to the current time; user has left the chat.
@@ -99,14 +120,18 @@ class Database
       end
     end
 
-    # Set *hideKarma* to its opposite value.
-    def toggle_karma : Nil
-      @hideKarma = !hideKarma
+    def set_tripcode(tripcode : String) : Nil
+      @tripcode = tripcode
     end
 
-    # Set *debugEnabled* to its opposite value.
+    # Set *hide_karma* to its opposite value.
+    def toggle_karma : Nil
+      @hide_karma = !hide_karma
+    end
+
+    # Set *debug_enabled* to its opposite value.
     def toggle_debug : Nil
-      @debugEnabled = !debugEnabled
+      @debug_enabled = !debug_enabled
     end
 
     # Increment the user's karma by a given amount (1 by default)
@@ -127,9 +152,9 @@ class Database
         cooldown_time = COOLDOWN_TIME_LINEAR_M * (@warnings - COOLDOWN_TIME_BEGIN.size) + COOLDOWN_TIME_LINEAR_B
       end
 
-      @cooldownUntil = Time.utc + cooldown_time.minutes
+      @cooldown_until = Time.utc + cooldown_time.minutes
       @warnings += 1
-      @warnExpiry = Time.utc + WARN_EXPIRE_HOURS.hours
+      @warn_expiry = Time.utc + WARN_EXPIRE_HOURS.hours
       self.decrement_karma(KARMA_WARN_PENALTY)
       cooldown_time.minutes
     end
@@ -137,10 +162,10 @@ class Database
     # Removes a cooldown from a user if it has expired.
     #
     # Returns true if the cooldown can be expired, false otherwise
-    def remove_cooldown : Bool
-      if cooldown = @cooldownUntil
-        if cooldown < Time.utc
-          @cooldownUntil = nil
+    def remove_cooldown(override : Bool = false) : Bool
+      if cooldown = @cooldown_until
+        if cooldown < Time.utc || override
+          @cooldown_until = nil
         else
           return false
         end
@@ -149,14 +174,14 @@ class Database
       true
     end
 
-    # Removes one or multiple warnings from a user and resets the `warnExpiry`
+    # Removes one or multiple warnings from a user and resets the `warn_expiry`
     def remove_warning(amount : Int32 = 1) : Nil
       @warnings -= amount
 
       if @warnings > 0
-        @warnExpiry = Time.utc + WARN_EXPIRE_HOURS.hours
+        @warn_expiry = Time.utc + WARN_EXPIRE_HOURS.hours
       else
-        @warnExpiry = nil
+        @warn_expiry = nil
       end
     end
 
@@ -164,7 +189,7 @@ class Database
     def blacklist(reason : String | Nil) : Nil
       @rank = -10
       self.set_left
-      @blacklistReason = reason
+      @blacklist_reason = reason
     end
 
     # Returns `true` if *rank* is -10; user is blacklisted.
@@ -186,6 +211,13 @@ class Database
     # Returns `false` otherwise.
     def authorized?(rank : Ranks) : Bool
       @rank >= rank.value
+    end
+
+    # Returns `true` if user is not in cooldown and not blacklisted; user can chat
+    #
+    # Returns false otherwise.
+    def can_chat? : Bool
+      return self.remove_cooldown && !self.blacklisted? && !self.left?
     end
   end
 
@@ -255,14 +287,15 @@ class Database
 
   # Updates a user record in the database with the current state of *user*.
   def modify_user(user : User) : Nil
+    attributes = {{User.instance_vars.map { |var| "#{var.name.camelcase(lower: true)}" }}}
     args = user.to_array
 
     sql = String.build do |str|
       str << "UPDATE users SET "
-      ATTRIBUTES.each(within: 1..-2) do |atr|
+      attributes.each(within: 1..-2) do |atr|
         str << atr << " = ?, "
       end
-      str << ATTRIBUTES.last << " = ? WHERE id = ?"
+      str << attributes.last << " = ? WHERE id = ?"
     end
 
     # Modify user
@@ -281,7 +314,7 @@ class Database
   # Queries the database for warned users and removes warnings they have expired.
   def expire_warnings : Nil
     get_warned_users.each do |user|
-      if expiry = user.warnExpiry
+      if expiry = user.warn_expiry
         if expiry <= Time.utc
           user.remove_warning
           modify_user(user)

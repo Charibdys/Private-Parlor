@@ -162,19 +162,6 @@ class PrivateParlor < Tourmaline::Client
     } of Symbol => Tasker::Task
   end
 
-  # Updates user's record in the database with new, up-to-date information.
-  def update_user(info, user : Database::User) : Nil
-    user.username = info.username
-    user.realname = info.full_name
-    user.set_active
-    database.modify_user(user)
-  end
-
-  # Update user's record in database with current values.
-  def update_user(user : Database::User) : Nil
-    database.modify_user(user)
-  end
-
   # User starts the bot and begins receiving messages.
   #
   # If the user is not in the database, this will add the user to it
@@ -188,19 +175,21 @@ class PrivateParlor < Tourmaline::Client
   def start_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       user = database.get_user(info.id)
-      unless user.nil? # User exists in DB; run checks
+      unless user.nil?
         if user.blacklisted?
-          relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:blacklisted, {"reason" => user.blacklistReason})) })
+          relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:blacklisted, {"reason" => user.blacklist_reason})) })
         elsif user.left?
           user.rejoin
-          update_user(info, user)
+          user.set_active(info.username, info.full_name)
+          @database.modify_user(user)
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:rejoined), reply_to_message: reply) })
-          Log.info { @replies.substitute_log(:rejoined, {"id" => user.id.to_s, "name" => user.get_formatted_name})}
-        else # user is already in the chat
-          update_user(info, user)
+          Log.info { @replies.substitute_log(:rejoined, {"id" => user.id.to_s, "name" => user.get_formatted_name}) }
+        else
+          user.set_active(info.username, info.full_name)
+          @database.modify_user(user)
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:already_in_chat), reply_to_message: reply) })
         end
-      else # User does not exist; add to DB
+      else
         if (database.no_users?)
           user = database.add_user(info.id, info.username, info.full_name, rank: 1000)
         else
@@ -211,7 +200,7 @@ class PrivateParlor < Tourmaline::Client
           relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.custom(motd)) })
         end
         relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:joined), reply_to_message: reply) })
-        Log.info { @replies.substitute_log(:joined, {"id" => user.id.to_s, "name" => user.get_formatted_name})}
+        Log.info { @replies.substitute_log(:joined, {"id" => user.id.to_s, "name" => user.get_formatted_name}) }
       end
     end
   end
@@ -224,9 +213,9 @@ class PrivateParlor < Tourmaline::Client
     if (message = ctx.message) && (info = message.from)
       if (user = database.get_user(info.id)) && !user.left?
         user.set_left
-        update_user(user)
+        @database.modify_user(user)
         relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:left), reply_to_message: reply) })
-        Log.info { @replies.substitute_log(:left, {"id" => user.id.to_s, "name" => user.get_formatted_name})}
+        Log.info { @replies.substitute_log(:left, {"id" => user.id.to_s, "name" => user.get_formatted_name}) }
       end
     end
   end
@@ -245,7 +234,7 @@ class PrivateParlor < Tourmaline::Client
                 @replies.substitute_reply(:ranked_info, {
                   "oid"            => reply_user.get_obfuscated_id,
                   "karma"          => reply_user.get_obfuscated_karma,
-                  "cooldown_until" => reply_user.cooldownUntil,
+                  "cooldown_until" => reply_user.cooldown_until,
                 }), reply_to_message: reply) })
             end
           end
@@ -258,8 +247,8 @@ class PrivateParlor < Tourmaline::Client
             "rank"           => Ranks.new(user.rank),
             "karma"          => user.karma,
             "warnings"       => user.warnings,
-            "warn_expiry"    => user.warnExpiry,
-            "cooldown_until" => user.cooldownUntil,
+            "warn_expiry"    => user.warn_expiry,
+            "cooldown_until" => user.cooldown_until,
           }), reply_to_message: reply) })
       end
     end
@@ -272,7 +261,11 @@ class PrivateParlor < Tourmaline::Client
   @[Command(["users"])]
   def users_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
-      if user = check_user(info)
+      if user = database.get_user(info.id)
+        unless user.can_chat?
+          return deny_user(user)
+        end
+
         counts = database.get_user_counts
 
         if user.authorized?(Ranks::Moderator) || config.full_usercount
@@ -282,6 +275,8 @@ class PrivateParlor < Tourmaline::Client
         end
 
         relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text) })
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -290,8 +285,13 @@ class PrivateParlor < Tourmaline::Client
   @[Command(["version"])]
   def version_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
-      if user = check_user(info)
+      if user = database.get_user(info.id)
+        unless user.can_chat?
+          return deny_user(user)
+        end
         relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.version, link_preview: true, reply_to_message: reply) })
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -312,9 +312,9 @@ class PrivateParlor < Tourmaline::Client
 
             if reply_user = database.get_user(history_with_karma.get_sender_id(reply.message_id))
               reply_user.increment_karma
-              update_user(reply_user)
+              @database.modify_user(reply_user)
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:gave_upvote), reply_to_message: reply) })
-              if (!reply_user.hideKarma)
+              if (!reply_user.hide_karma)
                 relay_to_one(history_with_karma.get_msid(reply.message_id, reply_user.id), reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:got_upvote), reply_to_message: reply) })
               end
             end
@@ -332,8 +332,8 @@ class PrivateParlor < Tourmaline::Client
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         user.toggle_karma
-        update_user(user)
-        relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:toggle_karma, {"toggle" => user.hideKarma})) })
+        @database.modify_user(user)
+        relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:toggle_karma, {"toggle" => user.hide_karma})) })
       end
     end
   end
@@ -344,8 +344,8 @@ class PrivateParlor < Tourmaline::Client
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
         user.toggle_debug
-        update_user(user)
-        relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:toggle_debug, {"toggle" => user.debugEnabled})) })
+        @database.modify_user(user)
+        relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:toggle_debug, {"toggle" => user.debug_enabled})) })
       end
     end
   end
@@ -360,8 +360,8 @@ class PrivateParlor < Tourmaline::Client
             return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:invalid_tripcode_format), reply_to_message: reply) })
           end
 
-          user.tripcode = arg
-          update_user(user)
+          user.set_tripcode(arg)
+          @database.modify_user(user)
 
           results = generate_tripcode(arg, @config.salt)
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:tripcode_set, {"name" => results[:name], "tripcode" => results[:tripcode]}), reply_to_message: reply) })
@@ -388,15 +388,15 @@ class PrivateParlor < Tourmaline::Client
                 return
               else
                 promoted_user.set_rank(Ranks::Moderator)
-                update_user(promoted_user)
+                @database.modify_user(promoted_user)
                 relay_to_one(nil, promoted_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:promoted, {"rank" => Ranks::Moderator})) })
 
                 Log.info { @replies.substitute_log(:promoted, {
-                  "id" => promoted_user.id.to_s, 
-                  "name" => promoted_user.get_formatted_name,
-                  "rank" => Ranks::Moderator,
-                  "invoker" => user.get_formatted_name
-                  })}
+                  "id"      => promoted_user.id.to_s,
+                  "name"    => promoted_user.get_formatted_name,
+                  "rank"    => Ranks::Moderator,
+                  "invoker" => user.get_formatted_name,
+                }) }
                 relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
               end
             else
@@ -422,15 +422,15 @@ class PrivateParlor < Tourmaline::Client
                 return
               else
                 promoted_user.set_rank(Ranks::Admin)
-                update_user(promoted_user)
+                @database.modify_user(promoted_user)
                 relay_to_one(nil, promoted_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:promoted, {"rank" => Ranks::Admin})) })
 
                 Log.info { @replies.substitute_log(:promoted, {
-                  "id" => promoted_user.id.to_s, 
-                  "name" => promoted_user.get_formatted_name,
-                  "rank" => Ranks::Admin,
-                  "invoker" => user.get_formatted_name
-                  })}
+                  "id"      => promoted_user.id.to_s,
+                  "name"    => promoted_user.get_formatted_name,
+                  "rank"    => Ranks::Admin,
+                  "invoker" => user.get_formatted_name,
+                }) }
                 relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
               end
             else
@@ -453,12 +453,12 @@ class PrivateParlor < Tourmaline::Client
           if arg = get_args(message.text)
             if demoted_user = database.get_user_by_name(arg)
               demoted_user.set_rank(Ranks::User)
-              update_user(demoted_user)
+              @database.modify_user(demoted_user)
               Log.info { @replies.substitute_log(:demoted, {
-                  "id" => demoted_user.id.to_s, 
-                  "name" => demoted_user.get_formatted_name,
-                  "invoker" => user.get_formatted_name
-                  })}
+                "id"      => demoted_user.id.to_s,
+                "name"    => demoted_user.get_formatted_name,
+                "invoker" => user.get_formatted_name,
+              }) }
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
             else
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:no_user_found), reply_to_message: reply) })
@@ -485,16 +485,16 @@ class PrivateParlor < Tourmaline::Client
 
                   duration = @replies.format_timespan(reply_user.cooldown_and_warn)
                   history_with_warnings.add_warning(reply.message_id)
-                  update_user(reply_user)
+                  @database.modify_user(reply_user)
 
                   relay_to_one(history_with_warnings.get_origin_msid(reply.message_id), reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:cooldown_given, {"reason" => reason, "duration" => duration}), reply_to_message: reply) })
                   Log.info { @replies.substitute_log(:warned, {
-                    "id" => user.id.to_s,
-                    "name" => user.get_formatted_name,
-                    "oid" => reply_user.get_obfuscated_id,
+                    "id"       => user.id.to_s,
+                    "name"     => user.get_formatted_name,
+                    "oid"      => reply_user.get_obfuscated_id,
                     "duration" => duration,
-                    "reason" => reason,
-                  })}
+                    "reason"   => reason,
+                  }) }
                   relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
                 else
                   relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:already_warned), reply_to_message: reply) })
@@ -523,17 +523,17 @@ class PrivateParlor < Tourmaline::Client
               cached_msid = delete_messages(reply.message_id, reply_user.id)
 
               duration = @replies.format_timespan(reply_user.cooldown_and_warn)
-              update_user(reply_user)
+              @database.modify_user(reply_user)
 
               relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:message_deleted, {"reason" => reason, "duration" => duration}), reply_to_message: reply) })
               Log.info { @replies.substitute_log(:message_deleted, {
-                    "id" => user.id.to_s,
-                    "name" => user.get_formatted_name,
-                    "msid" => cached_msid.to_s,
-                    "oid" => reply_user.get_obfuscated_id,
-                    "duration" => duration,
-                    "reason" => reason,
-                  })}
+                "id"       => user.id.to_s,
+                "name"     => user.get_formatted_name,
+                "msid"     => cached_msid.to_s,
+                "oid"      => reply_user.get_obfuscated_id,
+                "duration" => duration,
+                "reason"   => reason,
+              }) }
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
             else
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_cache), reply_to_message: reply) })
@@ -563,20 +563,20 @@ class PrivateParlor < Tourmaline::Client
               end
             end
 
-            if !(cooldown_until = uncooldown_user.cooldownUntil)
+            if !(cooldown_until = uncooldown_user.cooldown_until)
               return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_cooldown), reply_to_message: reply) })
             end
 
-            uncooldown_user.cooldownUntil = nil
+            uncooldown_user.remove_cooldown(true)
             uncooldown_user.remove_warning
-            update_user(uncooldown_user)
+            @database.modify_user(uncooldown_user)
 
             Log.info { @replies.substitute_log(:removed_cooldown, {
-                    "id" => user.id.to_s,
-                    "name" => user.get_formatted_name,
-                    "oid" => uncooldown_user.get_obfuscated_id,
-                    "cooldown_until" => cooldown_until
-                  })}
+              "id"             => user.id.to_s,
+              "name"           => user.get_formatted_name,
+              "oid"            => uncooldown_user.get_obfuscated_id,
+              "cooldown_until" => cooldown_until,
+            }) }
             relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
           else
             relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:missing_args), reply_to_message: reply) })
@@ -598,12 +598,12 @@ class PrivateParlor < Tourmaline::Client
 
               relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:message_removed, {"reason" => get_args(message.text)}), reply_to_message: reply) })
               Log.info { @replies.substitute_log(:message_removed, {
-                    "id" => user.id.to_s,
-                    "name" => user.get_formatted_name,
-                    "msid" => cached_msid.to_s,
-                    "oid" => reply_user.get_obfuscated_id,
-                    "reason" => get_args(message.text),
-                  })}
+                "id"     => user.id.to_s,
+                "name"   => user.get_formatted_name,
+                "msid"   => cached_msid.to_s,
+                "oid"    => reply_user.get_obfuscated_id,
+                "reason" => get_args(message.text),
+              }) }
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
             else
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_cache), reply_to_message: reply) })
@@ -648,7 +648,7 @@ class PrivateParlor < Tourmaline::Client
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
               reason = get_args(ctx.message.text)
               reply_user.blacklist(reason)
-              update_user(reply_user)
+              @database.modify_user(reply_user)
 
               # Remove queued messages sent by and directed to blacklisted user.
               @queue.reject! do |msg|
@@ -658,11 +658,11 @@ class PrivateParlor < Tourmaline::Client
 
               relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:blacklisted, {"reason" => reason}), reply_to_message: reply) })
               Log.info { @replies.substitute_log(:blacklisted, {
-                    "id" => reply_user.id.to_s,
-                    "name" => reply_user.get_formatted_name,
-                    "invoker" => user.get_formatted_name,
-                    "reason" => reason,
-                  })}
+                "id"      => reply_user.id.to_s,
+                "name"    => reply_user.get_formatted_name,
+                "invoker" => user.get_formatted_name,
+                "reason"  => reason,
+              }) }
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
             else
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_cache), reply_to_message: reply) })
@@ -672,18 +672,6 @@ class PrivateParlor < Tourmaline::Client
           end
         end
       end
-    end
-  end
-
-  # Deletes the given message for all receivers and removes it from the message history.
-  #
-  # Returns the sender's (user_id) original message id upon success.
-  def delete_messages(msid : Int64, user_id : Int64) : Int64?
-    if reply_msids = @history.get_all_msids(msid)
-      reply_msids.each do |receiver_id, cached_msid|
-        delete_message(receiver_id, reply_msids[receiver_id])
-      end
-      return @history.del_message_group(msid)
     end
   end
 
@@ -711,7 +699,11 @@ class PrivateParlor < Tourmaline::Client
   @[Command(["help"])]
   def help_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
-      if user = check_user(info)
+      if user = database.get_user(info.id)
+        unless user.can_chat?
+          return deny_user(user)
+        end
+
         case user.rank
         when Ranks::Moderator.value
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.mod_help, reply_to_message: reply) })
@@ -720,29 +712,9 @@ class PrivateParlor < Tourmaline::Client
         when Ranks::Host.value
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.host_help, reply_to_message: reply) })
         end
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
-    end
-  end
-
-  # Checks if the user can send a message.
-  #
-  # Returns the user if the user can send a message; nil otherwise.
-  def check_user(info : Tourmaline::User) : Database::User | Nil
-    user = database.get_user(info.id)
-    if (user && !user.left?)
-      unless user.remove_cooldown
-        relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:on_cooldown, {"cooldown_until" => user.cooldownUntil.not_nil!})) })
-        return
-      end
-
-      update_user(info, user)
-      return user
-    elsif user && user.blacklisted?
-      relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:blacklisted, {"reason" => user.blacklistReason})) })
-      return
-    else
-      relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
-      return
     end
   end
 
@@ -802,11 +774,11 @@ class PrivateParlor < Tourmaline::Client
       if user.authorized?(Ranks::Moderator)
         if (args = get_args(text)) && args.size > 0
           Log.info { @replies.substitute_log(:ranked_message, {
-                    "id" => user.id.to_s,
-                    "name" => user.get_formatted_name,
-                    "rank" => Ranks::Moderator,
-                    "text" => args,
-                  })}
+            "id"   => user.id.to_s,
+            "name" => user.get_formatted_name,
+            "rank" => Ranks::Moderator,
+            "text" => args,
+          }) }
           return String.build do |str|
             str << args
             str << @replies.format_user_say("mod")
@@ -817,11 +789,11 @@ class PrivateParlor < Tourmaline::Client
       if user.authorized?(Ranks::Admin)
         if (args = get_args(text)) && args.size > 0
           Log.info { @replies.substitute_log(:ranked_message, {
-                    "id" => user.id.to_s,
-                    "name" => user.get_formatted_name,
-                    "rank" => Ranks::Admin,
-                    "text" => args,
-                  })}
+            "id"   => user.id.to_s,
+            "name" => user.get_formatted_name,
+            "rank" => Ranks::Admin,
+            "text" => args,
+          }) }
           return String.build do |str|
             str << args
             str << @replies.format_user_say("admin")
@@ -832,11 +804,11 @@ class PrivateParlor < Tourmaline::Client
       if user.authorized?(Ranks::Host)
         if (args = get_args(text)) && args.size > 0
           Log.info { @replies.substitute_log(:ranked_message, {
-                    "id" => user.id.to_s,
-                    "name" => user.get_formatted_name,
-                    "rank" => Ranks::Host,
-                    "text" => args,
-                  })}
+            "id"   => user.id.to_s,
+            "name" => user.get_formatted_name,
+            "rank" => Ranks::Host,
+            "text" => args,
+          }) }
           return String.build do |str|
             str << args
             str << @replies.format_user_say("host")
@@ -858,7 +830,11 @@ class PrivateParlor < Tourmaline::Client
         return
       end
 
-      if user = check_user(info)
+      if user = database.get_user(info.id)
+        unless user.can_chat?
+          return deny_user(user)
+        end
+
         if raw_text = message.text
           if text = check_text(@replies.strip_format(raw_text, message.entities), user, message.message_id)
             unless @spam.spammy?(info.id, @spam.calculate_spam_score_text(text))
@@ -873,6 +849,8 @@ class PrivateParlor < Tourmaline::Client
             end
           end
         end
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -891,7 +869,11 @@ class PrivateParlor < Tourmaline::Client
         end
       {% end %}
 
-      if user = check_user(info)
+      if user = database.get_user(info.id)
+        unless user.can_chat?
+          return deny_user(user)
+        end
+
         if raw_caption = message.caption
           caption = check_text(@replies.strip_format(raw_caption, message.entities), user, message.message_id)
           if caption.nil? # Caption contained a special font or used a disabled command
@@ -913,6 +895,8 @@ class PrivateParlor < Tourmaline::Client
         else
           return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:spamming), reply_to_message: reply) })
         end
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -925,7 +909,11 @@ class PrivateParlor < Tourmaline::Client
       if message.forward_from || message.forward_from_chat
         return
       end
-      if user = check_user(info)
+      if user = database.get_user(info.id)
+        unless user.can_chat?
+          return deny_user(user)
+        end
+
         album = message.media_group_id.not_nil!
         if caption = message.caption
           caption = @replies.replace_links(caption, message.caption_entities)
@@ -972,6 +960,8 @@ class PrivateParlor < Tourmaline::Client
             end
           }
         end
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -983,7 +973,11 @@ class PrivateParlor < Tourmaline::Client
       if message.forward_from || message.forward_from_chat
         return
       end
-      if user = check_user(info)
+      if user = database.get_user(info.id)
+        unless user.can_chat?
+          return deny_user(user)
+        end
+
         if message.poll.not_nil!.anonymous? == false
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:deanon_poll), reply_to_message: reply) })
         else
@@ -998,6 +992,8 @@ class PrivateParlor < Tourmaline::Client
             return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:spamming), reply_to_message: reply) })
           end
         end
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -1006,7 +1002,11 @@ class PrivateParlor < Tourmaline::Client
   @[On(:forwarded_message)]
   def handle_forward(update) : Nil
     if (message = update.message) && (info = message.from)
-      if user = check_user(info)
+      if user = database.get_user(info.id)
+        unless user.can_chat?
+          return deny_user(user)
+        end
+
         unless @spam.spammy?(info.id, @spam.calculate_spam_score(:forward))
           relay(
             message.reply_message,
@@ -1017,6 +1017,8 @@ class PrivateParlor < Tourmaline::Client
         else
           return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:spamming), reply_to_message: reply) })
         end
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -1029,7 +1031,11 @@ class PrivateParlor < Tourmaline::Client
         return
       end
 
-      if user = check_user(info)
+      if user = database.get_user(info.id)
+        unless user.can_chat?
+          return deny_user(user)
+        end
+
         unless @spam.spammy?(info.id, @spam.calculate_spam_score(:sticker))
           relay(
             message.reply_message,
@@ -1040,6 +1046,8 @@ class PrivateParlor < Tourmaline::Client
         else
           return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:spamming), reply_to_message: reply) })
         end
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -1053,7 +1061,11 @@ class PrivateParlor < Tourmaline::Client
         if (message.forward_from || message.forward_from_chat)
           return
         end
-        if user = check_user(info)
+        if user = database.get_user(info.id)
+          unless user.can_chat?
+            return deny_user(user)
+          end
+
           unless @spam.spammy?(info.id, @spam.calculate_spam_score(:{{luck_type}}))
             relay(
               message.reply_message,
@@ -1064,6 +1076,8 @@ class PrivateParlor < Tourmaline::Client
           else
             return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:spamming), reply_to_message: reply) })
           end
+        else
+          relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
         end
       end
     end
@@ -1078,7 +1092,11 @@ class PrivateParlor < Tourmaline::Client
         if (message.forward_from || message.forward_from_chat)
           return
         end
-        if user = check_user(info)
+        if user = database.get_user(info.id)
+          unless user.can_chat?
+            return deny_user(user)
+          end
+
           unless @spam.spammy?(info.id, @spam.calculate_spam_score(:venue))
             venue = message.venue.not_nil!
             relay(
@@ -1101,6 +1119,8 @@ class PrivateParlor < Tourmaline::Client
           else
             return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:spamming), reply_to_message: reply) })
           end
+        else
+          relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
         end
       end
     end
@@ -1114,7 +1134,11 @@ class PrivateParlor < Tourmaline::Client
         if (message.forward_from || message.forward_from_chat) || message.venue
           return
         end
-        if user = check_user(info)
+        if user = database.get_user(info.id)
+          unless user.can_chat?
+            return deny_user(user)
+          end
+
           unless @spam.spammy?(info.id, @spam.calculate_spam_score(:location))
             location = message.location.not_nil!
             relay(
@@ -1131,6 +1155,8 @@ class PrivateParlor < Tourmaline::Client
           else
             return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:spamming), reply_to_message: reply) })
           end
+        else
+          relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
         end
       end
     end
@@ -1144,7 +1170,11 @@ class PrivateParlor < Tourmaline::Client
         if (message.forward_from || message.forward_from_chat)
           return
         end
-        if user = check_user(info)
+        if user = database.get_user(info.id)
+          unless user.can_chat?
+            return deny_user(user)
+          end
+
           unless @spam.spammy?(info.id, @spam.calculate_spam_score(:contact))
             contact = message.contact.not_nil!
             relay(
@@ -1161,8 +1191,33 @@ class PrivateParlor < Tourmaline::Client
           else
             return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:spamming), reply_to_message: reply) })
           end
+        else
+          relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
         end
       end
+    end
+  end
+
+  # Sends a message to the user explaining why they cannot chat at this time
+  def deny_user(user : Database::User) : Nil
+    if user.blacklisted?
+      relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:blacklisted, {"reason" => user.blacklist_reason})) })
+    elsif user.cooldown_until
+      relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:on_cooldown, {"cooldown_until" => user.cooldown_until.not_nil!})) })
+    else
+      relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
+    end
+  end
+
+  # Deletes the given message for all receivers and removes it from the message history.
+  #
+  # Returns the sender's (user_id) original message id upon success.
+  def delete_messages(msid : Int64, user_id : Int64) : Int64?
+    if reply_msids = @history.get_all_msids(msid)
+      reply_msids.each do |receiver_id, cached_msid|
+        delete_message(receiver_id, reply_msids[receiver_id])
+      end
+      return @history.del_message_group(msid)
     end
   end
 
@@ -1171,7 +1226,7 @@ class PrivateParlor < Tourmaline::Client
     if reply_message
       if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
         @database.get_prioritized_users.each do |receiver_id|
-          if receiver_id != user.id || user.debugEnabled
+          if receiver_id != user.id || user.debug_enabled
             add_to_queue(cached_msid, user.id, receiver_id, reply_msids[receiver_id], proc)
           end
         end
@@ -1185,7 +1240,7 @@ class PrivateParlor < Tourmaline::Client
       end
     else
       @database.get_prioritized_users.each do |receiver_id|
-        if (receiver_id != user.id) || user.debugEnabled
+        if (receiver_id != user.id) || user.debug_enabled
           add_to_queue(cached_msid, user.id, receiver_id, nil, proc)
         end
       end
@@ -1243,7 +1298,7 @@ class PrivateParlor < Tourmaline::Client
   def force_leave(user_id : Int64) : Nil
     if user = database.get_user(user_id)
       user.set_left
-      update_user(user)
+      @database.modify_user(user)
       Log.info { @replies.substitute_log(:force_leave, {"id" => user_id.to_s}) }
     end
     queue.reject! do |msg|
