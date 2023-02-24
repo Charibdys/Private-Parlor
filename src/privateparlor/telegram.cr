@@ -234,7 +234,7 @@ class PrivateParlor < Tourmaline::Client
                 @replies.substitute_reply(:ranked_info, {
                   "oid"            => reply_user.get_obfuscated_id,
                   "karma"          => reply_user.get_obfuscated_karma,
-                  "cooldown_until" => reply_user.cooldown_until,
+                  "cooldown_until" => reply_user.remove_cooldown ? nil : reply_user.cooldown_until,
                 }), reply_to_message: reply) })
             end
           end
@@ -248,7 +248,7 @@ class PrivateParlor < Tourmaline::Client
             "karma"          => user.karma,
             "warnings"       => user.warnings,
             "warn_expiry"    => user.warn_expiry,
-            "cooldown_until" => user.cooldown_until,
+            "cooldown_until" => user.remove_cooldown ? nil : user.cooldown_until,
           }), reply_to_message: reply) })
       else
         relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
