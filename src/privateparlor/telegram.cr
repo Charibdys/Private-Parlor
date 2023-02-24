@@ -250,6 +250,8 @@ class PrivateParlor < Tourmaline::Client
             "warn_expiry"    => user.warn_expiry,
             "cooldown_until" => user.cooldown_until,
           }), reply_to_message: reply) })
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -321,6 +323,8 @@ class PrivateParlor < Tourmaline::Client
           else
             relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:no_reply), reply_to_message: reply) })
           end
+        else
+          relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
         end
       end
     end
@@ -334,6 +338,8 @@ class PrivateParlor < Tourmaline::Client
         user.toggle_karma
         @database.modify_user(user)
         relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:toggle_karma, {"toggle" => user.hide_karma})) })
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -346,6 +352,8 @@ class PrivateParlor < Tourmaline::Client
         user.toggle_debug
         @database.modify_user(user)
         relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:toggle_debug, {"toggle" => user.debug_enabled})) })
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -368,6 +376,8 @@ class PrivateParlor < Tourmaline::Client
         else
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:tripcode_sinfo, {"tripcode" => user.tripcode}), reply_to_message: reply) })
         end
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
@@ -691,6 +701,8 @@ class PrivateParlor < Tourmaline::Client
             relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.custom(motd), reply_to_message: reply) })
           end
         end
+      else
+        relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
       end
     end
   end
