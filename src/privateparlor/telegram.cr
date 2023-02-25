@@ -729,24 +729,26 @@ class PrivateParlor < Tourmaline::Client
         if user.authorized?(Ranks::Admin)
           if reply = ctx.message.reply_message
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
-              reason = @replies.get_args(ctx.message.text)
-              reply_user.blacklist(reason)
-              @database.modify_user(reply_user)
+              if reply_user.rank < user.rank
+                reason = @replies.get_args(ctx.message.text)
+                reply_user.blacklist(reason)
+                @database.modify_user(reply_user)
 
-              # Remove queued messages sent by and directed to blacklisted user.
-              @queue.reject! do |msg|
-                msg.receiver == user.id || msg.sender == user.id
+                # Remove queued messages sent by and directed to blacklisted user.
+                @queue.reject! do |msg|
+                  msg.receiver == user.id || msg.sender == user.id
+                end
+                cached_msid = delete_messages(reply.message_id, reply_user.id)
+
+                relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:blacklisted, {"reason" => reason}), reply_to_message: reply) })
+                Log.info { @replies.substitute_log(:blacklisted, {
+                  "id"      => reply_user.id.to_s,
+                  "name"    => reply_user.get_formatted_name,
+                  "invoker" => user.get_formatted_name,
+                  "reason"  => reason,
+                }) }
+                relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
               end
-              cached_msid = delete_messages(reply.message_id, reply_user.id)
-
-              relay_to_one(cached_msid, reply_user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:blacklisted, {"reason" => reason}), reply_to_message: reply) })
-              Log.info { @replies.substitute_log(:blacklisted, {
-                "id"      => reply_user.id.to_s,
-                "name"    => reply_user.get_formatted_name,
-                "invoker" => user.get_formatted_name,
-                "reason"  => reason,
-              }) }
-              relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:success), reply_to_message: reply) })
             else
               relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_cache), reply_to_message: reply) })
             end
