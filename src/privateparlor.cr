@@ -4,7 +4,7 @@ require "tasker"
 require "sqlite3"
 require "./privateparlor/*"
 
-bot = PrivateParlor.new(Configuration.parse_config, parse_mode: Tourmaline::ParseMode::MarkdownV2)
+bot = PrivateParlor.new(Configuration.parse_config)
 
 Log.info { bot.replies.substitute_log(:start, {"version" => VERSION}) }
 
