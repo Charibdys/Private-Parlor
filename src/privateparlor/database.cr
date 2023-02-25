@@ -213,11 +213,18 @@ class Database
       @rank >= rank.value
     end
 
-    # Returns `true` if user is not in cooldown and not blacklisted; user can chat
+    # Returns `true` if user is joined, not in cooldown, and not blacklisted; user can chat
     #
     # Returns false otherwise.
     def can_chat? : Bool
-      return self.remove_cooldown && !self.blacklisted? && !self.left?
+      self.remove_cooldown && !self.blacklisted? && !self.left?
+    end
+
+    # Returns `true` if user is joined and not blacklisted; user can use commands
+    #
+    # Returns false otherwise.
+    def can_use_command? : Bool
+      !self.blacklisted? && !self.left?
     end
   end
 

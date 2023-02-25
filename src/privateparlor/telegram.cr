@@ -212,6 +212,7 @@ class PrivateParlor < Tourmaline::Client
   def stop_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if (user = database.get_user(info.id)) && !user.left?
+        user.set_active(info.username, info.full_name)
         user.set_left
         @database.modify_user(user)
         relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:left), reply_to_message: reply) })
@@ -227,6 +228,11 @@ class PrivateParlor < Tourmaline::Client
   def info_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if reply = message.reply_message
           if user.authorized?(Ranks::Moderator)
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
@@ -264,9 +270,11 @@ class PrivateParlor < Tourmaline::Client
   def users_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
-        unless user.can_chat?
+        unless user.can_use_command?
           return deny_user(user)
         end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
 
         counts = database.get_user_counts
 
@@ -288,9 +296,12 @@ class PrivateParlor < Tourmaline::Client
   def version_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
-        unless user.can_chat?
+        unless user.can_use_command?
           return deny_user(user)
         end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
+
         relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.version, link_preview: true, reply_to_message: reply) })
       else
         relay_to_one(nil, info.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:not_in_chat)) })
@@ -304,6 +315,12 @@ class PrivateParlor < Tourmaline::Client
     if history_with_karma = @history.as?(HistoryFull)
       if (message = ctx.message) && (info = message.from)
         if user = database.get_user(info.id)
+          unless user.can_use_command?
+            return deny_user(user)
+          end
+          user.set_active(info.username, info.full_name)
+          @database.modify_user(user)
+
           if reply = message.reply_message
             if (history_with_karma.get_sender_id(reply.message_id) == user.id)
               return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:upvoted_own_message), reply_to_message: reply) })
@@ -335,6 +352,10 @@ class PrivateParlor < Tourmaline::Client
   def toggle_karma_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
         user.toggle_karma
         @database.modify_user(user)
         relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:toggle_karma, {"toggle" => user.hide_karma})) })
@@ -349,6 +370,10 @@ class PrivateParlor < Tourmaline::Client
   def toggle_debug_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
         user.toggle_debug
         @database.modify_user(user)
         relay_to_one(nil, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:toggle_debug, {"toggle" => user.debug_enabled})) })
@@ -363,11 +388,14 @@ class PrivateParlor < Tourmaline::Client
   def tripcode_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
         if arg = @replies.get_args(ctx.message.text)
           if !((index = arg.index('#')) && (0 < index < arg.size - 1)) || arg.includes?('\n') || arg.size > 30
             return relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:invalid_tripcode_format), reply_to_message: reply) })
           end
-
+          user.set_active(info.username, info.full_name)
           user.set_tripcode(arg)
           @database.modify_user(user)
 
@@ -391,6 +419,11 @@ class PrivateParlor < Tourmaline::Client
   def mod_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if user.authorized?(Ranks::Host)
           if arg = @replies.get_args(message.text)
             if promoted_user = database.get_user_by_name(arg)
@@ -425,6 +458,11 @@ class PrivateParlor < Tourmaline::Client
   def admin_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if user.authorized?(Ranks::Host)
           if arg = @replies.get_args(message.text)
             if promoted_user = database.get_user_by_name(arg)
@@ -459,6 +497,11 @@ class PrivateParlor < Tourmaline::Client
   def demote_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if user.authorized?(Ranks::Host)
           if arg = @replies.get_args(message.text)
             if demoted_user = database.get_user_by_name(arg)
@@ -487,6 +530,11 @@ class PrivateParlor < Tourmaline::Client
     if history_with_warnings = @history.as?(HistoryFull)
       if (message = ctx.message) && (info = message.from)
         if user = database.get_user(info.id)
+          unless user.can_use_command?
+            return deny_user(user)
+          end
+          user.set_active(info.username, info.full_name)
+          @database.modify_user(user)
           if user.authorized?(Ranks::Moderator)
             if reply = message.reply_message
               if reply_user = database.get_user(history_with_warnings.get_sender_id(reply.message_id))
@@ -526,6 +574,11 @@ class PrivateParlor < Tourmaline::Client
   def delete_message(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if user.authorized?(Ranks::Moderator)
           if reply = message.reply_message
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
@@ -561,6 +614,11 @@ class PrivateParlor < Tourmaline::Client
   def uncooldown_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if user.authorized?(Ranks::Admin)
           if arg = @replies.get_args(message.text)
             if arg.size < 5
@@ -601,6 +659,11 @@ class PrivateParlor < Tourmaline::Client
   def remove_message(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if user.authorized?(Ranks::Moderator)
           if reply = message.reply_message
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
@@ -631,6 +694,11 @@ class PrivateParlor < Tourmaline::Client
   def delete_all_messages(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if user.authorized?(Ranks::Admin)
           if banned_users = @database.get_blacklisted_users
             delete_msids = 0
@@ -653,6 +721,11 @@ class PrivateParlor < Tourmaline::Client
   def blacklist(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if user.authorized?(Ranks::Admin)
           if reply = ctx.message.reply_message
             if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
@@ -691,6 +764,11 @@ class PrivateParlor < Tourmaline::Client
   def motd(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
+        unless user.can_use_command?
+          return deny_user(user)
+        end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
         if arg = @replies.get_args(ctx.message.text)
           if user.authorized?(Ranks::Host)
             @database.set_motd(arg)
@@ -712,9 +790,11 @@ class PrivateParlor < Tourmaline::Client
   def help_command(ctx) : Nil
     if (message = ctx.message) && (info = message.from)
       if user = database.get_user(info.id)
-        unless user.can_chat?
+        unless user.can_use_command?
           return deny_user(user)
         end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
 
         case user.rank
         when Ranks::Moderator.value
@@ -846,6 +926,8 @@ class PrivateParlor < Tourmaline::Client
         unless user.can_chat?
           return deny_user(user)
         end
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
 
         if raw_text = message.text
           if text = check_text(@replies.strip_format(raw_text, message.entities), user, message.message_id)
@@ -886,6 +968,9 @@ class PrivateParlor < Tourmaline::Client
           return deny_user(user)
         end
 
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
+
         if raw_caption = message.caption
           caption = check_text(@replies.strip_format(raw_caption, message.entities), user, message.message_id)
           if caption.nil? # Caption contained a special font or used a disabled command
@@ -925,6 +1010,9 @@ class PrivateParlor < Tourmaline::Client
         unless user.can_chat?
           return deny_user(user)
         end
+
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
 
         album = message.media_group_id.not_nil!
         if caption = message.caption
@@ -990,6 +1078,9 @@ class PrivateParlor < Tourmaline::Client
           return deny_user(user)
         end
 
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
+
         if message.poll.not_nil!.anonymous? == false
           relay_to_one(message.message_id, user.id, ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(:deanon_poll), reply_to_message: reply) })
         else
@@ -1019,6 +1110,9 @@ class PrivateParlor < Tourmaline::Client
           return deny_user(user)
         end
 
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
+
         unless @spam.spammy?(info.id, @spam.calculate_spam_score(:forward))
           relay(
             message.reply_message,
@@ -1047,6 +1141,9 @@ class PrivateParlor < Tourmaline::Client
         unless user.can_chat?
           return deny_user(user)
         end
+
+        user.set_active(info.username, info.full_name)
+        @database.modify_user(user)
 
         unless @spam.spammy?(info.id, @spam.calculate_spam_score(:sticker))
           relay(
@@ -1078,6 +1175,9 @@ class PrivateParlor < Tourmaline::Client
             return deny_user(user)
           end
 
+          user.set_active(info.username, info.full_name)
+          @database.modify_user(user)
+
           unless @spam.spammy?(info.id, @spam.calculate_spam_score(:{{luck_type}}))
             relay(
               message.reply_message,
@@ -1108,6 +1208,9 @@ class PrivateParlor < Tourmaline::Client
           unless user.can_chat?
             return deny_user(user)
           end
+
+          user.set_active(info.username, info.full_name)
+          @database.modify_user(user)
 
           unless @spam.spammy?(info.id, @spam.calculate_spam_score(:venue))
             venue = message.venue.not_nil!
@@ -1151,6 +1254,9 @@ class PrivateParlor < Tourmaline::Client
             return deny_user(user)
           end
 
+          user.set_active(info.username, info.full_name)
+          @database.modify_user(user)
+
           unless @spam.spammy?(info.id, @spam.calculate_spam_score(:location))
             location = message.location.not_nil!
             relay(
@@ -1186,6 +1292,9 @@ class PrivateParlor < Tourmaline::Client
           unless user.can_chat?
             return deny_user(user)
           end
+
+          user.set_active(info.username, info.full_name)
+          @database.modify_user(user)
 
           unless @spam.spammy?(info.id, @spam.calculate_spam_score(:contact))
             contact = message.contact.not_nil!
