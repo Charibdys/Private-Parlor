@@ -50,22 +50,22 @@ class Replies
     )
 
     @entity_types = entities
-    @time_units = yaml["time_units"].as_a.map { |str| str.as_s }
-    @toggle = yaml["toggle"].as_a.map { |str| str.as_s }
-    @replies = Hash.zip(reply_keys, yaml["replies"].as_a.map { |str| str.as_s })
-    @logs = Hash.zip(log_keys, yaml["logs"].as_a.map { |str| str.as_s })
+    @time_units = yaml["time_units"].as_a.map(&.as_s)
+    @toggle = yaml["toggle"].as_a.map(&.as_s)
+    @replies = Hash.zip(reply_keys, yaml["replies"].as_a.map(&.as_s))
+    @logs = Hash.zip(log_keys, yaml["logs"].as_a.map(&.as_s))
   end
 
   # Globally substitutes placeholders in reply with the given variables
   def substitute_reply(key : Symbol, variables : LocaleParameters = {"" => ""}) : String
     if @replies[key].nil?
-      Log.warn { "There was no reply available with key #{key.to_s}" }
+      Log.warn { "There was no reply available with key #{key}" }
       return ""
     end
 
-    unless @replies[key].scan(/\#{\w*}/).size == 0
+    if @replies[key].scan(/\#{\w*}/).size != 0
       if variables.size == 1 && variables[""]? == ""
-        Log.warn { "\"#{key.to_s}\" reply has placeholders, but no parameters were available!" }
+        Log.warn { "\"#{key}\" reply has placeholders, but no parameters were available!" }
       end
 
       @replies[key].gsub(/\#{\w*}/) do |match|
@@ -108,20 +108,20 @@ class Replies
   # Globally substitutes placeholders in log message with the given variables
   def substitute_log(key : Symbol, variables : LocaleParameters = {"" => ""}) : String
     if @logs[key].nil?
-      Log.warn { "There was no log message available with key #{key.to_s}" }
+      Log.warn { "There was no log message available with key #{key}" }
       return ""
     end
 
-    unless @logs[key].scan(/\#{\w*}/).size == 0
+    if @logs[key].scan(/\#{\w*}/).size != 0
       if variables.size == 1 && variables[""]? == ""
-        Log.warn { "\"#{key.to_s}\" log message has placeholders, but no parameters were available!" }
+        Log.warn { "\"#{key}\" log message has placeholders, but no parameters were available!" }
       end
 
       @logs[key].gsub(/\#{\w*}/) do |match|
         placeholder = match.strip("\#{}")
         case placeholder
         when "rank"
-          replace = variables[placeholder]?.to_s.downcase
+          variables[placeholder]?.to_s.downcase
         when "reason"
           if variables[placeholder]?
             "#{@logs[:reason_prefix]}#{variables[placeholder]}"
@@ -158,11 +158,11 @@ class Replies
   # Returns false if the text has mathematical alphanumeric symbols, as they contain bold and italic characters.
   def allow_text?(text : String) : Bool
     if text.empty?
-      return true
+      true
     elsif text.codepoints.any? { |codepoint| (0x1D400..0x1D7FF).includes?(codepoint) }
-      return false
+      false
     else
-      return true
+      true
     end
   end
 
@@ -176,7 +176,7 @@ class Replies
       end
     end
 
-    entities = entities - stripped_entities
+    entities - stripped_entities
   end
 
   # Strips MarkdownV2 format from a message and escapes formatting found in `MessageEntities`.
@@ -240,12 +240,12 @@ class Replies
 
   # Returns a link to the given user's account.
   def format_user_sign(id : Int64, name : String) : String
-    return Link.new("~~#{name}", "tg://user?id=#{id}").to_md
+    Link.new("~~#{name}", "tg://user?id=#{id}").to_md
   end
 
   # Returns a bolded signature showing which type of user sent this message.
   def format_user_say(signature : String) : String
-    return Bold.new("~~#{signature}").to_md
+    Bold.new("~~#{signature}").to_md
   end
 
   # Returns a tripcode (Name!Tripcode) segment.
@@ -273,20 +273,20 @@ class Replies
   #
   # Feel free to edit this if you fork the code.
   def version : String
-    return Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://github.com/Charibdys/Private-Parlor")).to_md
+    Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://github.com/Charibdys/Private-Parlor")).to_md
   end
 
   # Returns a custom text from a given string.
   def custom(text : String) : String
     message = Section.new
     message << text
-    return message.to_md
+    message.to_md
   end
 
   # TODO: Move command descriptions to locale
   # Returns a message containing the commands the a moderator can use.
   def mod_help : String
-    return Section.new(
+    Section.new(
       Italic.new("The following commands are available to moderators:"),
       "    /help - Show this text",
       "    /modsay [text] - Send an offical moderator message",
@@ -301,7 +301,7 @@ class Replies
   # TODO: Move command descriptions to locale
   # Returns a message containing the commands the an admin can use.
   def admin_help : String
-    return Section.new(
+    Section.new(
       Italic.new("The following commands are available to admins:"),
       "    /help - Show this text",
       "    /purge - Delete all messages from a blacklisted user",
@@ -318,7 +318,7 @@ class Replies
   # TODO: Move command descriptions to locale
   # Returns a message containing the commands the a host can use.
   def host_help : String
-    return Section.new(
+    Section.new(
       Italic.new("The following commands are available to hosts:"),
       "    /help - Show this text",
       "    /purge - Delete all messages from a blacklisted user",

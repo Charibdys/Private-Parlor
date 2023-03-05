@@ -55,7 +55,8 @@ abstract class History
 
       user_msgs.add(msg.receivers[uid])
     end
-    return user_msgs
+
+    user_msgs
   end
 
   # Deletes a `MessageGroup` from `msid_map`,
@@ -182,7 +183,7 @@ end
 
 class MessageGroupFull < MessageGroup
   property ratings : Set(Int64)
-  property warned : Bool
+  property warned : Bool?
 
   # :inherit:
   def initialize(sender_id : Int64, msid : Int64)

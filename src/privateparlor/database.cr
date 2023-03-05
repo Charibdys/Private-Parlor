@@ -27,9 +27,9 @@ class Database
     getter warn_expiry : Time?
     getter karma : Int32
     @[DB::Field(key: "hideKarma")]
-    getter hide_karma : Bool
+    getter hide_karma : Bool?
     @[DB::Field(key: "debugEnabled")]
-    getter debug_enabled : Bool
+    getter debug_enabled : Bool?
     getter tripcode : String?
 
     # Create an instance of `User` from a hash with an `:id` key.
@@ -76,8 +76,8 @@ class Database
     #
     # Otherwise, the user's realname is returned.
     def get_formatted_name : String
-      if at = @username
-        at = "@" + at
+      if username = @username
+        "@" + username
       else
         @realname
       end
@@ -85,13 +85,13 @@ class Database
 
     # Get the user's obfuscated ID
     def get_obfuscated_id : String
-      return Random.new(@id + Time.utc.at_beginning_of_day.to_unix).base64(3)
+      Random.new(@id + Time.utc.at_beginning_of_day.to_unix).base64(3)
     end
 
     # Get the user's obfuscated karma
     def get_obfuscated_karma : Int32
       offset = ((@karma * 0.2).abs + 2).round.to_i
-      return @karma + Random.rand(0..(offset + 1)) - offset
+      @karma + Random.rand(0..(offset + 1)) - offset
     end
 
     # Set *left* to nil, meaning that User has joined the chat.

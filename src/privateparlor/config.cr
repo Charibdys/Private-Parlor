@@ -28,25 +28,25 @@ module Configuration
     getter lifetime : Int32 = 24
 
     @[YAML::Field(key: "relay-luck")]
-    getter relay_luck : Bool = true
+    getter relay_luck : Bool? = true
 
     @[YAML::Field(key: "relay-venue")]
-    getter relay_venue : Bool = false
+    getter relay_venue : Bool? = false
 
     @[YAML::Field(key: "relay-location")]
-    getter relay_location : Bool = false
+    getter relay_location : Bool? = false
 
     @[YAML::Field(key: "relay-contact")]
-    getter relay_contact : Bool = false
+    getter relay_contact : Bool? = false
 
     @[YAML::Field(key: "full-usercount")]
-    getter full_usercount : Bool = false
+    getter full_usercount : Bool? = false
 
     @[YAML::Field(key: "allow_signing")]
-    getter allow_signing : Bool = false
+    getter allow_signing : Bool? = false
 
     @[YAML::Field(key: "allow_tripcodes")]
-    getter allow_tripcodes : Bool = false
+    getter allow_tripcodes : Bool? = false
 
     @[YAML::Field(key: "sign_limit_interval")]
     getter sign_limit_interval : Int32 = 600
@@ -65,21 +65,19 @@ module Configuration
   #
   # Values that aren't specified in the config file will be set to a default value.
   def parse_config : Config
-    begin
-      config = Config.from_yaml(File.open(File.expand_path("config.yaml")))
-      if check_config(config) == false
-        config = Config.new(config.token, config.database)
-      end
+    config = Config.from_yaml(File.open(File.expand_path("config.yaml")))
+    if check_config(config) == false
+      config = Config.new(config.token, config.database)
+    end
 
-      set_log(config)
-      return config
+    set_log(config)
+    config
     rescue ex : YAML::ParseException
       Log.error(exception: ex) { "Could not parse the given value at row #{ex.line_number}. This could be because a required value was not set or the wrong type was given." }
       exit
     rescue ex : File::NotFoundError | File::AccessDeniedError
       Log.error(exception: ex) { "Could not open \"./config.yaml\". Exiting..." }
       exit
-    end
   end
 
   # Run additional checks on Config instance variables.
@@ -94,7 +92,8 @@ module Configuration
       Log.notice { "Could not determine strip-format, was #{config.entities}; check for duplicates or mispellings. Using defaults." }
       return false
     end
-    return true
+
+    true
   end
 
   # Reset log with the severity level defined in `config.yaml`.
