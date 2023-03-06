@@ -246,7 +246,7 @@ class PrivateParlor < Tourmaline::Client
           relay_to_one(message.message_id, user.id, :ranked_info, {
             "oid"            => reply_user.get_obfuscated_id,
             "karma"          => reply_user.get_obfuscated_karma,
-            "cooldown_until" => reply_user.remove_cooldown ? nil : reply_user.cooldown_until,
+            "cooldown_until" => reply_user.remove_cooldown ? nil : @replies.format_time(reply_user.cooldown_until),
           })
         end
       end
@@ -257,9 +257,9 @@ class PrivateParlor < Tourmaline::Client
         "rank"           => Ranks.new(user.rank),
         "karma"          => user.karma,
         "warnings"       => user.warnings,
-        "warn_expiry"    => user.warn_expiry,
+        "warn_expiry"    => @replies.format_time(user.warn_expiry),
         "smiley"         => @replies.format_smiley(user.warnings, @config.smileys),
-        "cooldown_until" => user.remove_cooldown ? nil : user.cooldown_until,
+        "cooldown_until" => user.remove_cooldown ? nil : @replies.format_time(user.cooldown_until),
       })
     end
   end
@@ -1391,7 +1391,7 @@ class PrivateParlor < Tourmaline::Client
     if user.blacklisted?
       relay_to_one(nil, user.id, :blacklisted, {"reason" => user.blacklist_reason})
     elsif cooldown_until = user.cooldown_until
-      relay_to_one(nil, user.id, :on_cooldown, {"cooldown_until" => cooldown_until})
+      relay_to_one(nil, user.id, :on_cooldown, {"cooldown_until" => @replies.format_time(cooldown_until)})
     else
       relay_to_one(nil, user.id, :not_in_chat)
     end

@@ -14,6 +14,7 @@ class Replies
   getter replies : Hash(Symbol, String) = {} of Symbol => String
   getter logs : Hash(Symbol, String) = {} of Symbol => String
   getter time_units : Array(String)
+  getter time_format : String
   getter toggle : Array(String)
 
   # Creates an instance of `Replies`.
@@ -51,6 +52,7 @@ class Replies
 
     @entity_types = entities
     @time_units = yaml["time_units"].as_a.map(&.as_s)
+    @time_format = yaml["time_format"].as_s
     @toggle = yaml["toggle"].as_a.map(&.as_s)
     @replies = Hash.zip(reply_keys, yaml["replies"].as_a.map(&.as_s))
     @logs = Hash.zip(log_keys, yaml["logs"].as_a.map(&.as_s))
@@ -280,6 +282,13 @@ class Replies
       return smileys[3]
     end
   end
+
+  def format_time(time : Time?) : String?
+    if time
+      time.to_s(@time_format)
+    end
+  end
+
 
   # Returns a message containing the program version and a link to its Git repo.
   #

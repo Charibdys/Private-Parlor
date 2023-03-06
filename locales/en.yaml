@@ -2,6 +2,10 @@
 # 5 elements from largest unit to smallest: weeks, days, hours, mintues, seconds
 time_units: ['w', 'd', 'h', 'm', 's']
 
+# Format for timestamps
+# Currently in the form "MM-DD-YY" with 12 hour time and showing timzeone/offset name
+time_format: "%m-%d-%y %r %Z"
+
 # Term for off and on, respectively
 toggle: ["disabled", "enabled"]
 
