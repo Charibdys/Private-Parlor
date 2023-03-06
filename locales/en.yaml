@@ -133,11 +133,11 @@ replies:
  - |-
     unset
 
-# user_info: oid, username, rank, karma, warnings, warn_expiry, cooldown_until
+# user_info: oid, username, rank, karma, warnings, smiley, warn_expiry, cooldown_until
  - |-
     *id*: #{oid}, *username*: #{username}, *rank*: #{rank}
     *karma*: #{karma}
-    *warnings*: #{warnings}#{warn_expiry}
+    *warnings*: #{warnings} #{smiley} #{warn_expiry}
     *cooldown*: #{cooldown_until}
 
 # ranked_info: oid, karma, cooldown_until

@@ -269,6 +269,18 @@ class Replies
     end
   end
 
+  def format_smiley(warnings : Int32, smileys : Array(String)) : String
+    if warnings <= 0
+      return smileys[0]
+    elsif warnings == 1
+      return smileys[1]
+    elsif warnings <= 3
+      return smileys[2]
+    else
+      return smileys[3]
+    end
+  end
+
   # Returns a message containing the program version and a link to its Git repo.
   #
   # Feel free to edit this if you fork the code.

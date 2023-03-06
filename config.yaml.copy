@@ -36,6 +36,11 @@ locale: "en"
 # The defaults remove bold, italics, and inline links; it's recommended to keep these
 # strip-format: ["bold", "italic", "text_link"]
 
+# Smileys
+# Emoticons that are appened to /info messages
+# Smileys start out happy then get sadder based on the number of the user's warnings
+smileys: [":)", ":|", ":/", ":("]
+
 # Secure Tripcode toggle
 # Uncomment (and change the value of the salt) to generate secure tripcodes
 # tripcode-salt: "abcdefghijklmnopqrstuvwxyz0123456789"

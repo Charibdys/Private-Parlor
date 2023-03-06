@@ -258,6 +258,7 @@ class PrivateParlor < Tourmaline::Client
         "karma"          => user.karma,
         "warnings"       => user.warnings,
         "warn_expiry"    => user.warn_expiry,
+        "smiley"         => @replies.format_smiley(user.warnings, @config.smileys),
         "cooldown_until" => user.remove_cooldown ? nil : user.cooldown_until,
       })
     end

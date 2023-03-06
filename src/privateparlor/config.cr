@@ -3,9 +3,6 @@ require "yaml"
 module Configuration
   extend self
 
-  MESSAGE_ENTITIES = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold", "italic",
-                      "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention", "custom_emoji"]
-
   class Config
     include YAML::Serializable
 
@@ -51,6 +48,9 @@ module Configuration
     @[YAML::Field(key: "sign_limit_interval")]
     getter sign_limit_interval : Int32 = 600
 
+    @[YAML::Field(key: "smileys")]
+    getter smileys : Array(String) = [":)", ":|", ":/", ":("]
+
     @[YAML::Field(key: "strip-format")]
     getter entities : Array(String) = ["bold", "italic", "text_link"]
 
@@ -83,12 +83,18 @@ module Configuration
   # Run additional checks on Config instance variables.
   #
   # Check bounds on `config.lifetime`.
+  # Check size of `config.smileys`; should be 4
   # Check contents of `config.entities` for mispellings or duplicates.
   def check_config(config : Config) : Bool
+    message_entities = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold", "italic",
+                      "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention", "custom_emoji"]
+
     if (1..48).includes?(config.lifetime) == false
       Log.notice { "Message lifetime not within range, was #{config.lifetime}; defaulting to 24 hours." }
       return false
-    elsif (config.entities & MESSAGE_ENTITIES).size != config.entities.size
+    elsif config.smileys.size != 4
+      Log.notice { "Not enough or too many smileys. Should be four, was #{config.smileys}; defaulting to [:), :|, :/, :(]" }
+    elsif (config.entities & message_entities).size != config.entities.size
       Log.notice { "Could not determine strip-format, was #{config.entities}; check for duplicates or mispellings. Using defaults." }
       return false
     end
