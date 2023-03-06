@@ -72,12 +72,12 @@ module Configuration
 
     set_log(config)
     config
-    rescue ex : YAML::ParseException
-      Log.error(exception: ex) { "Could not parse the given value at row #{ex.line_number}. This could be because a required value was not set or the wrong type was given." }
-      exit
-    rescue ex : File::NotFoundError | File::AccessDeniedError
-      Log.error(exception: ex) { "Could not open \"./config.yaml\". Exiting..." }
-      exit
+  rescue ex : YAML::ParseException
+    Log.error(exception: ex) { "Could not parse the given value at row #{ex.line_number}. This could be because a required value was not set or the wrong type was given." }
+    exit
+  rescue ex : File::NotFoundError | File::AccessDeniedError
+    Log.error(exception: ex) { "Could not open \"./config.yaml\". Exiting..." }
+    exit
   end
 
   # Run additional checks on Config instance variables.

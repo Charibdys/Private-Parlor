@@ -278,35 +278,33 @@ class Database
   #
   # Returns the new `User`.
   def add_user(id, username, realname, rank = 0) : User
-    # Prepare values
     user = User.new({id: id, username: username, realname: realname, rank: rank})
-    args = user.to_array
 
-    sql = String.build do |str|
-      str << "INSERT INTO users VALUES (" << "?, " * (args.size - 1) << "?)"
-    end
+    {% begin %}
+      {% arr = [] of ArrayLiteral %}
+      {% for var in User.instance_vars %}
+        {% arr << "?" %}
+      {% end %}
+      {% arr = arr.join(", ") %}
 
-    # Add user to database
-    db.exec(sql, args: args)
+      # Add user to database
+      db.exec("INSERT INTO users VALUES (#{{{arr}}})", args: user.to_array)
+    {% end %}
 
     user
   end
 
   # Updates a user record in the database with the current state of *user*.
   def modify_user(user : User) : Nil
-    attributes = {{User.instance_vars.map { |var| "#{var.name.camelcase(lower: true)}" }}}
-    args = user.to_array
-
-    sql = String.build do |str|
-      str << "UPDATE users SET "
-      attributes.each(within: 1..-2) do |atr|
-        str << atr << " = ?, "
-      end
-      str << attributes.last << " = ? WHERE id = ?"
-    end
-
-    # Modify user
-    db.exec(sql, args: args[1..] << args[0])
+    {% begin %}
+      {% arr = [] of ArrayLiteral %}
+      {% for var in User.instance_vars[1..-1] %}
+        {% arr << "#{var.name.camelcase(lower: true)} = ?" %}
+      {% end %}
+      {% arr = arr.join(", ") %}
+      # Modify user
+      db.exec("UPDATE users SET #{{{arr}}} WHERE id = ?", args: user.to_array.rotate)
+    {% end %}
   end
 
   # Queries the database for any rows in the user table
