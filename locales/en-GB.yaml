@@ -1,0 +1,258 @@
+# Short specifiers for units of time
+# 5 elements from largest unit to smallest: weeks, days, hours, mintues, seconds
+time_units: ['w', 'd', 'h', 'm', 's']
+
+# Format for timestamps
+# Currently in the form "DD/MM/YY" with 24 hour time and showing timzeone/offset name
+time_format: "%d/%m/%y %T %Z"
+
+# Term for off and on, respectively
+toggle: ["disabled", "enabled"]
+
+# Parameters are enclosed by a placeholder, #{text}, where text is any of the parameters next to the comment
+# Placeholders should not be escaped
+# Special characters in MarkdownV2 must be escaped
+
+replies:
+# joined
+ - |-
+    _Welcome to the chat\!_
+
+# rejoined
+ - |-
+    _You rejoined the chat\!_
+
+# left
+ - |-
+    _You left the chat\._
+
+# already_in_chat
+ - |-
+    _You're already in the chat\._
+
+# not_in_chat
+ - |-
+    _You're not in this chat\! Type /start to join\._
+
+# not_in_cooldown
+ - |-
+    _User found, but the user was not in cooldown\!_
+
+# rejected_message
+ - |-
+    _Your message was not relayed because it contained a special font\._
+
+# deanon_poll
+ - |-
+    _Your poll was not sent because it does not allow anonymous voting\._
+
+# missing_args
+ - |-
+    _You need to give an input to use this command\._
+
+# command_disabled
+ - |-
+    _This command is disabled\._
+
+# no_reply
+ - |-
+    _You need to reply to a message to use this command\._
+
+# not_in_cache
+ - |-
+    _That message could not be found in the cache\._
+
+# no_tripcode_set
+ - |-
+    _You do not have a tripcode set\.
+    Use the /tripcode command to set one\._
+
+# no_user_found
+ - |-
+    _There was no user found with that name\._
+
+# no_user_oid_found
+ - |-
+    _There was no user found with that OID\._
+
+# promoted: rank
+ - |-
+    _You have been promoted to #{rank}\! Type /help to view the commands available to you\._
+
+# toggle_karma: toggle
+ - |-
+    *Karma notifications*: #{toggle}
+
+# toggle_debug: toggle
+ - |-
+    *Debug mode*: #{toggle}
+
+# gave_upvote
+ - |-
+    _You upvoted this message\!_
+
+# got_upvote
+ - |-
+    _You've just been upvoted\! \(check /info to see your karma or /toggleKarma to turn these notifications off\)_
+
+# upvoted_own_message
+ - |-
+    _You can't upvote your own message\!_
+
+# already_upvoted
+ - |-
+    _You have already upvoted this message\._
+
+# already_warned
+ - |-
+    _This message has already been warned\._
+
+# private_sign
+ - |-
+    _Your account's forward privacy must be set to "Everybody" to sign with your username\._
+
+# spamming
+ - |-
+    _Your message has not been sent, avoid sending messages too fast\. Try again later\._
+
+# sign_spam
+ - |-
+    _Your message has not been sent, avoid signing too often\. Try again later\._
+
+# invalid_tripcode_format
+ - |-
+    _Invalid tripcode format\. The format is:_
+    `name#pass`
+
+# tripcode_set: name, tripcode
+ - |-
+    _Tripcode set\. It will appear as:_
+    *#{name}* `#{tripcode}`:
+
+# tripcode_info: tripcode
+ - |-
+    *Tripcode*: `#{tripcode}`
+
+# tripcode_unset
+ - |-
+    unset
+
+# user_info: oid, username, rank, karma, warnings, smiley, warn_expiry, cooldown_until
+ - |-
+    *id*: #{oid}, *username*: #{username}, *rank*: #{rank}
+    *karma*: #{karma}
+    *warnings*: #{warnings} #{smiley} #{warn_expiry}
+    *cooldown*: #{cooldown_until}
+
+# ranked_info: oid, karma, cooldown_until
+ - |-
+    *id*: #{oid}, *username*: anonymous, *rank*: n/a
+    *karma*: #{karma}
+    *cooldown*: #{cooldown_until}
+
+# cooldown_true
+ - |-
+    yes, until
+# cooldown_false
+ - |-
+    no
+
+# user_count: total
+ - |-
+    *#{total}* _users_
+
+# user_count_full: joined, left, blacklisted, total
+ - |-
+    *#{joined}* _joined,_ *#{left}* _left,_ *#{blacklisted}* _blacklisted users_ \(_total_: *#{total}*\)
+
+# message_deleted: reason
+ - |-
+    _This message has been deleted #{reason}_
+
+# message_removed: reason
+ - |-
+    _This message has been removed #{reason}\. No cooldown has been given, but please refrain from posting the same message again\._
+
+# reason_prefix
+ - |-
+    for: 
+
+# cooldown_given: duration, reason
+ - |-
+    _You've been given a cooldown of #{duration} #{reason}_
+
+# on_cooldown: time
+ - |-
+    _You're on cooldown until #{duration}_
+
+# blacklisted: reason
+ - |-
+    _You have been blacklisted #{reason}_
+
+# purge_complete: msgs_deleted
+ - |-
+    _#{msgs_deleted} messages were matched and deleted\._
+
+# success
+ - |-
+   ✅ 
+
+# Parameters are enclosed by a placeholder, #{text}, where text is any of the parameters next to the comment
+
+logs:
+# start: version
+ - |-
+   Starting Private Parlor v#{version}...
+
+# joined: id, name
+ - |-
+   User #{id}, aka #{name}, joined the chat.
+
+# rejoined: id, name
+ - |-
+   User #{id}, aka #{name}, rejoined the chat.
+
+# left: id, name
+ - |-
+   User #{id}, aka #{name}, joined the chat.
+
+# promoted: id, name, rank, invoker
+ - |-
+   User #{id}, aka #{name}, has been promoted to #{rank} by #{invoker}.
+
+# demoted: id, name, invoker
+ - |-
+   User #{id}, aka #{name}, has been demoted by #{invoker}.
+
+# warned: id, name, oid, duration, reason
+ - |-
+   User #{id}, aka #{name}, warned user [#{oid}] with #{duration} cooldown #{reason}
+
+# message_deleted: id, name, msid, oid, duration, reason
+ - |-
+   User #{id}, aka #{name}, deleted message [#{msid}] by user [#{oid}] with a #{duration} cooldown #{reason}
+
+# message_removed: id, name, msid, oid, reason
+ - |-
+   User #{id}, aka #{name}, removed message [#{msid}] by user [#{oid}] #{reason}
+
+# removed_cooldown: id, name, oid, cooldown_until
+ - |-
+   User #{id}, aka #{name}, removed cooldown from user [#{oid}] (was until #{cooldown_until})
+
+# blacklisted: id, name, invoker, reason
+ - |-
+   User #{id}, aka #{name}, has been blacklisted by #{invoker} #{reason}
+
+# reason_prefix
+ - |-
+   for: 
+
+# ranked_message: id, name, rank, text
+ - |-
+   User #{id}, aka #{name}, sent #{rank} message: #{text}
+
+# force_leave: id
+ - |-
+   Force leaving user #{id} because bot is blocked.
+---
