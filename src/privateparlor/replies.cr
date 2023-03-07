@@ -273,13 +273,13 @@ class Replies
 
   def format_smiley(warnings : Int32, smileys : Array(String)) : String
     if warnings <= 0
-      return smileys[0]
+      smileys[0]
     elsif warnings == 1
-      return smileys[1]
+      smileys[1]
     elsif warnings <= 3
-      return smileys[2]
+      smileys[2]
     else
-      return smileys[3]
+      smileys[3]
     end
   end
 
@@ -288,7 +288,6 @@ class Replies
       time.to_s(@time_format)
     end
   end
-
 
   # Returns a message containing the program version and a link to its Git repo.
   #
@@ -299,9 +298,7 @@ class Replies
 
   # Returns a custom text from a given string.
   def custom(text : String) : String
-    message = Section.new
-    message << text
-    message.to_md
+    Section.new(text).to_md
   end
 
   # TODO: Move command descriptions to locale

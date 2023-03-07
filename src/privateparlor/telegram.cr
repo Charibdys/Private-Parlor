@@ -254,6 +254,7 @@ class PrivateParlor < Tourmaline::Client
       relay_to_one(message.message_id, user.id, :user_info, {
         "oid"            => user.get_obfuscated_id,
         "username"       => user.get_formatted_name,
+        "rank_val"       => user.rank,
         "rank"           => Ranks.new(user.rank),
         "karma"          => user.karma,
         "warnings"       => user.warnings,
@@ -373,7 +374,7 @@ class PrivateParlor < Tourmaline::Client
     user.toggle_karma
     @database.modify_user(user)
 
-    relay_to_one(nil, user.id, :toggle_karma, {"toggle" => user.hide_karma})
+    relay_to_one(nil, user.id, :toggle_karma, {"toggle" => !user.hide_karma})
   end
 
   # Toggle the user's toggle_debug attribute.
@@ -423,7 +424,7 @@ class PrivateParlor < Tourmaline::Client
       results = @replies.generate_tripcode(arg, @config.salt)
       relay_to_one(message.message_id, user.id, :tripcode_set, {"name" => results[:name], "tripcode" => results[:tripcode]})
     else
-      relay_to_one(message.message_id, user.id, :tripcode_sinfo, {"tripcode" => user.tripcode})
+      relay_to_one(message.message_id, user.id, :tripcode_info, {"tripcode" => user.tripcode})
     end
   end
 
@@ -1391,7 +1392,7 @@ class PrivateParlor < Tourmaline::Client
     if user.blacklisted?
       relay_to_one(nil, user.id, :blacklisted, {"reason" => user.blacklist_reason})
     elsif cooldown_until = user.cooldown_until
-      relay_to_one(nil, user.id, :on_cooldown, {"cooldown_until" => @replies.format_time(cooldown_until)})
+      relay_to_one(nil, user.id, :on_cooldown, {"time" => @replies.format_time(cooldown_until)})
     else
       relay_to_one(nil, user.id, :not_in_chat)
     end

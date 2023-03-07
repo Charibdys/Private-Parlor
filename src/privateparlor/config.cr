@@ -87,7 +87,7 @@ module Configuration
   # Check contents of `config.entities` for mispellings or duplicates.
   def check_config(config : Config) : Bool
     message_entities = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold", "italic",
-                      "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention", "custom_emoji"]
+                        "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention", "custom_emoji"]
 
     if (1..48).includes?(config.lifetime) == false
       Log.notice { "Message lifetime not within range, was #{config.lifetime}; defaulting to 24 hours." }

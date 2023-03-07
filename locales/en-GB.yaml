@@ -137,11 +137,11 @@ replies:
  - |-
     unset
 
-# user_info: oid, username, rank, karma, warnings, smiley, warn_expiry, cooldown_until
+# user_info: oid, username, rank, rank_val, karma, warnings, smiley, warn_expiry, cooldown_until
  - |-
-    *id*: #{oid}, *username*: #{username}, *rank*: #{rank}
+    *id*: #{oid}, *username*: #{username}, *rank*: #{rank_val} \(#{rank}\)
     *karma*: #{karma}
-    *warnings*: #{warnings} #{smiley} #{warn_expiry}
+    *warnings*: #{warnings} #{smiley} \(one warning will expire at #{warn_expiry}\)
     *cooldown*: #{cooldown_until}
 
 # ranked_info: oid, karma, cooldown_until
@@ -165,17 +165,17 @@ replies:
  - |-
     *#{joined}* _joined,_ *#{left}* _left,_ *#{blacklisted}* _blacklisted users_ \(_total_: *#{total}*\)
 
-# message_deleted: reason
+# message_deleted: reason, duration
  - |-
-    _This message has been deleted #{reason}_
+    _This message has been deleted#{reason}\. You have been given a cooldown of #{duration}\._
 
 # message_removed: reason
  - |-
-    _This message has been removed #{reason}\. No cooldown has been given, but please refrain from posting the same message again\._
+    _This message has been removed#{reason}\. No cooldown has been given, but please refrain from posting the same message again\._
 
 # reason_prefix
  - |-
-    for: 
+    \ for: 
 
 # cooldown_given: duration, reason
  - |-
@@ -183,7 +183,7 @@ replies:
 
 # on_cooldown: time
  - |-
-    _You're on cooldown until #{duration}_
+    _You're on cooldown until #{time}_
 
 # blacklisted: reason
  - |-
