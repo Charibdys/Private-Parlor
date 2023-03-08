@@ -1145,9 +1145,6 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    unless poll.anonymous?
-      return relay_to_one(message.message_id, user.id, :deanon_poll)
-    end
     if @spam.spammy?(info.id, @spam.calculate_spam_score(:poll))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
@@ -1155,11 +1152,29 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
+    cached_msid = @history.new_message(user.id, message.message_id)
+    poll_msg = send_poll(
+        user.id, 
+        question: poll.question,
+        options: poll.options.map(&.text),
+        anonymous: true,
+        type: poll.type,
+        allows_multiple_answers: poll.allows_multiple_answers,
+        correct_option_id: poll.correct_option_id,
+        reply_to_message: message.message_id
+    )
+    @history.add_to_cache(cached_msid, poll_msg.message_id, user.id)
+
+    # Prevent user from receiving a second copy of the poll if debug mode is enabled
+    if user.debug_enabled 
+      user.toggle_debug
+    end
+
     relay(
       message.reply_message,
       user,
-      @history.new_message(user.id, message.message_id),
-      ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+      cached_msid,
+      ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, poll_msg.message_id) }
     )
   end
 
@@ -1168,6 +1183,11 @@ class PrivateParlor < Tourmaline::Client
   def handle_forward(update) : Nil
     unless (message = update.message) && (info = message.from)
       return
+    end
+    if message.poll
+      unless (poll = message.poll) && (poll.anonymous?)
+        return relay_to_one(message.message_id, info.id, :deanon_poll)
+      end
     end
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
