@@ -258,6 +258,9 @@ class Database
   #
   # Returns a `User` object or Nil if no user was found.
   def get_user_by_name(username) : User | Nil
+    if username.starts_with?("@")
+      username = username[1..]
+    end
     db.query_one?("SELECT * FROM users WHERE LOWER(username) = ?", username.downcase, as: User)
   end
 
