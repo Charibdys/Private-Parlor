@@ -12,7 +12,8 @@ jobs:
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
       - name: Build
-        run: crystal docs
+      - run: shards install
+      - run: crystal docs
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
