@@ -3,15 +3,7 @@ name: Deploy nightly release
 on:
   push:
     branches: [ "master" ]
-    # Ignore any created tags; run only on push/pull
-    tags-ignore:
-      - '**'
-    paths:
-      - 'src/*'
-      - 'config.yaml.copy'
-      - 'shard.yml'
-  pull_request:
-    branches: [ "master" ]
+    # Ignore any created tags; run only on push
     tags-ignore:
       - '**'
     paths:
@@ -38,7 +30,8 @@ jobs:
         shards build --static --stats --time
         strip ./bin/privateparlor
         mkdir privateparlor
-        mv ./bin/privateparlor privateparlor/ && mv config.yaml.copy privateparlor/
+        mkdir privateparlor/locales
+        mv ./bin/privateparlor privateparlor/ && mv config.yaml.copy privateparlor/ && mv locales/* privateparlor/locales/
         tar -cvf privateparlor-x86_64.tar privateparlor/
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
@@ -67,7 +60,8 @@ jobs:
           crystal -v
           shards build --static --stats --time
           strip ./bin/privateparlor
-          mv ./bin/privateparlor /privateparlor && mv config.yaml.copy /privateparlor
+          mkdir /privateparlor/locales
+          mv ./bin/privateparlor /privateparlor && mv config.yaml.copy /privateparlor && mv locales/* /privateparlor/locales/
           tar -cvf privateparlor-arm64.tar /privateparlor
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
