@@ -1,0 +1,21 @@
+name: Deploy documentation
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  deploy_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Crystal
+        uses: crystal-lang/install-crystal@v1
+      - name: Build
+        run: crystal docs
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          branch: master
+          folder: docs
+          single-commit: true
