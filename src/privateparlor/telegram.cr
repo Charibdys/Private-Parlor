@@ -1103,7 +1103,7 @@ class PrivateParlor < Tourmaline::Client
       @albums[album] = media_group
 
       # Wait an arbitrary amount of time for Telegram MediaGroup updates to come in before relaying the album.
-      Tasker.at(2.seconds.from_now) {
+      Tasker.at(500.milliseconds.from_now) {
         unless temp_album = @albums.delete(album)
           next
         end
