@@ -30,6 +30,10 @@ replies:
  - |-
     _You're already in the chat\._
 
+# registration_closed 
+ - |-
+    _Registration is closed\. Check back later\._
+
 # not_in_chat
  - |-
     _You're not in this chat\! Type /start to join\._

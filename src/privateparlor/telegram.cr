@@ -202,6 +202,10 @@ class PrivateParlor < Tourmaline::Client
         relay_to_one(message.message_id, user.id, :already_in_chat)
       end
     else
+      unless @config.registration_open
+        return relay_to_one(nil, info.id, :registration_closed)
+      end
+
       if database.no_users?
         user = database.add_user(info.id, info.username, info.full_name, rank: 1000)
       else

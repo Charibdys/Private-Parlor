@@ -48,6 +48,9 @@ module Configuration
     @[YAML::Field(key: "media_limit_period")]
     getter media_limit_period : Int32 = 0
 
+    @[YAML::Field(key: "registration_open")]
+    getter registration_open : Bool? = true
+
     @[YAML::Field(key: "full-usercount")]
     getter full_usercount : Bool? = false
 

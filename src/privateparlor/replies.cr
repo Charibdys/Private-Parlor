@@ -37,7 +37,7 @@ class Replies
     end
 
     reply_keys = %i(
-      joined rejoined left already_in_chat not_in_chat not_in_cooldown rejected_message deanon_poll
+      joined rejoined left already_in_chat registration_closed not_in_chat not_in_cooldown rejected_message deanon_poll
       missing_args command_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found
       promoted toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted
       gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming

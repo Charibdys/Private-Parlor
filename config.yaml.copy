@@ -36,8 +36,12 @@ enable_warnings: true
 #relay-location: true
 #relay-contact: true
 
-# duration (hours) in which new users cannot send media
+# Duration (hours) in which new users cannot send media
 #media_limit_period: 3
+
+# Open registration, so that new users can join
+# Defaults to true; set to false to close registration
+registration_open: true
 
 # MessageEntity toggles
 # Entity types specified here will be stripped from every user message
