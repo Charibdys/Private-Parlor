@@ -197,6 +197,10 @@ replies:
  - |-
     _You're on cooldown until #{time}_
 
+# media_limit: total
+ - |-
+    _You cannot send media or forward messages at this time, try again in #{total} hours\._
+
 # blacklisted: reason
  - |-
     _You have been blacklisted #{reason}_

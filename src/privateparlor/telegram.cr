@@ -1073,7 +1073,7 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?
+    unless user.can_chat?(@config.media_limit_period.hours)
       return deny_user(user)
     end
     if @spam.spammy?(info.id, @spam.calculate_spam_score(:{{captioned_type}}))
@@ -1123,7 +1123,7 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?
+    unless user.can_chat?(@config.media_limit_period.hours)
       return deny_user(user)
     end
 
@@ -1245,7 +1245,7 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?
+    unless user.can_chat?(@config.media_limit_period.hours)
       return deny_user(user)
     end
     if @spam.spammy?(info.id, @spam.calculate_spam_score(:forward))
@@ -1278,7 +1278,7 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?
+    unless user.can_chat?(@config.media_limit_period.hours)
       return deny_user(user)
     end
     if @spam.spammy?(info.id, @spam.calculate_spam_score(:sticker))
@@ -1466,6 +1466,8 @@ class PrivateParlor < Tourmaline::Client
       relay_to_one(nil, user.id, :blacklisted, {"reason" => user.blacklist_reason})
     elsif cooldown_until = user.cooldown_until
       relay_to_one(nil, user.id, :on_cooldown, {"time" => @replies.format_time(cooldown_until)})
+    elsif Time.utc - user.joined < @config.media_limit_period.hours
+      relay_to_one(nil, user.id, :media_limit, {"total" => (@config.media_limit_period.hours - (Time.utc - user.joined)).hours})
     else
       relay_to_one(nil, user.id, :not_in_chat)
     end

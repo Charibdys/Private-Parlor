@@ -43,7 +43,7 @@ class Replies
       gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming
       sign_spam invalid_tripcode_format tripcode_set tripcode_info tripcode_unset user_info ranked_info
       cooldown_true cooldown_false user_count user_count_full message_deleted message_removed
-      reason_prefix cooldown_given on_cooldown blacklisted purge_complete success
+      reason_prefix cooldown_given on_cooldown media_limit blacklisted purge_complete success
     )
 
     log_keys = %i(

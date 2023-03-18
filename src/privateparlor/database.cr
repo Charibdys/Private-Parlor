@@ -220,6 +220,17 @@ class Database
       self.remove_cooldown && !self.blacklisted? && !self.left?
     end
 
+    # Returns `true` if user is joined, not in cooldown, not blacklisted, and not limited; user can chat
+    #
+    # Returns false otherwise.
+    def can_chat?(limit : Time::Span) : Bool
+      if self.rank > 0
+        self.can_chat?
+      else
+        self.remove_cooldown && !self.blacklisted? && !self.left? && (Time.utc - self.joined > limit)
+      end
+    end
+
     # Returns `true` if user is joined and not blacklisted; user can use commands
     #
     # Returns false otherwise.

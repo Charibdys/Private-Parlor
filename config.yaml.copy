@@ -36,6 +36,9 @@ enable_warnings: true
 #relay-location: true
 #relay-contact: true
 
+# duration (hours) in which new users cannot send media
+#media_limit_period: 3
+
 # MessageEntity toggles
 # Entity types specified here will be stripped from every user message
 # The defaults remove bold, italics, and inline links; it's recommended to keep these
