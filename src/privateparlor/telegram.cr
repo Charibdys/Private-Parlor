@@ -25,7 +25,7 @@ class PrivateParlor < Tourmaline::Client
     Client.default_parse_mode = (Tourmaline::ParseMode::MarkdownV2)
 
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
-    @history = HistoryFull.new(config.lifetime.hours)
+    @history = HistoryRatingsAndWarnings.new(config.lifetime.hours)
     @queue = Deque(QueuedMessage).new
     @replies = Replies.new(config.entities, config.locale)
     @spam = SpamScoreHandler.new
@@ -319,8 +319,8 @@ class PrivateParlor < Tourmaline::Client
 
   # Upvotes a message.
   @[Command(["1"], prefix: ["+"])]
-  def karma_command(ctx) : Nil
-    unless history_with_karma = @history.as?(HistoryFull)
+  def upvote_command(ctx) : Nil
+    unless history_with_karma = @history.as?(HistoryRatingsAndWarnings)
       return
     end
     unless (message = ctx.message) && (info = message.from)
@@ -346,7 +346,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, :upvoted_own_message)
     end
     if !history_with_karma.add_rating(reply.message_id, user.id)
-      return relay_to_one(message.message_id, user.id, :already_upvoted)
+      return relay_to_one(message.message_id, user.id, :already_voted)
     end
 
     reply_user.increment_karma
@@ -354,6 +354,46 @@ class PrivateParlor < Tourmaline::Client
     relay_to_one(message.message_id, user.id, :gave_upvote)
     if !reply_user.hide_karma
       relay_to_one(history_with_karma.get_msid(reply.message_id, reply_user.id), reply_user.id, :got_upvote)
+    end
+  end
+
+  # Downvotes a message.
+  @[Command(["1"], prefix: ["-"])]
+  def downvote_command(ctx) : Nil
+    unless history_with_karma = @history.as?(HistoryRatingsAndWarnings)
+      return
+    end
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, :not_in_chat)
+    end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
+    unless reply = message.reply_message
+      return relay_to_one(message.message_id, user.id, :no_reply)
+    end
+    unless reply_user = database.get_user(history_with_karma.get_sender_id(reply.message_id))
+      return
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    if history_with_karma.get_sender_id(reply.message_id) == user.id
+      return relay_to_one(message.message_id, user.id, :downvoted_own_message)
+    end
+    if !history_with_karma.add_rating(reply.message_id, user.id)
+      return relay_to_one(message.message_id, user.id, :already_voted)
+    end
+
+    reply_user.decrement_karma
+    @database.modify_user(reply_user)
+    relay_to_one(message.message_id, user.id, :gave_downvote)
+    if !reply_user.hide_karma
+      relay_to_one(history_with_karma.get_msid(reply.message_id, reply_user.id), reply_user.id, :got_downvote)
     end
   end
 
@@ -550,7 +590,7 @@ class PrivateParlor < Tourmaline::Client
   # Warns a message without deleting it. Gives the user who sent the message a warning and a cooldown.
   @[Command(["warn"])]
   def warn_command(ctx) : Nil
-    unless history_with_warnings = @history.as?(HistoryFull)
+    unless history_with_warnings = @history.as(HistoryRatingsAndWarnings)
       return
     end
     unless (message = ctx.message) && (info = message.from)

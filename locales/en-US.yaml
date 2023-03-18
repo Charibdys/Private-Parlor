@@ -99,9 +99,21 @@ replies:
  - |-
     _You can't upvote your own message\!_
 
-# already_upvoted
+# already_voted
  - |-
-    _You have already upvoted this message\._
+    _You have already upvoted or downvoted this message\._
+
+# gave_downvote
+ - |-
+    _You downvoted this message\!_
+
+# got_downvote
+ - |-
+    _You've just been downvoted\! \(check /info to see your karma or /toggleKarma to turn these notifications off\)_
+
+# downvoted_own_message
+ - |-
+    _You can't downvote your own message\!_
 
 # already_warned
  - |-

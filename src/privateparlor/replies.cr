@@ -37,11 +37,12 @@ class Replies
     end
 
     reply_keys = %i(
-      joined rejoined left already_in_chat not_in_chat not_in_cooldown rejected_message deanon_poll missing_args
-      command_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found promoted
-      toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_upvoted already_warned
-      private_sign spamming sign_spam invalid_tripcode_format tripcode_set tripcode_info tripcode_unset
-      user_info ranked_info cooldown_true cooldown_false user_count user_count_full message_deleted message_removed
+      joined rejoined left already_in_chat not_in_chat not_in_cooldown rejected_message deanon_poll 
+      missing_args command_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found 
+      promoted toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted 
+      gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming 
+      sign_spam invalid_tripcode_format tripcode_set tripcode_info tripcode_unset user_info ranked_info 
+      cooldown_true cooldown_false user_count user_count_full message_deleted message_removed
       reason_prefix cooldown_given on_cooldown blacklisted purge_complete success
     )
 
