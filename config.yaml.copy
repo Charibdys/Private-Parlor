@@ -25,6 +25,11 @@ locale: "en-US"
 # Toggle whether or not users can see the full count of joined, left, and blacklisted users.
 #full-usercount: false
 
+# Command toggles
+enable-upvotes: true
+enable-downvotes: true
+enable_warnings: true
+
 # Relaying toggles
 #relay-luck: true
 #relay-venue: true

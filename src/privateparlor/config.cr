@@ -24,6 +24,15 @@ module Configuration
     @[YAML::Field(key: "lifetime")]
     getter lifetime : Int32 = 24
 
+    @[YAML::Field(key: "enable-upvotes")]
+    getter enable_upvotes : Bool? = true
+
+    @[YAML::Field(key: "enable-downvotes")]
+    getter enable_downvotes : Bool? = true
+
+    @[YAML::Field(key: "enable-warnings")]
+    getter enable_warnings : Bool? = true
+
     @[YAML::Field(key: "relay-luck")]
     getter relay_luck : Bool? = true
 

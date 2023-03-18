@@ -25,7 +25,7 @@ class PrivateParlor < Tourmaline::Client
     Client.default_parse_mode = (Tourmaline::ParseMode::MarkdownV2)
 
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
-    @history = HistoryRatingsAndWarnings.new(config.lifetime.hours)
+    @history = get_history_type(config)
     @queue = Deque(QueuedMessage).new
     @replies = Replies.new(config.entities, config.locale)
     @spam = SpamScoreHandler.new
@@ -149,6 +149,19 @@ class PrivateParlor < Tourmaline::Client
           @scores[user] = score - 1
         end
       end
+    end
+  end
+
+  # Determine appropriate `History` type based on given config variables
+  def get_history_type(config : Configuration::Config) : History
+    if (config.enable_downvotes || config.enable_upvotes) && config.enable_warnings
+      HistoryRatingsAndWarnings.new(config.lifetime.hours)
+    elsif config.enable_downvotes || config.enable_upvotes
+      HistoryRatings.new(config.lifetime.hours)
+    elsif config.enable_warnings
+      HistoryWarnings.new(config.lifetime.hours)
+    else
+      HistoryBase.new(config.lifetime.hours)
     end
   end
 
@@ -320,7 +333,7 @@ class PrivateParlor < Tourmaline::Client
   # Upvotes a message.
   @[Command(["1"], prefix: ["+"])]
   def upvote_command(ctx) : Nil
-    unless history_with_karma = @history.as?(HistoryRatingsAndWarnings)
+    unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryRatingsAndWarnings | HistoryRatings)
       return
     end
     unless (message = ctx.message) && (info = message.from)
@@ -360,7 +373,7 @@ class PrivateParlor < Tourmaline::Client
   # Downvotes a message.
   @[Command(["1"], prefix: ["-"])]
   def downvote_command(ctx) : Nil
-    unless history_with_karma = @history.as?(HistoryRatingsAndWarnings)
+    unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryRatingsAndWarnings | HistoryRatings)
       return
     end
     unless (message = ctx.message) && (info = message.from)
@@ -590,7 +603,7 @@ class PrivateParlor < Tourmaline::Client
   # Warns a message without deleting it. Gives the user who sent the message a warning and a cooldown.
   @[Command(["warn"])]
   def warn_command(ctx) : Nil
-    unless history_with_warnings = @history.as(HistoryRatingsAndWarnings)
+    unless (history_with_warnings = @history) && history_with_warnings.is_a?(HistoryRatingsAndWarnings | HistoryWarnings)
       return
     end
     unless (message = ctx.message) && (info = message.from)
@@ -1194,19 +1207,19 @@ class PrivateParlor < Tourmaline::Client
 
     cached_msid = @history.new_message(user.id, message.message_id)
     poll_msg = send_poll(
-        user.id, 
-        question: poll.question,
-        options: poll.options.map(&.text),
-        anonymous: true,
-        type: poll.type,
-        allows_multiple_answers: poll.allows_multiple_answers,
-        correct_option_id: poll.correct_option_id,
-        reply_to_message: message.message_id
+      user.id,
+      question: poll.question,
+      options: poll.options.map(&.text),
+      anonymous: true,
+      type: poll.type,
+      allows_multiple_answers: poll.allows_multiple_answers,
+      correct_option_id: poll.correct_option_id,
+      reply_to_message: message.message_id
     )
     @history.add_to_cache(cached_msid, poll_msg.message_id, user.id)
 
     # Prevent user from receiving a second copy of the poll if debug mode is enabled
-    if user.debug_enabled 
+    if user.debug_enabled
       user.toggle_debug
     end
 
