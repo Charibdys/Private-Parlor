@@ -66,6 +66,12 @@ module Configuration
     @[YAML::Field(key: "sign_limit_interval")]
     getter sign_limit_interval : Int32 = 600
 
+    @[YAML::Field(key: "upvote_limit_interval")]
+    getter upvote_limit_interval : Int32 = 0
+
+    @[YAML::Field(key: "downvote_limit_interval")]
+    getter downvote_limit_interval : Int32 = 0
+
     @[YAML::Field(key: "smileys")]
     getter smileys : Array(String) = [":)", ":|", ":/", ":("]
 

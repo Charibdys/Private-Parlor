@@ -135,6 +135,14 @@ replies:
  - |-
     _Your message has not been sent, avoid signing too often\. Try again later\._
 
+# upvote_spam
+ - |-
+    _You can't upvote at this time, avoid upvoting too often\. Try again later\._
+
+# downvote_spam
+ - |-
+    _Your can't downvote at this time, avoid downvoting too often\. Try again later\._
+
 # invalid_tripcode_format
  - |-
     _Invalid tripcode format\. The format is:_

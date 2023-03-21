@@ -22,6 +22,11 @@ locale: "en-US"
 # Set to 0 to disable, defaults to 600 seconds
 #sign_limit_interval: 600
 
+# Limit usage of upvotes or downvotes once every interval (seconds)
+# Set to 0 to disable; disabled by default
+#upvote_limit_interval: 0
+#downvote_limit_interval: 0
+
 # Toggle whether or not users can see the full count of joined, left, and blacklisted users.
 #full-usercount: false
 

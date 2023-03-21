@@ -82,10 +82,14 @@ class PrivateParlor < Tourmaline::Client
   class SpamScoreHandler
     getter scores : Hash(Int64, Float32)
     getter sign_last_used : Hash(Int64, Time)
+    getter upvote_last_used : Hash(Int64, Time)
+    getter downvote_last_used : Hash(Int64, Time)
 
     def initialize
       @scores = {} of Int64 => Float32
       @sign_last_used = {} of Int64 => Time
+      @upvote_last_used = {} of Int64 => Time
+      @downvote_last_used = {} of Int64 => Time
     end
 
     # Check if user's spam score triggers the spam filter
@@ -119,6 +123,44 @@ class PrivateParlor < Tourmaline::Client
           end
         else
           @sign_last_used[user] = Time.utc
+        end
+      end
+
+      false
+    end
+
+    # Check if user has upvoted within an interval of time
+    #
+    # Returns true if so (user is upvoting too often), false otherwise.
+    def spammy_upvote?(user : Int64, interval : Int32) : Bool
+      unless interval == 0
+        if last_used = @upvote_last_used[user]?
+          if (Time.utc - last_used) < interval.seconds
+            return true
+          else
+            @upvote_last_used[user] = Time.utc
+          end
+        else
+          @upvote_last_used[user] = Time.utc
+        end
+      end
+
+      false
+    end
+
+    # Check if user has downvoted within an interval of time
+    #
+    # Returns true if so (user is downvoting too often), false otherwise.
+    def spammy_downvote?(user : Int64, interval : Int32) : Bool
+      unless interval == 0
+        if last_used = @downvote_last_used[user]?
+          if (Time.utc - last_used) < interval.seconds
+            return true
+          else
+            @downvote_last_used[user] = Time.utc
+          end
+        else
+          @downvote_last_used[user] = Time.utc
         end
       end
 
@@ -352,6 +394,9 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
+    if @spam.spammy_upvote?(user.id, @config.upvote_limit_interval)
+      return relay_to_one(message.message_id, user.id, :upvote_spam)
+    end
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, :no_reply)
     end
@@ -391,6 +436,9 @@ class PrivateParlor < Tourmaline::Client
     end
     unless user.can_use_command?
       return deny_user(user)
+    end
+    if @spam.spammy_downvote?(user.id, @config.upvote_limit_interval)
+      return relay_to_one(message.message_id, user.id, :downvote_spam)
     end
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, :no_reply)
