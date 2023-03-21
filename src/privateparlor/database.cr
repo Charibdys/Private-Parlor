@@ -400,8 +400,8 @@ class DatabaseHistory
   # Returns the original msid of this message group
   def new_message(sender_id : Int64, msid : Int64) : Int64
     db.exec(
-      "INSERT INTO message_groups VALUES (?, ?, ?, ?)", 
-      args: [msid, sender_id, Time.utc, false] 
+      "INSERT INTO message_groups VALUES (?, ?, ?, ?)",
+      args: [msid, sender_id, Time.utc, false]
     )
     msid
   end
@@ -409,8 +409,8 @@ class DatabaseHistory
   # Adds receiver_id and its associated msid to the receivers table
   def add_to_cache(origin_msid : Int64, msid : Int64, receiver_id : Int64) : Nil
     db.exec(
-      "INSERT INTO receivers VALUES (?, ?, ?)", 
-      args: [msid, receiver_id, origin_msid] 
+      "INSERT INTO receivers VALUES (?, ?, ?)",
+      args: [msid, receiver_id, origin_msid]
     )
   end
 
@@ -421,12 +421,12 @@ class DatabaseHistory
       FROM receivers
       where receiverMSID = ?
       UNION
-      select messageGroupID 
-      FROM message_groups 
+      select messageGroupID
+      FROM message_groups
       WHERE messageGroupID = ?",
       msid, msid,
       as: Int64
-      )
+    )
   end
 
   # Get all receivers for a message group associated with the given MSID
@@ -434,11 +434,11 @@ class DatabaseHistory
     origin_msid = get_origin_msid(msid)
 
     db.query_all(
-      "SELECT senderID, messageGroupID 
+      "SELECT senderID, messageGroupID
       FROM message_groups
       WHERE messageGroupID = ?
       UNION
-      SELECT receiverID, receiverMSID  
+      SELECT receiverID, receiverMSID
       FROM receivers
       WHERE messageGroupID = ?",
       origin_msid, origin_msid,
@@ -494,7 +494,7 @@ class DatabaseHistory
     db.exec(
       "UPDATE message_groups
       SET warned = TRUE
-      WHERE messageGroupID = ?", 
+      WHERE messageGroupID = ?",
       get_origin_msid(msid)
     )
   end
@@ -535,7 +535,7 @@ class DatabaseHistory
       Log.debug { "Expired #{count} messages from the cache" }
     end
   end
-  
+
   # Ensures that the DB schema for persisting message history is usable by the program.
   def ensure_schema : Nil
     db.exec("PRAGMA foreign_keys = ON")
