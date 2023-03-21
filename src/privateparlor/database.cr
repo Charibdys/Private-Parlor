@@ -448,13 +448,7 @@ class DatabaseHistory
 
   # Get receiver msid from the given MSID and receiver ID
   def get_msid(msid : Int64, receiver_id : Int64) : Int64 | Nil
-    db.query_one?(
-      "SELECT receiverMSID
-      FROM receivers
-      WHERE messageGroupID = ? AND receiverID = ?",
-      [msid, receiver_id],
-      as: Int64
-    )
+    get_all_msids(msid)[receiver_id]?
   end
 
   # Get sender_id of a specific message group

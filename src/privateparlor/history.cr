@@ -51,9 +51,7 @@ abstract class History
 
   # Returns the receivers *msid* found in the associated `MessageGroup`
   def get_msid(msid : Int64, receiver_id : Int64) : Int64 | Nil
-    if msg = @msid_map[msid]?
-      msg.receivers[receiver_id]?
-    end
+    get_all_msids(msid)[receiver_id]?
   end
 
   # Returns the *sender* of a specific `MessageGroup`
