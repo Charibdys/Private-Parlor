@@ -25,6 +25,10 @@ locale: "en-US"
 # Toggle whether or not users can see the full count of joined, left, and blacklisted users.
 #full-usercount: false
 
+# Persist message history
+# Use the database in place of the message cache; message history remains if bot restarts 
+#database-history: true
+
 # Command toggles
 enable-upvotes: true
 enable-downvotes: true

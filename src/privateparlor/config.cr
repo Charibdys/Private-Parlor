@@ -24,6 +24,9 @@ module Configuration
     @[YAML::Field(key: "lifetime")]
     getter lifetime : Int32 = 24
 
+    @[YAML::Field(key: "database-history")]
+    getter database_history : Bool? = false
+
     @[YAML::Field(key: "enable-upvotes")]
     getter enable_upvotes : Bool? = true
 
