@@ -75,14 +75,14 @@ The following features are planned and being worked on:
 	- [X] Promotion 
 	- [X] Demotion 
 - [x] Message history/cache
-- [ ] Karma
+- [X] Karma
 	- [X] Upvotes
-	- [ ] Downvotes
+	- [X] Downvotes
 - [x] Message queue
 - [x] Spam prevention
 - [ ] Configuration
 	- [ ] Configurable roles and command permissions 
-	- [ ] Configurable cache contents/data
+	- [X] Configurable cache contents/data
 	- [x] Configurable cache life
 	- [ ] Configurable time and content limits for spam filter
 - [ ] Inactivity timeout
