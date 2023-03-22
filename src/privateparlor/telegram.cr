@@ -214,15 +214,15 @@ class PrivateParlor < Tourmaline::Client
 
   def initialize_handlers(descriptions : Hash(Symbol, String), config : Configuration::Config) : Nil
     add_event_handler(CommandHandler.new("start", register: true, description: descriptions[:start]) {|ctx| start_command(ctx)})
-    add_event_handler(CommandHandler.new(["stop", "leave"], register: true, description: descriptions[:start]) {|ctx| stop_command(ctx)})
-    add_event_handler(CommandHandler.new("info", register: true, description: descriptions[:start]) {|ctx| info_command(ctx)})
-    add_event_handler(CommandHandler.new("users", register: true, description: descriptions[:start]) {|ctx| users_command(ctx)})
-    add_event_handler(CommandHandler.new("version", register: true, description: descriptions[:start]) {|ctx| version_command(ctx)})
-    add_event_handler(CommandHandler.new(["togglekarma", "toggle_karma"], register: true, description: descriptions[:start]) {|ctx| toggle_karma_command(ctx)})
-    add_event_handler(CommandHandler.new(["toggledebug", "toggle_debug"], register: true, description: descriptions[:start]) {|ctx| toggle_debug_command(ctx)})
-    add_event_handler(CommandHandler.new("tripcode", register: true, description: descriptions[:start]) {|ctx| tripcode_command(ctx)})
-    add_event_handler(CommandHandler.new(["rules", "motd"], register: true, description: descriptions[:start]) {|ctx| motd_command(ctx)})
-    add_event_handler(CommandHandler.new("help", register: true, description: descriptions[:start]) {|ctx| help_command(ctx)})
+    add_event_handler(CommandHandler.new(["stop", "leave"], register: true, description: descriptions[:stop]) {|ctx| stop_command(ctx)})
+    add_event_handler(CommandHandler.new("info", register: true, description: descriptions[:info]) {|ctx| info_command(ctx)})
+    add_event_handler(CommandHandler.new("users", register: true, description: descriptions[:users]) {|ctx| users_command(ctx)})
+    add_event_handler(CommandHandler.new("version", register: true, description: descriptions[:version]) {|ctx| version_command(ctx)})
+    add_event_handler(CommandHandler.new(["togglekarma", "toggle_karma"], register: true, description: descriptions[:toggle_karma]) {|ctx| toggle_karma_command(ctx)})
+    add_event_handler(CommandHandler.new(["toggledebug", "toggle_debug"], register: true, description: descriptions[:toggle_debug]) {|ctx| toggle_debug_command(ctx)})
+    add_event_handler(CommandHandler.new("tripcode", register: true, description: descriptions[:tripcode]) {|ctx| tripcode_command(ctx)})
+    add_event_handler(CommandHandler.new(["rules", "motd"], register: true, description: descriptions[:motd]) {|ctx| motd_command(ctx)})
+    add_event_handler(CommandHandler.new("help", register: true, description: descriptions[:help]) {|ctx| help_command(ctx)})
 
     register_commands_with_botfather if @set_commands
 
@@ -237,6 +237,21 @@ class PrivateParlor < Tourmaline::Client
     add_event_handler(CommandHandler.new("remove") {|ctx| remove_command(ctx)})
     add_event_handler(CommandHandler.new("purge") {|ctx| purge_command(ctx)})
     add_event_handler(CommandHandler.new(["blacklist", "ban"]) {|ctx| blacklist_command(ctx)})
+
+    add_event_handler(UpdateHandler.new(:text) {|update| handle_text(update)})
+    {% for captioned_type in ["animation", "audio", "document", "video", "video_note", "voice", "photo"] %}
+    add_event_handler(UpdateHandler.new(:{{captioned_type.id}}) {|update| handle_{{captioned_type.id}}(update)})
+    {% end %}
+    add_event_handler(UpdateHandler.new(:media_group) {|update| handle_albums(update)})
+    add_event_handler(UpdateHandler.new(:poll) {|update| handle_poll(update)})
+    add_event_handler(UpdateHandler.new(:forwarded_message) {|update| handle_forward(update)})
+    add_event_handler(UpdateHandler.new(:sticker) {|update| handle_sticker(update)})
+    {% for luck_type in ["dice", "dart", "basketball", "soccerball", "slot_machine", "bowling"] %}
+    add_event_handler(UpdateHandler.new(:{{luck_type.id}}) {|update| handle_{{luck_type.id}}(update)})
+    {% end %}
+    add_event_handler(UpdateHandler.new(:venue) {|update| handle_venue(update)})
+    add_event_handler(UpdateHandler.new(:location) {|update| handle_location(update)})
+    add_event_handler(UpdateHandler.new(:contact) {|update| handle_contact(update)})
   end
 
   # Starts various background tasks and stores them in a hash.
@@ -297,7 +312,7 @@ class PrivateParlor < Tourmaline::Client
   # Stops the bot for the user.
   #
   # This will set the user status to left, meaning the user will not receive any further messages.
-  def stop_command(ctx) : Nil
+  def stop_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -314,7 +329,7 @@ class PrivateParlor < Tourmaline::Client
   # Returns a message containing the user's OID, username, karma, warnings, etc.
   #
   # If this is used with a reply, returns the user info of that message if the invoker is ranked.
-  def info_command(ctx) : Nil
+  def info_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -357,7 +372,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # If the user is not ranked, or `full_usercount` is false, show the total numbers users.
   # Otherwise, return a message containing the number of joined, left, and blacklisted users.
-  def users_command(ctx) : Nil
+  def users_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -386,7 +401,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Returns a message containing the progam's version.
-  def version_command(ctx) : Nil
+  def version_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -404,7 +419,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Upvotes a message.
-  def upvote_command(ctx) : Nil
+  def upvote_command(ctx : CommandHandler::Context) : Nil
     unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryRatingsAndWarnings | HistoryRatings | DatabaseHistory)
       return
     end
@@ -446,7 +461,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Downvotes a message.
-  def downvote_command(ctx) : Nil
+  def downvote_command(ctx : CommandHandler::Context) : Nil
     unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryRatingsAndWarnings | HistoryRatings | DatabaseHistory)
       return
     end
@@ -488,7 +503,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Toggle the user's hide_karma attribute.
-  def toggle_karma_command(ctx) : Nil
+  def toggle_karma_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -507,7 +522,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Toggle the user's toggle_debug attribute.
-  def toggle_debug_command(ctx) : Nil
+  def toggle_debug_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -526,7 +541,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Set/modify/view the user's tripcode.
-  def tripcode_command(ctx) : Nil
+  def tripcode_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -560,7 +575,7 @@ class PrivateParlor < Tourmaline::Client
   ##################
 
   # Promote a user to the moderator rank.
-  def mod_command(ctx) : Nil
+  def mod_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -599,7 +614,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Promote a user to the administrator rank.
-  def admin_command(ctx) : Nil
+  def admin_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -638,7 +653,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Returns a ranked user to the user rank
-  def demote_command(ctx) : Nil
+  def demote_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -672,7 +687,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Warns a message without deleting it. Gives the user who sent the message a warning and a cooldown.
-  def warn_command(ctx) : Nil
+  def warn_command(ctx : CommandHandler::Context) : Nil
     unless (history_with_warnings = @history) && history_with_warnings.is_a?(HistoryRatingsAndWarnings | HistoryWarnings | DatabaseHistory)
       return
     end
@@ -722,7 +737,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Delete a message from a user, give a warning and a cooldown.
-  def delete_command(ctx) : Nil
+  def delete_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -764,7 +779,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Removes a cooldown and warning from a user if the user is in cooldown.
-  def uncooldown_command(ctx) : Nil
+  def uncooldown_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -812,7 +827,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Remove a message from a user without giving a warning or cooldown.
-  def remove_command(ctx) : Nil
+  def remove_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -849,7 +864,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Delete all messages from recently blacklisted users.
-  def purge_command(ctx) : Nil
+  def purge_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -880,7 +895,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Blacklists a user from the chat, deletes the reply, and removes all the user's incoming and outgoing messages from the queue.
-  def blacklist_command(ctx) : Nil
+  def blacklist_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -927,7 +942,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Replies with the motd/rules associated with this bot.
   # If the host invokes this command, the motd/rules can be set or modified.
-  def motd_command(ctx) : Nil
+  def motd_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -954,7 +969,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Returns a message containing all the commands that a user can use, according to the user's rank.
-  def help_command(ctx) : Nil
+  def help_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -1083,8 +1098,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Prepares a text message for relaying.
-  @[On(:text)]
-  def handle_text(update)
+  def handle_text(update : Tourmaline::Update)
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1117,8 +1131,7 @@ class PrivateParlor < Tourmaline::Client
 
   {% for captioned_type in ["animation", "audio", "document", "video", "video_note", "voice", "photo"] %}
   # Prepares a {{captioned_type}} message for relaying.
-  @[On(:{{captioned_type.id}})]
-  def handle_{{captioned_type.id}}(update) : Nil
+  def handle_{{captioned_type.id}}(update : Tourmaline::Update) : Nil
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1172,8 +1185,7 @@ class PrivateParlor < Tourmaline::Client
   {% end %}
 
   # Prepares a album message for relaying.
-  @[On(:media_group)]
-  def handle_albums(update) : Nil
+  def handle_albums(update : Tourmaline::Update) : Nil
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1244,8 +1256,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Prepares a poll for relaying.
-  @[On(:poll)]
-  def handle_poll(update) : Nil
+  def handle_poll(update : Tourmaline::Update) : Nil
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1295,8 +1306,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Prepares a poll message for relaying.
-  @[On(:forwarded_message)]
-  def handle_forward(update) : Nil
+  def handle_forward(update : Tourmaline::Update) : Nil
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1327,8 +1337,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Prepares a sticker message for relaying.
-  @[On(:sticker)]
-  def handle_sticker(update) : Nil
+  def handle_sticker(update : Tourmaline::Update) : Nil
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1361,8 +1370,7 @@ class PrivateParlor < Tourmaline::Client
 
   {% for luck_type in ["dice", "dart", "basketball", "soccerball", "slot_machine", "bowling"] %}
   # Prepares a {{luck_type}} message for relaying.
-  @[On(:{{luck_type.id}})]
-  def handle_{{luck_type.id}}(update) : Nil
+  def handle_{{luck_type.id}}(update : Tourmaline::Update) : Nil
     unless config.relay_luck
       return
     end
@@ -1395,8 +1403,7 @@ class PrivateParlor < Tourmaline::Client
   {% end %}
 
   # Prepares a venue message for relaying.
-  @[On(:venue)]
-  def handle_venue(update) : Nil
+  def handle_venue(update : Tourmaline::Update) : Nil
     unless config.relay_venue
       return
     end
@@ -1442,8 +1449,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Prepares a location message for relaying.
-  @[On(:location)]
-  def handle_location(update) : Nil
+  def handle_location(update : Tourmaline::Update) : Nil
     unless config.relay_location
       return
     end
@@ -1483,8 +1489,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Prepares a contact message for relaying.
-  @[On(:contact)]
-  def handle_contact(update) : Nil
+  def handle_contact(update : Tourmaline::Update) : Nil
     unless config.relay_contact
       return
     end
