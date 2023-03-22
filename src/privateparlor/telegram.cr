@@ -21,7 +21,7 @@ class PrivateParlor < Tourmaline::Client
   # `connection`
   # :     the `DB::Databse` object obtained from the database path in the `config.yaml` file
   def initialize(@config : Configuration::Config)
-    super(bot_token: config.token)
+    super(bot_token: config.token, set_commands: true)
     Client.default_parse_mode = (Tourmaline::ParseMode::MarkdownV2)
 
     db = DB.open("sqlite3://#{Path.new(config.database)}") # TODO: We'll want check if this works on Windows later
@@ -32,6 +32,8 @@ class PrivateParlor < Tourmaline::Client
     @spam = SpamScoreHandler.new
     @tasks = register_tasks()
     @albums = {} of String => Album
+
+    initialize_handlers(@replies.command_descriptions, config)
   end
 
   class QueuedMessage
@@ -210,6 +212,33 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  def initialize_handlers(descriptions : Hash(Symbol, String), config : Configuration::Config) : Nil
+    add_event_handler(CommandHandler.new("start", register: true, description: descriptions[:start]) {|ctx| start_command(ctx)})
+    add_event_handler(CommandHandler.new(["stop", "leave"], register: true, description: descriptions[:start]) {|ctx| stop_command(ctx)})
+    add_event_handler(CommandHandler.new("info", register: true, description: descriptions[:start]) {|ctx| info_command(ctx)})
+    add_event_handler(CommandHandler.new("users", register: true, description: descriptions[:start]) {|ctx| users_command(ctx)})
+    add_event_handler(CommandHandler.new("version", register: true, description: descriptions[:start]) {|ctx| version_command(ctx)})
+    add_event_handler(CommandHandler.new(["togglekarma", "toggle_karma"], register: true, description: descriptions[:start]) {|ctx| toggle_karma_command(ctx)})
+    add_event_handler(CommandHandler.new(["toggledebug", "toggle_debug"], register: true, description: descriptions[:start]) {|ctx| toggle_debug_command(ctx)})
+    add_event_handler(CommandHandler.new("tripcode", register: true, description: descriptions[:start]) {|ctx| tripcode_command(ctx)})
+    add_event_handler(CommandHandler.new(["rules", "motd"], register: true, description: descriptions[:start]) {|ctx| motd_command(ctx)})
+    add_event_handler(CommandHandler.new("help", register: true, description: descriptions[:start]) {|ctx| help_command(ctx)})
+
+    register_commands_with_botfather if @set_commands
+
+    add_event_handler(CommandHandler.new("1", "+") {|ctx| upvote_command(ctx)})
+    add_event_handler(CommandHandler.new("1", "-") {|ctx| downvote_command(ctx)})
+    add_event_handler(CommandHandler.new("mod") {|ctx| mod_command(ctx)})
+    add_event_handler(CommandHandler.new("admin") {|ctx| admin_command(ctx)})
+    add_event_handler(CommandHandler.new("demote") {|ctx| demote_command(ctx)})
+    add_event_handler(CommandHandler.new("warn") {|ctx| warn_command(ctx)})
+    add_event_handler(CommandHandler.new("delete") {|ctx| delete_command(ctx)})
+    add_event_handler(CommandHandler.new("uncooldown") {|ctx| uncooldown_command(ctx)})
+    add_event_handler(CommandHandler.new("remove") {|ctx| remove_command(ctx)})
+    add_event_handler(CommandHandler.new("purge") {|ctx| purge_command(ctx)})
+    add_event_handler(CommandHandler.new(["blacklist", "ban"]) {|ctx| blacklist_command(ctx)})
+  end
+
   # Starts various background tasks and stores them in a hash.
   def register_tasks : Hash
     {
@@ -226,8 +255,7 @@ class PrivateParlor < Tourmaline::Client
   # If blacklisted or joined, this will not allow them to rejoin
   #
   # Left users can rejoin the bot with this command
-  @[Command("start")]
-  def start_command(ctx) : Nil
+  def start_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -269,7 +297,6 @@ class PrivateParlor < Tourmaline::Client
   # Stops the bot for the user.
   #
   # This will set the user status to left, meaning the user will not receive any further messages.
-  @[Command(["stop", "leave"])]
   def stop_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -287,7 +314,6 @@ class PrivateParlor < Tourmaline::Client
   # Returns a message containing the user's OID, username, karma, warnings, etc.
   #
   # If this is used with a reply, returns the user info of that message if the invoker is ranked.
-  @[Command(["info"])]
   def info_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -331,7 +357,6 @@ class PrivateParlor < Tourmaline::Client
   #
   # If the user is not ranked, or `full_usercount` is false, show the total numbers users.
   # Otherwise, return a message containing the number of joined, left, and blacklisted users.
-  @[Command(["users"])]
   def users_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -361,7 +386,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Returns a message containing the progam's version.
-  @[Command(["version"])]
   def version_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -380,7 +404,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Upvotes a message.
-  @[Command(["1"], prefix: ["+"])]
   def upvote_command(ctx) : Nil
     unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryRatingsAndWarnings | HistoryRatings | DatabaseHistory)
       return
@@ -423,7 +446,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Downvotes a message.
-  @[Command(["1"], prefix: ["-"])]
   def downvote_command(ctx) : Nil
     unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryRatingsAndWarnings | HistoryRatings | DatabaseHistory)
       return
@@ -466,7 +488,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Toggle the user's hide_karma attribute.
-  @[Command(["toggle_karma", "togglekarma"])]
   def toggle_karma_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -486,7 +507,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Toggle the user's toggle_debug attribute.
-  @[Command(["toggle_debug", "toggledebug"])]
   def toggle_debug_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -506,7 +526,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Set/modify/view the user's tripcode.
-  @[Command(["tripcode"])]
   def tripcode_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -541,7 +560,6 @@ class PrivateParlor < Tourmaline::Client
   ##################
 
   # Promote a user to the moderator rank.
-  @[Command(["mod"])]
   def mod_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -581,7 +599,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Promote a user to the administrator rank.
-  @[Command(["admin"])]
   def admin_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -621,7 +638,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Returns a ranked user to the user rank
-  @[Command(["demote"])]
   def demote_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -656,7 +672,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Warns a message without deleting it. Gives the user who sent the message a warning and a cooldown.
-  @[Command(["warn"])]
   def warn_command(ctx) : Nil
     unless (history_with_warnings = @history) && history_with_warnings.is_a?(HistoryRatingsAndWarnings | HistoryWarnings | DatabaseHistory)
       return
@@ -707,7 +722,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Delete a message from a user, give a warning and a cooldown.
-  @[Command(["delete"])]
   def delete_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -750,7 +764,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Removes a cooldown and warning from a user if the user is in cooldown.
-  @[Command(["uncooldown"])]
   def uncooldown_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -799,7 +812,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Remove a message from a user without giving a warning or cooldown.
-  @[Command(["remove"])]
   def remove_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -837,7 +849,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Delete all messages from recently blacklisted users.
-  @[Command(["purge"])]
   def purge_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -869,7 +880,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Blacklists a user from the chat, deletes the reply, and removes all the user's incoming and outgoing messages from the queue.
-  @[Command(["blacklist", "ban"])]
   def blacklist_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -917,7 +927,6 @@ class PrivateParlor < Tourmaline::Client
 
   # Replies with the motd/rules associated with this bot.
   # If the host invokes this command, the motd/rules can be set or modified.
-  @[Command(["motd", "rules"])]
   def motd_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -945,7 +954,6 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Returns a message containing all the commands that a user can use, according to the user's rank.
-  @[Command(["help"])]
   def help_command(ctx) : Nil
     unless (message = ctx.message) && (info = message.from)
       return

@@ -225,6 +225,101 @@ replies:
  - |-
    ✅ 
 
+
+# Special characters in MarkdownV2 must be escaped
+command_descriptions:
+# start
+ - |-
+   Join the chat (start receiving messages)
+
+# stop
+ - |-
+   Leave the chat (stop receiving messages)
+
+# info
+ - |-
+   Get info about your account
+
+# users
+ - |-
+   Show the number of users in the chat
+
+# version
+ - |-
+   Get the version number and a link to the source code
+
+# upvote
+ - |-
+   Upvote a message
+
+# downvote
+ - |-
+   Downvote a message
+
+# toggle_karma
+ - |-
+   Toggle karma notifications
+
+# toggle_debug
+ - |-
+   Toggle debug mode (sends messages back to you)
+
+# tripcode
+ - |-
+   Set or view your tripcode
+
+# mod
+ - |-
+   Promote a user to the moderator rank
+
+# admin
+ - |-
+   Promote a user to the administrator rank
+
+# demote
+ - |-
+   Demote a ranked user to the user rank
+
+# warn
+ - |-
+   Warns a message without deleting it
+
+# delete
+ - |-
+   Delete a message and give a cooldown
+
+# uncooldown
+ - |-
+   Remove cooldown from a user
+
+# remove
+ - |-
+   Delete a message without giving a cooldown
+
+# purge
+ - |-
+   Delete all messages from all blacklisted users
+
+# blacklist
+ - |-
+   Ban a user from the chat
+
+# motd
+ - |-
+   Show the rules of this chat
+
+# help
+ - |-
+   Show help text for current rank
+
+# motd_set
+ - |-
+   Set the motd (users will see this when joining)
+
+# ranked_info
+ - |-
+   Get the user info from this message
+
 # Parameters are enclosed by a placeholder, #{text}, where text is any of the parameters next to the comment
 
 logs:

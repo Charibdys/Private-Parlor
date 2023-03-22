@@ -13,6 +13,7 @@ class Replies
 
   getter replies : Hash(Symbol, String) = {} of Symbol => String
   getter logs : Hash(Symbol, String) = {} of Symbol => String
+  getter command_descriptions : Hash(Symbol, String) = {} of Symbol => String
   getter time_units : Array(String)
   getter time_format : String
   getter toggle : Array(String)
@@ -51,12 +52,18 @@ class Replies
       blacklisted reason_prefix ranked_message force_leave
     )
 
+    command_keys = %i(
+      start stop info users version upvote downvote toggle_karma toggle_debug tripcode mod admin demote
+      warn delete uncooldown remove purge blacklist motd help motd_set rankded_info
+    )
+
     @entity_types = entities
     @time_units = yaml["time_units"].as_a.map(&.as_s)
     @time_format = yaml["time_format"].as_s
     @toggle = yaml["toggle"].as_a.map(&.as_s)
     @replies = Hash.zip(reply_keys, yaml["replies"].as_a.map(&.as_s))
     @logs = Hash.zip(log_keys, yaml["logs"].as_a.map(&.as_s))
+    @command_descriptions = Hash.zip(command_keys, yaml["command_descriptions"].as_a.map(&.as_s))
   end
 
   # Globally substitutes placeholders in reply with the given variables
