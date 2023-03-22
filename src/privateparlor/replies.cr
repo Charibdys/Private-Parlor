@@ -13,6 +13,7 @@ class Replies
 
   getter replies : Hash(Symbol, String) = {} of Symbol => String
   getter logs : Hash(Symbol, String) = {} of Symbol => String
+  getter command_descriptions : Hash(Symbol, String) = {} of Symbol => String
   getter time_units : Array(String)
   getter time_format : String
   getter toggle : Array(String)
@@ -37,17 +38,23 @@ class Replies
     end
 
     reply_keys = %i(
-      joined rejoined left already_in_chat not_in_chat not_in_cooldown rejected_message deanon_poll missing_args
-      command_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found promoted
-      toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_upvoted already_warned
-      private_sign spamming sign_spam invalid_tripcode_format tripcode_set tripcode_info tripcode_unset
-      user_info ranked_info cooldown_true cooldown_false user_count user_count_full message_deleted message_removed
-      reason_prefix cooldown_given on_cooldown blacklisted purge_complete success
+      joined rejoined left already_in_chat registration_closed not_in_chat not_in_cooldown rejected_message deanon_poll
+      missing_args command_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found
+      promoted toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted
+      gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming
+      sign_spam upvote_spam downvote_spam invalid_tripcode_format tripcode_set tripcode_info
+      tripcode_unset user_info ranked_info cooldown_true cooldown_false user_count user_count_full
+      message_deleted message_removed reason_prefix cooldown_given on_cooldown media_limit blacklisted purge_complete success
     )
 
     log_keys = %i(
       start joined rejoined left promoted demoted warned message_deleted message_removed removed_cooldown
       blacklisted reason_prefix ranked_message force_leave
+    )
+
+    command_keys = %i(
+      start stop info users version upvote downvote toggle_karma toggle_debug tripcode mod admin demote
+      warn delete uncooldown remove purge blacklist motd help motd_set rankded_info
     )
 
     @entity_types = entities
@@ -56,6 +63,7 @@ class Replies
     @toggle = yaml["toggle"].as_a.map(&.as_s)
     @replies = Hash.zip(reply_keys, yaml["replies"].as_a.map(&.as_s))
     @logs = Hash.zip(log_keys, yaml["logs"].as_a.map(&.as_s))
+    @command_descriptions = Hash.zip(command_keys, yaml["command_descriptions"].as_a.map(&.as_s))
   end
 
   # Globally substitutes placeholders in reply with the given variables

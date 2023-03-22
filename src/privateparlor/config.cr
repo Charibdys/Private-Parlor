@@ -24,6 +24,18 @@ module Configuration
     @[YAML::Field(key: "lifetime")]
     getter lifetime : Int32 = 24
 
+    @[YAML::Field(key: "database-history")]
+    getter database_history : Bool? = false
+
+    @[YAML::Field(key: "enable-upvotes")]
+    getter enable_upvotes : Bool? = true
+
+    @[YAML::Field(key: "enable-downvotes")]
+    getter enable_downvotes : Bool? = true
+
+    @[YAML::Field(key: "enable-warnings")]
+    getter enable_warnings : Bool? = true
+
     @[YAML::Field(key: "relay-luck")]
     getter relay_luck : Bool? = true
 
@@ -36,6 +48,12 @@ module Configuration
     @[YAML::Field(key: "relay-contact")]
     getter relay_contact : Bool? = false
 
+    @[YAML::Field(key: "media_limit_period")]
+    getter media_limit_period : Int32 = 0
+
+    @[YAML::Field(key: "registration_open")]
+    getter registration_open : Bool? = true
+
     @[YAML::Field(key: "full-usercount")]
     getter full_usercount : Bool? = false
 
@@ -47,6 +65,12 @@ module Configuration
 
     @[YAML::Field(key: "sign_limit_interval")]
     getter sign_limit_interval : Int32 = 600
+
+    @[YAML::Field(key: "upvote_limit_interval")]
+    getter upvote_limit_interval : Int32 = 0
+
+    @[YAML::Field(key: "downvote_limit_interval")]
+    getter downvote_limit_interval : Int32 = 0
 
     @[YAML::Field(key: "smileys")]
     getter smileys : Array(String) = [":)", ":|", ":/", ":("]

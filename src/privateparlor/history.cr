@@ -1,4 +1,22 @@
 abstract class History
+  abstract class MessageGroup
+    getter sender : Int64 = 0
+    getter origin_msid : Int64 = 0
+    property receivers : Hash(Int64, Int64) = {} of Int64 => Int64
+    property sent : Time = Time.utc
+
+    # Creates an instance of `MessageGroup`
+    #
+    # ## Arguments:
+    #
+    # `sender_id`
+    # :     the id of the user who originally sent this message
+    #
+    # `msid`
+    # :     the messaage ID returned when the new message was sent successfully
+    abstract def initialize(sender_id : Int64, msid : Int64)
+  end
+
   getter lifespan : Time::Span = 24.hours
   getter msid_map : Hash(Int64, MessageGroup) = {} of Int64 => MessageGroup
 
@@ -33,9 +51,7 @@ abstract class History
 
   # Returns the receivers *msid* found in the associated `MessageGroup`
   def get_msid(msid : Int64, receiver_id : Int64) : Int64 | Nil
-    if msg = @msid_map[msid]?
-      msg.receivers[receiver_id]?
-    end
+    get_all_msids(msid)[receiver_id]?
   end
 
   # Returns the *sender* of a specific `MessageGroup`
@@ -106,24 +122,43 @@ abstract class History
 end
 
 class HistoryBase < History
+  class MessageGroupBase < MessageGroup
+    def initialize(sender_id : Int64, msid : Int64)
+      @sender = sender_id
+      @origin_msid = msid
+    end
+  end
+
   def initialize(message_life : Time::Span)
     @lifespan = message_life
-    @msid_map = {} of Int64 => MessageGroup
+
+    # Covariance is not fully supported in Crystal yet, so we must do this:
+    @msid_map = {0 => MessageGroupBase.new(0, 0)} of Int64 => MessageGroup
+    @msid_map.delete(0)
   end
 
   def new_message(sender_id : Int64, msid : Int64) : Int64
-    message = MessageGroup.new(sender_id, msid)
+    message = MessageGroupBase.new(sender_id, msid)
     @msid_map.merge!({msid => message})
     msid
   end
 end
 
-class HistoryFull < History
+class HistoryRatings < History
+  class MessageGroupRatings < MessageGroup
+    property ratings : Set(Int64)
+
+    # :inherit:
+    def initialize(sender_id : Int64, msid : Int64)
+      @sender = sender_id
+      @origin_msid = msid
+      @ratings = Set(Int64).new
+    end
+  end
+
   def initialize(message_life : Time::Span)
     @lifespan = message_life
-
-    # Covariance is not fully supported in Crystal yet, so we must do this:
-    @msid_map = {0 => MessageGroupFull.new(0, 0)} of Int64 => MessageGroup
+    @msid_map = {0 => MessageGroupRatings.new(0, 0)} of Int64 => MessageGroup
     @msid_map.delete(0)
   end
 
@@ -131,7 +166,7 @@ class HistoryFull < History
   #
   # Returns the original msid of the new MessageGroup
   def new_message(sender_id : Int64, msid : Int64) : Int64
-    message = MessageGroupFull.new(sender_id, msid)
+    message = MessageGroupRatings.new(sender_id, msid)
     @msid_map.merge!({msid => message})
     msid
   end
@@ -140,55 +175,99 @@ class HistoryFull < History
   #
   # Returns true if the user was added to the ratings set; false if the user was already in it.
   def add_rating(msid : Int64, uid : Int64) : Bool
-    @msid_map[msid].as(MessageGroupFull).ratings.add?(uid)
+    @msid_map[msid].as(MessageGroupRatings).ratings.add?(uid)
+  end
+end
+
+class HistoryWarnings < History
+  class MessageGroupWarnings < MessageGroup
+    property warned : Bool?
+
+    # :inherit:
+    def initialize(sender_id : Int64, msid : Int64)
+      @sender = sender_id
+      @origin_msid = msid
+      @warned = false
+    end
+  end
+
+  def initialize(message_life : Time::Span)
+    @lifespan = message_life
+    @msid_map = {0 => MessageGroupWarnings.new(0, 0)} of Int64 => MessageGroup
+    @msid_map.delete(0)
+  end
+
+  # Creates a new `MessageGroup` with the *sender_id* and its associated *msid*
+  #
+  # Returns the original msid of the new MessageGroup
+  def new_message(sender_id : Int64, msid : Int64) : Int64
+    message = MessageGroupWarnings.new(sender_id, msid)
+    @msid_map.merge!({msid => message})
+    msid
   end
 
   # Set the warned variable in the associated `MessageGroup`.
   def add_warning(msid : Int64) : Nil
-    if msg = @msid_map[msid].as(MessageGroupFull)
+    if msg = @msid_map[msid].as(MessageGroupWarnings)
       msg.warned = true
     end
   end
 
   # Returns true if the associated `MessageGroup` was warned; false otherwise.
   def get_warning(msid : Int64) : Bool | Nil
-    if msg = @msid_map[msid].as(MessageGroupFull)
+    if msg = @msid_map[msid].as(MessageGroupWarnings)
       msg.warned
     end
   end
 end
 
-class MessageGroup
-  getter sender : Int64
-  getter origin_msid : Int64
-  property receivers : Hash(Int64, Int64)
-  property sent : Time
+class HistoryRatingsAndWarnings < History
+  class MessageGroupRatingsAndWarnings < MessageGroup
+    property ratings : Set(Int64)
+    property warned : Bool?
 
-  # Creates an instance of `MessageGroup`
-  #
-  # ## Arguments:
-  #
-  # `sender_id`
-  # :     the id of the user who originally sent this message
-  #
-  # `msid`
-  # :     the messaage ID returned when the new message was sent successfully
-  def initialize(sender_id : Int64, msid : Int64)
-    @sender = sender_id
-    @origin_msid = msid
-    @receivers = {} of Int64 => Int64
-    @sent = Time.utc
+    # :inherit:
+    def initialize(sender_id : Int64, msid : Int64)
+      @sender = sender_id
+      @origin_msid = msid
+      @ratings = Set(Int64).new
+      @warned = false
+    end
   end
-end
 
-class MessageGroupFull < MessageGroup
-  property ratings : Set(Int64)
-  property warned : Bool?
+  def initialize(message_life : Time::Span)
+    @lifespan = message_life
+    @msid_map = {0 => MessageGroupRatingsAndWarnings.new(0, 0)} of Int64 => MessageGroup
+    @msid_map.delete(0)
+  end
 
-  # :inherit:
-  def initialize(sender_id : Int64, msid : Int64)
-    super
-    @ratings = Set(Int64).new
-    @warned = false
+  # Creates a new `MessageGroup` with the *sender_id* and its associated *msid*
+  #
+  # Returns the original msid of the new MessageGroup
+  def new_message(sender_id : Int64, msid : Int64) : Int64
+    message = MessageGroupRatingsAndWarnings.new(sender_id, msid)
+    @msid_map.merge!({msid => message})
+    msid
+  end
+
+  # Update the ratings set in the associated `MessageGroup`
+  #
+  # Returns true if the user was added to the ratings set; false if the user was already in it.
+  def add_rating(msid : Int64, uid : Int64) : Bool
+    @msid_map[msid].as(MessageGroupRatingsAndWarnings).ratings.add?(uid)
+  end
+
+  # Set the warned variable in the associated `MessageGroup`.
+  def add_warning(msid : Int64) : Nil
+    if msg = @msid_map[msid].as(MessageGroupRatingsAndWarnings)
+      msg.warned = true
+    end
+  end
+
+  # Returns true if the associated `MessageGroup` was warned; false otherwise.
+  def get_warning(msid : Int64) : Bool | Nil
+    if msg = @msid_map[msid].as(MessageGroupRatingsAndWarnings)
+      msg.warned
+    end
   end
 end
