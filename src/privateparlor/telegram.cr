@@ -1125,7 +1125,7 @@ class PrivateParlor < Tourmaline::Client
       message.reply_message,
       user,
       @history.new_message(user.id, message.message_id),
-      ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, reply_to_message: reply) }
+      ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, link_preview: true, reply_to_message: reply) }
     )
   end
 
