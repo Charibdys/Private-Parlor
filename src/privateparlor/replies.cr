@@ -43,7 +43,7 @@ class Replies
       promoted toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted
       gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming
       sign_spam upvote_spam downvote_spam invalid_tripcode_format tripcode_set tripcode_info
-      tripcode_unset user_info ranked_info cooldown_true cooldown_false user_count user_count_full
+      tripcode_unset user_info info_warning ranked_info cooldown_true cooldown_false user_count user_count_full
       message_deleted message_removed reason_prefix cooldown_given on_cooldown media_limit blacklisted purge_complete success
     )
 
@@ -90,6 +90,11 @@ class Replies
             replace = "#{@replies[:cooldown_true]} #{variables[placeholder]}"
           else
             replace = @replies[:cooldown_false]
+          end
+        when "warn_expiry"
+          if variables[placeholder]
+            # Skip replace.to_md to prevent escaping Markdown twice
+            next replace = @replies[:info_warning].gsub("#\{warn_expiry\}") {"#{variables[placeholder]}".to_md}
           end
         when "reason"
           if variables[placeholder]

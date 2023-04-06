@@ -165,8 +165,12 @@ replies:
  - |-
     *id*: #{oid}, *username*: #{username}, *rank*: #{rank_val} \(#{rank}\)
     *karma*: #{karma}
-    *warnings*: #{warnings} #{smiley} \(one warning will expire at #{warn_expiry}\)
+    *warnings*: #{warnings} #{smiley} #{warn_expiry}
     *cooldown*: #{cooldown_until}
+
+# info_warning: warn_expiry
+ - |-
+    \(one warning will expire at #{warn_expiry}\)
 
 # ranked_info: oid, karma, cooldown_until
  - |-
