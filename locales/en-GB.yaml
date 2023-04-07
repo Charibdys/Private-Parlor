@@ -207,7 +207,7 @@ replies:
 
 # cooldown_given: duration, reason
  - |-
-    _You've been given a cooldown of #{duration} #{reason}_
+    _You've been given a cooldown of #{duration}#{reason}_
 
 # on_cooldown: time
  - |-
@@ -219,7 +219,7 @@ replies:
 
 # blacklisted: reason
  - |-
-    _You have been blacklisted #{reason}_
+    _You have been blacklisted#{reason}_
 
 # purge_complete: msgs_deleted
  - |-
