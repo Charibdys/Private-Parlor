@@ -43,7 +43,7 @@ abstract class History
   # Returns the receivers hash found in the associated `MessageGroup`
   def get_all_msids(msid : Int64) : Hash
     if msg = @msid_map[msid]?
-      {msg.sender => msg.origin_msid}.merge!(msg.receivers)
+      msg.receivers
     else
       {} of Int64 => Int64
     end
