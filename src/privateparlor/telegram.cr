@@ -1243,7 +1243,7 @@ class PrivateParlor < Tourmaline::Client
 
   def handle_tripcode(text : String, user : Database::User, msid : Int64) : String?
     unless @enable_tripsign
-      relay_to_one(msid, user.id, :command_disabled)
+      return relay_to_one(msid, user.id, :command_disabled)
     end
     if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
       return relay_to_one(msid, user.id, :sign_spam)
