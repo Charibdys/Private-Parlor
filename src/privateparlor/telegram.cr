@@ -624,7 +624,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @config.upvote_limit_interval)
+    if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @config.downvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :downvote_spam)
     end
     unless reply = message.reply_message
