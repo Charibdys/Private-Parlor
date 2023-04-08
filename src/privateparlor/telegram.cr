@@ -1,7 +1,7 @@
 enum Ranks
   Banned    =  -10
   User      =    0
-  Moderator =   10
+  Mod =   10
   Admin     =  100
   Host      = 1000
 end
@@ -510,7 +510,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     if reply = message.reply_message
-      if user.authorized?(Ranks::Moderator)
+      if user.authorized?(Ranks::Mod)
         if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
           relay_to_one(message.message_id, user.id, :ranked_info, {
             "oid"            => reply_user.get_obfuscated_id,
@@ -554,7 +554,7 @@ class PrivateParlor < Tourmaline::Client
 
     counts = database.get_user_counts
 
-    if user.authorized?(Ranks::Moderator) || @full_usercount
+    if user.authorized?(Ranks::Mod) || @full_usercount
       relay_to_one(nil, user.id, :user_count_full, {
         "joined"      => counts[:total] - counts[:left],
         "left"        => counts[:left],
@@ -764,15 +764,15 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    unless promoted_user.left? || promoted_user.rank >= Ranks::Moderator.value
-      promoted_user.set_rank(Ranks::Moderator)
+    unless promoted_user.left? || promoted_user.rank >= Ranks::Mod.value
+      promoted_user.set_rank(Ranks::Mod)
       @database.modify_user(promoted_user)
-      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => Ranks::Moderator})
+      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => Ranks::Mod})
 
       Log.info { @replies.substitute_log(:promoted, {
         "id"      => promoted_user.id.to_s,
         "name"    => promoted_user.get_formatted_name,
-        "rank"    => Ranks::Moderator,
+        "rank"    => Ranks::Mod,
         "invoker" => user.get_formatted_name,
       }) }
       relay_to_one(message.message_id, user.id, :success)
@@ -866,7 +866,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Moderator)
+    unless user.authorized?(Ranks::Mod)
       return
     end
     unless reply = message.reply_message
@@ -915,7 +915,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Moderator)
+    unless user.authorized?(Ranks::Mod)
       return
     end
     unless reply = message.reply_message
@@ -1007,7 +1007,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Moderator)
+    unless user.authorized?(Ranks::Mod)
       return
     end
     unless reply = message.reply_message
@@ -1154,7 +1154,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     case user.rank
-    when Ranks::Moderator.value
+    when Ranks::Mod.value
       relay_to_one(message.message_id, user.id, @replies.mod_help)
     when Ranks::Admin.value
       relay_to_one(message.message_id, user.id, @replies.admin_help)
@@ -1185,103 +1185,79 @@ class PrivateParlor < Tourmaline::Client
   # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
   def check_text(text : String, user : Database::User, msid : Int64) : String?
     if !@replies.allow_text?(text)
-      relay_to_one(msid, user.id, :rejected_message)
-      return
+      return relay_to_one(msid, user.id, :rejected_message)
     end
 
     case
     when !text.starts_with?('/')
       return text
-    when text.starts_with?("/s"), text.starts_with?("/sign")
-      if @allow_signing
-        if (chat = get_chat(user.id)) && chat.has_private_forwards
-          relay_to_one(msid, user.id, :private_sign)
-        else
-          if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
-            relay_to_one(msid, user.id, :sign_spam)
-          else
-            if (args = @replies.get_args(text)) && args.size > 0
-              return String.build do |str|
-                str << args
-                str << @replies.format_user_sign(user.id, user.get_formatted_name)
-              end
-            end
-          end
-        end
-      else
-        relay_to_one(msid, user.id, :command_disabled)
+    when text.starts_with?("/s "), text.starts_with?("/sign ")
+      return handle_sign(text, user, msid)
+    when text.starts_with?("/t "), text.starts_with?("/tsign ")
+      return handle_tripcode(text, user, msid)
+    when match = /^\/(.*)say/.match(text).try &.[1]
+      return handle_ranksay(match, text, user, msid)
+    end
+  end
+
+  def handle_sign(text : String, user : Database::User, msid : Int64) : String?
+    unless @allow_signing
+      return relay_to_one(msid, user.id, :command_disabled)
+    end
+    if (chat = get_chat(user.id)) && chat.has_private_forwards
+      return relay_to_one(msid, user.id, :private_sign)
+    end
+    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
+      return relay_to_one(msid, user.id, :sign_spam)
+    end
+
+    if (args = @replies.get_args(text)) && args.size > 0
+      String.build do |str|
+        str << args
+        str << @replies.format_user_sign(user.id, user.get_formatted_name)
       end
-    when text.starts_with?("/t"), text.starts_with?("/tsign")
-      if @allow_tripcodes
-        if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
-          relay_to_one(msid, user.id, :sign_spam)
-        else
-          if tripkey = user.tripcode
-            if (args = @replies.get_args(text)) && args.size > 0
-              pair = @replies.generate_tripcode(tripkey)
-              return String.build do |str|
-                str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
-                str << "\n"
-                str << args
-              end
-            end
-          else
-            relay_to_one(msid, user.id, :no_tripcode_set)
-          end
-        end
-      else
-        relay_to_one(msid, user.id, :command_disabled)
+    end
+  end
+
+  def handle_tripcode(text : String, user : Database::User, msid : Int64) : String?
+    unless @allow_tripcodes
+      relay_to_one(msid, user.id, :command_disabled)
+    end
+    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
+      return relay_to_one(msid, user.id, :sign_spam)
+    end
+    unless tripkey = user.tripcode
+      return relay_to_one(msid, user.id, :no_tripcode_set)
+    end
+
+    if (args = @replies.get_args(text)) && args.size > 0
+      pair = @replies.generate_tripcode(tripkey)
+      String.build do |str|
+        str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
+        str << "\n"
+        str << args
       end
-    when text.starts_with?("/modsay")
-      if user.authorized?(Ranks::Moderator)
-        if (args = @replies.get_args(text)) && args.size > 0
-          Log.info { @replies.substitute_log(:ranked_message, {
-            "id"   => user.id.to_s,
-            "name" => user.get_formatted_name,
-            "rank" => Ranks::Moderator,
-            "text" => args,
-          }) }
-          return String.build do |str|
-            str << args
-            str << @replies.format_user_say("mod")
-          end
-        end
-      end
-    when text.starts_with?("/adminsay")
-      if user.authorized?(Ranks::Admin)
-        if (args = @replies.get_args(text)) && args.size > 0
-          Log.info { @replies.substitute_log(:ranked_message, {
-            "id"   => user.id.to_s,
-            "name" => user.get_formatted_name,
-            "rank" => Ranks::Admin,
-            "text" => args,
-          }) }
-          return String.build do |str|
-            str << args
-            str << @replies.format_user_say("admin")
-          end
-        end
-      end
-    when text.starts_with?("/hostsay")
-      if user.authorized?(Ranks::Host)
-        if (args = @replies.get_args(text)) && args.size > 0
-          Log.info { @replies.substitute_log(:ranked_message, {
-            "id"   => user.id.to_s,
-            "name" => user.get_formatted_name,
-            "rank" => Ranks::Host,
-            "text" => args,
-          }) }
-          return String.build do |str|
-            str << args
-            str << @replies.format_user_say("host")
-          end
-        end
-      end
-    else
+    end
+  end
+
+  def handle_ranksay(rank : String, text : String, user : Database::User, msid : Int64) : String?
+    unless (parsed_rank = Ranks.parse?(rank)) && user.authorized?(parsed_rank)
       return
     end
 
-    return
+    if (args = @replies.get_args(text)) && args.size > 0
+      Log.info { @replies.substitute_log(:ranked_message, {
+        "id"   => user.id.to_s,
+        "name" => user.get_formatted_name,
+        "rank" => parsed_rank,
+        "text" => args,
+      }) }
+      String.build do |str|
+        str << args
+        str << @replies.format_user_say(parsed_rank.to_s)
+      end
+    end
+  
   end
 
   # Prepares a text message for relaying.
