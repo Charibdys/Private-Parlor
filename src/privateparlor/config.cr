@@ -6,7 +6,7 @@ module Configuration
   class Config
     include YAML::Serializable
 
-    @[YAML::Field(key: "api-token")]
+    @[YAML::Field(key: "api_token")]
     getter token : String
 
     @[YAML::Field(key: "database")]
@@ -15,16 +15,16 @@ module Configuration
     @[YAML::Field(key: "locale")]
     getter locale : String = "en"
 
-    @[YAML::Field(key: "log-level")]
+    @[YAML::Field(key: "log_level")]
     getter log_level : Log::Severity = Log::Severity::Info
 
-    @[YAML::Field(key: "log-file")]
+    @[YAML::Field(key: "log_file")]
     getter log_file : String? = nil
 
     @[YAML::Field(key: "lifetime")]
     getter lifetime : Int32 = 24
 
-    @[YAML::Field(key: "database-history")]
+    @[YAML::Field(key: "database_history")]
     getter database_history : Bool? = false
 
     # Command Toggles
@@ -163,7 +163,7 @@ module Configuration
     @[YAML::Field(key: "registration_open")]
     getter registration_open : Bool? = true
 
-    @[YAML::Field(key: "full-usercount")]
+    @[YAML::Field(key: "full_usercount")]
     getter full_usercount : Bool? = false
 
     @[YAML::Field(key: "allow_signing")]
@@ -184,10 +184,10 @@ module Configuration
     @[YAML::Field(key: "smileys")]
     getter smileys : Array(String) = [":)", ":|", ":/", ":("]
 
-    @[YAML::Field(key: "strip-format")]
+    @[YAML::Field(key: "strip_format")]
     getter entities : Array(String) = ["bold", "italic", "text_link"]
 
-    @[YAML::Field(key: "tripcode-salt")]
+    @[YAML::Field(key: "tripcode_salt")]
     getter salt : String = ""
 
     def initialize(@token : String, @database : String)
@@ -228,7 +228,7 @@ module Configuration
     elsif config.smileys.size != 4
       Log.notice { "Not enough or too many smileys. Should be four, was #{config.smileys}; defaulting to [:), :|, :/, :(]" }
     elsif (config.entities & message_entities).size != config.entities.size
-      Log.notice { "Could not determine strip-format, was #{config.entities}; check for duplicates or mispellings. Using defaults." }
+      Log.notice { "Could not determine strip_format, was #{config.entities}; check for duplicates or mispellings. Using defaults." }
       return false
     end
 
