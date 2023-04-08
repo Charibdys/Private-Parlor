@@ -5,6 +5,8 @@ lib LibCrypt
   fun crypt(password : UInt8*, salt : UInt8*) : UInt8*
 end
 
+alias LocaleParameters = Hash(String, String | Time | Int32 | Bool | Ranks | Nil)
+
 class Replies
   include Tourmaline::Format
   include Tourmaline::Helpers

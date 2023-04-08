@@ -1,3 +1,13 @@
+enum Ranks
+  Banned    =  -10
+  User      =    0
+  Moderator =   10
+  Admin     =  100
+  Host      = 1000
+end
+
+alias MessageProc = Proc(Int64, Int64 | Nil, Tourmaline::Message) | Proc(Int64, Int64 | Nil, Array(Tourmaline::Message))
+
 class PrivateParlor < Tourmaline::Client
   getter database : Database
   getter history : History | DatabaseHistory
