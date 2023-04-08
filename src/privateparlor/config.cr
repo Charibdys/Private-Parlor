@@ -157,6 +157,171 @@ module Configuration
     @[YAML::Field(key: "relay_contact")]
     getter relay_contact : Bool? = false
 
+    # Karma/Warning Cooldown Constants
+
+    @[YAML::Field(key: "cooldown_time_begin")]
+    getter cooldown_time_begin : Array(Int32) = [1, 5, 25, 120, 720, 4320]
+
+    @[YAML::Field(key: "cooldown_time_linear_m")]
+    getter cooldown_time_linear_m : Int32 = 4320 # continues 7d, 10d, 13d, 16d, ... (linear)
+
+    @[YAML::Field(key: "cooldown_time_linear_b")]
+    getter cooldown_time_linear_b : Int32 = 10080
+
+    @[YAML::Field(key: "warn_expire_hours")]
+    getter warn_expire_hours : Int32 = 7 * 24
+
+    @[YAML::Field(key: "karma_warn_penalty")]
+    getter karma_warn_penalty : Int32 = 10
+
+    # Spam limits
+
+    @[YAML::Field(key: "spam_limit")]
+    getter spam_limit : Float32 = 3.0
+
+    @[YAML::Field(key: "spam_limit_hit")]
+    getter spam_limit_hit : Float32 = 6.0
+
+    @[YAML::Field(key: "spam_interval_seconds")]
+    getter spam_interval_seconds : Int32 = 10
+
+    # Spam Score Constants
+
+    @[YAML::Field(key: "score_base_message")]
+    getter score_base_message : Float32 = 0.75
+
+    @[YAML::Field(key: "score_text_character")]
+    getter score_text_character : Float32 = 0.002
+
+    @[YAML::Field(key: "score_text_linebreak")]
+    getter score_text_linebreak : Float32 = 0.1
+
+    @[YAML::Field(key: "score_animation")]
+    getter score_animation : Float32 = 1.0
+
+    @[YAML::Field(key: "score_audio")]
+    getter score_audio : Float32 = 1.0
+
+    @[YAML::Field(key: "score_document")]
+    getter score_document : Float32 = 1.0
+
+    @[YAML::Field(key: "score_video")]
+    getter score_video : Float32 = 1.0
+
+    @[YAML::Field(key: "score_video_note")]
+    getter score_video_note : Float32 = 1.5
+
+    @[YAML::Field(key: "score_voice")]
+    getter score_voice : Float32 = 1.5
+
+    @[YAML::Field(key: "score_photo")]
+    getter score_photo : Float32 = 1.0
+
+    @[YAML::Field(key: "score_media_group")]
+    getter score_media_group : Float32 = 2.5
+
+    @[YAML::Field(key: "score_poll")]
+    getter score_poll : Float32 = 2.5
+    
+    @[YAML::Field(key: "score_forwarded_message")]
+    getter score_forwarded_message : Float32 = 1.25
+
+    @[YAML::Field(key: "score_sticker")]
+    getter score_sticker : Float32 = 1.5
+
+    @[YAML::Field(key: "score_dice")]
+    getter score_dice : Float32 = 2.0
+
+    @[YAML::Field(key: "score_dart")]
+    getter score_dart : Float32 = 2.0
+
+    @[YAML::Field(key: "score_basketball")]
+    getter score_basketball : Float32 = 2.0
+
+    @[YAML::Field(key: "score_soccerball")]
+    getter score_soccerball : Float32 = 2.0
+
+    @[YAML::Field(key: "score_slot_machine")]
+    getter score_slot_machine : Float32 = 2.0
+
+    @[YAML::Field(key: "score_bowling")]
+    getter score_bowling : Float32 = 2.0
+
+    @[YAML::Field(key: "score_venue")]
+    getter score_venue : Float32 = 2.0
+    
+    @[YAML::Field(key: "score_location")]
+    getter score_location : Float32 = 2.0
+    
+    @[YAML::Field(key: "score_contact")]
+    getter score_contact : Float32 = 2.0
+
+    @[YAML::Field(key: "relay_text")]
+    getter relay_text : Bool? = true
+
+    @[YAML::Field(key: "relay_text")]
+    getter relay_text : Bool? = true
+
+    @[YAML::Field(key: "relay_animation")]
+    getter relay_animation : Bool? = true
+
+    @[YAML::Field(key: "relay_audio")]
+    getter relay_audio : Bool? = true
+
+    @[YAML::Field(key: "relay_document")]
+    getter relay_document : Bool? = true
+
+    @[YAML::Field(key: "relay_video")]
+    getter relay_video : Bool? = true
+
+    @[YAML::Field(key: "relay_video_note")]
+    getter relay_video_note : Bool? = true
+
+    @[YAML::Field(key: "relay_voice")]
+    getter relay_voice : Bool? = true
+
+    @[YAML::Field(key: "relay_photo")]
+    getter relay_photo : Bool? = true
+
+    @[YAML::Field(key: "relay_media_group")]
+    getter relay_media_group : Bool? = true
+
+    @[YAML::Field(key: "relay_poll")]
+    getter relay_poll : Bool? = true
+
+    @[YAML::Field(key: "relay_forwarded_message")]
+    getter relay_forwarded_message : Bool? = true
+
+    @[YAML::Field(key: "relay_sticker")]
+    getter relay_sticker : Bool? = true
+
+    @[YAML::Field(key: "relay_dice")]
+    getter relay_dice : Bool? = false
+
+    @[YAML::Field(key: "relay_dart")]
+    getter relay_dart : Bool? = false
+
+    @[YAML::Field(key: "relay_basketball")]
+    getter relay_basketball : Bool? = false
+
+    @[YAML::Field(key: "relay_soccerball")]
+    getter relay_soccerball : Bool? = false
+
+    @[YAML::Field(key: "relay_slot_machine")]
+    getter relay_slot_machine : Bool? = false
+
+    @[YAML::Field(key: "relay_bowling")]
+    getter relay_bowling : Bool? = false
+
+    @[YAML::Field(key: "relay_venue")]
+    getter relay_venue : Bool? = false
+
+    @[YAML::Field(key: "relay_location")]
+    getter relay_location : Bool? = false
+
+    @[YAML::Field(key: "relay_contact")]
+    getter relay_contact : Bool? = false
+
     @[YAML::Field(key: "media_limit_period")]
     getter media_limit_period : Int32 = 0
 

@@ -83,6 +83,44 @@ relay_venue: false
 relay_location: false
 relay_contact: false
 
+# Cooldown Constants
+cooldown_time_begin: [1, 5, 25, 120, 720, 4320] # begins with 1m, 5m, 25m, 2h, 12h, 3d
+cooldown_time_linear_m: 4320 # continues 7d, 10d, 13d, 16d, ... (linear)
+cooldown_time_linear_b: 10080
+warn_expire_hours: 168 # 7 days
+karma_warn_penalty: 10
+
+# Spam Limits
+# Set spam interval to 0 to disable spam checking 
+spam_limit: 3.0
+spam_limit_hit: 6.0
+spam_interval_seconds: 10
+
+# Spam Score Constants
+score_base_message: 0.75
+score_text_character: 0.002
+score_text_linebreak: 0.1
+score_animation: 1.0
+score_audio: 1.0
+score_document: 1.0
+score_video: 1.0
+score_video_note: 1.5
+score_voice: 1.5
+score_photo: 1.0
+score_media_group: 2.5
+score_poll: 2.5
+score_forwarded_message: 1.25
+score_sticker: 1.5
+score_dice: 2.0
+score_dart: 2.0
+score_basketball: 2.0
+score_soccerball: 2.0
+score_slot_machine: 2.0
+score_bowling: 2.0
+score_venue: 2.0
+score_location: 2.0
+score_contact: 2.0
+
 # Duration (hours) in which new users cannot send media
 #media_limit_period: 3
 

@@ -6,7 +6,14 @@ class PrivateParlor < Tourmaline::Client
   getter tasks : Hash(Symbol, Tasker::Task)
   getter config : Configuration::Config
   getter albums : Hash(String, Album)
-  getter spam : SpamScoreHandler
+  getter spam_handler : SpamScoreHandler | Nil
+
+  getter cooldown_time_begin : Array(Int32)
+  getter cooldown_time_linear_m : Int32
+  getter cooldown_time_linear_b : Int32
+  getter warn_expire_hours : Int32
+  getter karma_warn_penalty : Int32
+
 
   # Creates a new instance of PrivateParlor.
   #
@@ -24,13 +31,20 @@ class PrivateParlor < Tourmaline::Client
     super(bot_token: config.token, set_commands: true)
     Client.default_parse_mode = (Tourmaline::ParseMode::MarkdownV2)
 
+    # Init warn/karma variables
+    @cooldown_time_begin = config.cooldown_time_begin
+    @cooldown_time_linear_m = config.cooldown_time_linear_m
+    @cooldown_time_linear_b = config.cooldown_time_linear_b
+    @warn_expire_hours = config.warn_expire_hours
+    @karma_warn_penalty = config.karma_warn_penalty
+
     db = DB.open("sqlite3://#{Path.new(config.database)}") # TODO: We'll want check if this works on Windows later
     @database = Database.new(db)
     @history = get_history_type(db, config)
     @queue = Deque(QueuedMessage).new
     @replies = Replies.new(config.entities, config.locale)
-    @spam = SpamScoreHandler.new
-    @tasks = register_tasks()
+    @spam_handler = SpamScoreHandler.new(config) if config.spam_interval_seconds != 0
+    @tasks = register_tasks(config.spam_interval_seconds)
     @albums = {} of String => Album
 
     initialize_handlers(@replies.command_descriptions, config)
@@ -87,11 +101,66 @@ class PrivateParlor < Tourmaline::Client
     getter upvote_last_used : Hash(Int64, Time)
     getter downvote_last_used : Hash(Int64, Time)
 
-    def initialize
+    getter spam_limit : Float32
+    getter spam_limit_hit : Float32
+
+    getter score_base_message : Float32
+    getter score_text_character : Float32
+    getter score_text_linebreak : Float32
+    getter score_animation : Float32
+    getter score_audio : Float32
+    getter score_document : Float32
+    getter score_video : Float32
+    getter score_video_note : Float32
+    getter score_voice : Float32
+    getter score_photo : Float32
+    getter score_media_group : Float32 
+    getter score_poll : Float32
+    getter score_forwarded_message : Float32
+    getter score_sticker : Float32 
+    getter score_dice : Float32
+    getter score_dart : Float32
+    getter score_basketball : Float32
+    getter score_soccerball : Float32
+    getter score_slot_machine : Float32
+    getter score_bowling : Float32
+    getter score_venue : Float32
+    getter score_location : Float32
+    getter score_contact : Float32
+
+    def initialize(config : Configuration::Config)
       @scores = {} of Int64 => Float32
       @sign_last_used = {} of Int64 => Time
       @upvote_last_used = {} of Int64 => Time
       @downvote_last_used = {} of Int64 => Time
+
+      # Init spam score constants
+      @spam_limit = config.spam_limit
+      @spam_limit_hit = config.spam_limit_hit
+
+      @score_base_message = config.score_base_message
+      @score_text_character = config.score_text_character
+      @score_text_linebreak = config.score_text_linebreak
+      @score_animation = config.score_animation
+      @score_audio = config.score_audio
+      @score_document = config.score_document
+      @score_video = config.score_video
+      @score_video_note = config.score_video_note
+      @score_voice = config.score_voice
+      @score_photo = config.score_photo
+      @score_media_group = config.score_media_group
+      @score_poll = config.score_poll
+      @score_forwarded_message = config.score_forwarded_message
+      @score_sticker = config.score_sticker
+      @score_dice = config.score_dice
+      @score_dart = config.score_dart
+      @score_basketball = config.score_basketball
+      @score_soccerball = config.score_soccerball
+      @score_slot_machine = config.score_slot_machine
+      @score_bowling = config.score_bowling
+      @score_venue = config.score_venue
+      @score_location = config.score_location
+      @score_contact = config.score_contact
     end
 
     # Check if user's spam score triggers the spam filter
@@ -100,11 +169,11 @@ class PrivateParlor < Tourmaline::Client
     def spammy?(user : Int64, increment : Float32) : Bool
       score = 0 unless score = @scores[user]?
 
-      if score > SPAM_LIMIT
+      if score > spam_limit
         return true
-      elsif score + increment > SPAM_LIMIT
-        @scores[user] = SPAM_LIMIT_HIT
-        return score + increment >= SPAM_LIMIT_HIT
+      elsif score + increment > spam_limit
+        @scores[user] = spam_limit_hit
+        return score + increment >= spam_limit_hit
       end
 
       @scores[user] = score + increment
@@ -171,19 +240,53 @@ class PrivateParlor < Tourmaline::Client
 
     def calculate_spam_score(type : Symbol) : Float32
       case type
-      when :forward
-        SCORE_BASE_FORWARD
-      when :sticker
-        SCORE_STICKER
+      when :animation
+        score_animation
+      when :audio
+        score_audio
+      when :document
+        score_document
+      when :video
+        score_video
+      when :video_note
+        score_video_note
+      when :voice
+        score_voice
+      when :photo
+        score_photo
       when :album
-        SCORE_ALBUM
+        score_media_group
+      when :poll
+        score_poll
+      when :forward
+        score_forwarded_message
+      when :sticker
+        score_sticker
+      when :dice
+        score_dice
+      when :dart
+        score_dart
+      when :basketball
+        score_basketball
+      when :soccerball
+        score_soccerball
+      when :slot_machine
+        score_slot_machine
+      when :bowling
+        score_bowling
+      when :venue
+        score_venue
+      when :location
+        score_location
+      when :contact
+        score_contact
       else
-        SCORE_BASE_MESSAGE
+        score_base_message
       end
     end
 
     def calculate_spam_score_text(text : String) : Float32
-      SCORE_BASE_MESSAGE + (text.size * SCORE_TEXT_CHARACTER) + (text.count('\n') * SCORE_TEXT_LINEBREAK)
+      score_base_message + (text.size * score_text_character) + (text.count('\n') * score_text_linebreak)
     end
 
     def expire
@@ -290,12 +393,14 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Starts various background tasks and stores them in a hash.
-  def register_tasks : Hash
-    {
-      :cache    => Tasker.every(@history.lifespan * (1/4)) { @history.expire },
-      :spam     => Tasker.every(SPAM_INTERVAL_SECONDS.seconds) { @spam.expire },
-      :warnings => Tasker.every(15.minutes) { @database.expire_warnings },
-    } of Symbol => Tasker::Task
+  def register_tasks(spam_interval_seconds : Int32) : Hash
+    tasks = {} of Symbol => Tasker::Task
+    tasks[:cache] = Tasker.every(@history.lifespan * (1/4)) { @history.expire }
+    tasks[:warnings] = Tasker.every(15.minutes) { @database.expire_warnings(warn_expire_hours) }
+    if spam = @spam_handler
+      tasks[:spam] = Tasker.every(spam_interval_seconds.seconds) { spam.expire } 
+    end
+    tasks
   end
 
   # User starts the bot and begins receiving messages.
@@ -467,7 +572,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    if @spam.spammy_upvote?(user.id, @config.upvote_limit_interval)
+    if (spam = @spam_handler) && spam.spammy_upvote?(user.id, @config.upvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :upvote_spam)
     end
     unless reply = message.reply_message
@@ -509,7 +614,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    if @spam.spammy_downvote?(user.id, @config.upvote_limit_interval)
+    if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @config.upvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :downvote_spam)
     end
     unless reply = message.reply_message
@@ -753,7 +858,9 @@ class PrivateParlor < Tourmaline::Client
 
     reason = @replies.get_args(ctx.message.text)
 
-    duration = @replies.format_timespan(reply_user.cooldown_and_warn)
+    duration = @replies.format_timespan(reply_user.cooldown_and_warn(
+      cooldown_time_begin, cooldown_time_linear_m, cooldown_time_linear_b, warn_expire_hours, karma_warn_penalty
+    ))
     history_with_warnings.add_warning(reply.message_id)
     @database.modify_user(reply_user)
 
@@ -798,7 +905,9 @@ class PrivateParlor < Tourmaline::Client
     reason = @replies.get_args(message.text)
     cached_msid = delete_messages(reply.message_id, reply_user.id)
 
-    duration = @replies.format_timespan(reply_user.cooldown_and_warn)
+    duration = @replies.format_timespan(reply_user.cooldown_and_warn(
+      cooldown_time_begin, cooldown_time_linear_m, cooldown_time_linear_b, warn_expire_hours, karma_warn_penalty
+    ))
     @database.modify_user(reply_user)
 
     relay_to_one(cached_msid, reply_user.id, :message_deleted, {"reason" => reason, "duration" => duration})
@@ -849,7 +958,7 @@ class PrivateParlor < Tourmaline::Client
     end
 
     uncooldown_user.remove_cooldown(true)
-    uncooldown_user.remove_warning
+    uncooldown_user.remove_warning(1, warn_expire_hours)
     @database.modify_user(uncooldown_user)
 
     Log.info { @replies.substitute_log(:removed_cooldown, {
@@ -1062,7 +1171,7 @@ class PrivateParlor < Tourmaline::Client
         if (chat = get_chat(user.id)) && chat.has_private_forwards
           relay_to_one(msid, user.id, :private_sign)
         else
-          if @spam.spammy_sign?(user.id, @config.sign_limit_interval)
+          if (spam = @spam_handler) && spam.spammy_sign?(user.id, @config.sign_limit_interval)
             relay_to_one(msid, user.id, :sign_spam)
           else
             if (args = @replies.get_args(text)) && args.size > 0
@@ -1078,7 +1187,7 @@ class PrivateParlor < Tourmaline::Client
       end
     when text.starts_with?("/t"), text.starts_with?("/tsign")
       if config.allow_tripcodes
-        if @spam.spammy_sign?(user.id, @config.sign_limit_interval)
+        if (spam = @spam_handler) && spam.spammy_sign?(user.id, @config.sign_limit_interval)
           relay_to_one(msid, user.id, :sign_spam)
         else
           if tripkey = user.tripcode
@@ -1166,7 +1275,7 @@ class PrivateParlor < Tourmaline::Client
     unless (raw_text = message.text) && (text = check_text(@replies.strip_format(raw_text, message.entities), user, message.message_id))
       return
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score_text(text))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score_text(text))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1204,7 +1313,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?(@config.media_limit_period.hours)
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:{{captioned_type}}))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:{{captioned_type}}))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
     {% if captioned_type == "photo" %}
@@ -1287,7 +1396,7 @@ class PrivateParlor < Tourmaline::Client
         unless temp_album = @albums.delete(album)
           next
         end
-        if @spam.spammy?(info.id, @spam.calculate_spam_score(:album))
+        if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:album))
           next relay_to_one(message.message_id, user.id, :spamming)
         end
 
@@ -1324,7 +1433,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:poll))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:poll))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1373,7 +1482,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?(@config.media_limit_period.hours)
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:forward))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:forward))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1405,7 +1514,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?(@config.media_limit_period.hours)
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:sticker))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:sticker))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1435,7 +1544,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:{{luck_type}}))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:{{luck_type}}))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1468,7 +1577,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:venue))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:venue))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1511,7 +1620,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:location))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:location))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1548,7 +1657,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:contact))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:contact))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
