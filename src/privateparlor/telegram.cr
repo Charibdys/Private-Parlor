@@ -282,6 +282,8 @@ class PrivateParlor < Tourmaline::Client
 
     if config.relay_{{media_type.id}}
       add_event_handler(UpdateHandler.new(:{{media_type.id}}) {|update| handle_{{media_type.id}}(update)})
+    else
+      add_event_handler(UpdateHandler.new(:{{media_type.id}}) {|update| media_disabled(update, "{{media_type.id}}")})
     end
 
     {% end %}
@@ -1033,6 +1035,9 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
 
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
@@ -1431,7 +1436,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     if @spam.spammy?(info.id, @spam.calculate_spam_score(:{{luck_type}}))
-    return relay_to_one(message.message_id, user.id, :spamming)
+      return relay_to_one(message.message_id, user.id, :spamming)
     end
 
     user.set_active(info.username, info.full_name)
@@ -1561,6 +1566,23 @@ class PrivateParlor < Tourmaline::Client
         last_name: contact.last_name,
       ) }
     )
+  end
+
+  def media_disabled(update : Tourmaline::Update, type : String) : Nil
+    unless (message = update.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, :not_in_chat)
+    end
+    unless user.can_chat?
+      return deny_user(user)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    relay_to_one(message.message_id, user.id, :media_disabled, {"type" => type})
   end
 
   # Sends a message to the user explaining why they cannot chat at this time

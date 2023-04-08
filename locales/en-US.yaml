@@ -58,6 +58,10 @@ replies:
  - |-
     _This command is disabled\._
 
+# media_disabled: type
+ - |-
+   _Messages of type `#{type}` are disabled\._
+
 # no_reply
  - |-
     _You need to reply to a message to use this command\._
