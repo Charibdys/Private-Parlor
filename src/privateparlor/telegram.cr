@@ -242,6 +242,30 @@ class PrivateParlor < Tourmaline::Client
            description: descriptions[:{{command.id}}]
         ) {|ctx| {{command.id}}_command(ctx)}
       )
+    else
+      add_event_handler(
+        CommandHandler.new(
+          {% if command == "stop" %}
+          ["stop", "leave"],
+          {% elsif command == "toggle_karma" %}
+          ["togglekarma", "toggle_karma"],
+          {% elsif command == "toggle_debug" %}
+          ["toggledebug", "toggle_debug"],
+          {% elsif command == "motd" %}
+          ["rules", "motd"],
+          {% elsif command == "upvote" %}
+          "1", "+",
+          {% elsif command == "downvote" %}
+          "1", "-",
+          {% elsif command == "blacklist" %}
+          ["blacklist", "ban"],
+          {% else %}
+          "{{command.id}}",
+          {% end %}
+           register: config.enable_{{command.id}}[1],
+           description: descriptions[:{{command.id}}]
+        ) {|ctx| command_disabled(ctx)}
+      )
     end
 
     {% end %}
@@ -1001,6 +1025,20 @@ class PrivateParlor < Tourmaline::Client
     when Ranks::Host.value
       relay_to_one(message.message_id, user.id, @replies.host_help)
     end
+  end
+
+  def command_disabled(ctx : CommandHandler::Context) : Nil
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, :not_in_chat)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    relay_to_one(message.message_id, user.id, :command_disabled)
   end
 
   # Checks if the text contains a special font or starts a sign command.
