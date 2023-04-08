@@ -20,7 +20,7 @@ class Replies
   getter time_format : String
   getter toggle : Array(String)
   getter smileys : Array(String)
-  getter salt : String
+  getter tripcode_salt : String
 
   # Creates an instance of `Replies`.
   #
@@ -63,7 +63,7 @@ class Replies
 
     @entity_types = entities
     @smileys = smileys
-    @salt = salt
+    @tripcode_salt = salt
     @time_units = yaml["time_units"].as_a.map(&.as_s)
     @time_format = yaml["time_format"].as_s
     @toggle = yaml["toggle"].as_a.map(&.as_s)
@@ -218,14 +218,15 @@ class Replies
     name = split[0]
     pass = split[1]
 
-    if !@salt.empty?
+    salt = @tripcode_salt
+    if !salt.empty?
       # Based on 8chan's secure tripcodes
       pass = String.new(pass.encode("Shift_JIS"), "Shift_JIS")
-      tripcode = "!#{Digest::SHA1.base64digest(pass + @salt)[0...10]}"
+      tripcode = "!#{Digest::SHA1.base64digest(pass + salt)[0...10]}"
     else
-      @salt = (pass[...8] + "H.")[1...3]
-      @salt = String.build do |s|
-        @salt.each_char do |c|
+      salt = (pass[...8] + "H.")[1...3]
+      salt = String.build do |s|
+        salt.each_char do |c|
           if ':' <= c <= '@'
             s << c + 7
           elsif '[' <= c <= '`'
@@ -238,7 +239,7 @@ class Replies
         end
       end
 
-      tripcode = "!#{String.new(LibCrypt.crypt(pass[...8], @salt))[-10...]}"
+      tripcode = "!#{String.new(LibCrypt.crypt(pass[...8], salt))[-10...]}"
     end
 
     {name: name, tripcode: tripcode}
