@@ -215,7 +215,8 @@ class PrivateParlor < Tourmaline::Client
   def initialize_handlers(descriptions : Hash(Symbol, String), config : Configuration::Config) : Nil
     {% for command in [
       "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help", "upvote", 
-      "downvote", "mod", "admin", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist"] 
+      "downvote", "mod", "admin", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist"
+    ] 
     %}
 
     if config.enable_{{command.id}}[0]
@@ -272,20 +273,18 @@ class PrivateParlor < Tourmaline::Client
 
     register_commands_with_botfather if @set_commands
 
-    add_event_handler(UpdateHandler.new(:text) {|update| handle_text(update)})
-    {% for captioned_type in ["animation", "audio", "document", "video", "video_note", "voice", "photo"] %}
-    add_event_handler(UpdateHandler.new(:{{captioned_type.id}}) {|update| handle_{{captioned_type.id}}(update)})
+    {% for media_type in [
+      "text", "animation", "audio", "document", "video", "video_note", "voice", "photo",
+      "media_group", "poll", "forwarded_message", "sticker", "dice", "dart", "basketball", 
+      "soccerball", "slot_machine", "bowling", "venue", "location", "contact"
+    ]
+    %}
+
+    if config.relay_{{media_type.id}}
+      add_event_handler(UpdateHandler.new(:{{media_type.id}}) {|update| handle_{{media_type.id}}(update)})
+    end
+
     {% end %}
-    add_event_handler(UpdateHandler.new(:media_group) {|update| handle_albums(update)})
-    add_event_handler(UpdateHandler.new(:poll) {|update| handle_poll(update)})
-    add_event_handler(UpdateHandler.new(:forwarded_message) {|update| handle_forward(update)})
-    add_event_handler(UpdateHandler.new(:sticker) {|update| handle_sticker(update)})
-    {% for luck_type in ["dice", "dart", "basketball", "soccerball", "slot_machine", "bowling"] %}
-    add_event_handler(UpdateHandler.new(:{{luck_type.id}}) {|update| handle_{{luck_type.id}}(update)})
-    {% end %}
-    add_event_handler(UpdateHandler.new(:venue) {|update| handle_venue(update)})
-    add_event_handler(UpdateHandler.new(:location) {|update| handle_location(update)})
-    add_event_handler(UpdateHandler.new(:contact) {|update| handle_contact(update)})
   end
 
   # Starts various background tasks and stores them in a hash.
@@ -1232,8 +1231,8 @@ class PrivateParlor < Tourmaline::Client
   end
   {% end %}
 
-  # Prepares a album message for relaying.
-  def handle_albums(update : Tourmaline::Update) : Nil
+  # Prepares an album message for relaying.
+  def handle_media_group(update : Tourmaline::Update) : Nil
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1353,8 +1352,8 @@ class PrivateParlor < Tourmaline::Client
     )
   end
 
-  # Prepares a poll message for relaying.
-  def handle_forward(update : Tourmaline::Update) : Nil
+  # Prepares a forwarded message for relaying.
+  def handle_forwarded_message(update : Tourmaline::Update) : Nil
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1419,9 +1418,6 @@ class PrivateParlor < Tourmaline::Client
   {% for luck_type in ["dice", "dart", "basketball", "soccerball", "slot_machine", "bowling"] %}
   # Prepares a {{luck_type}} message for relaying.
   def handle_{{luck_type.id}}(update : Tourmaline::Update) : Nil
-    unless config.relay_luck
-      return
-    end
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1452,9 +1448,6 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a venue message for relaying.
   def handle_venue(update : Tourmaline::Update) : Nil
-    unless config.relay_venue
-      return
-    end
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1498,9 +1491,6 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a location message for relaying.
   def handle_location(update : Tourmaline::Update) : Nil
-    unless config.relay_location
-      return
-    end
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1538,9 +1528,6 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a contact message for relaying.
   def handle_contact(update : Tourmaline::Update) : Nil
-    unless config.relay_contact
-      return
-    end
     unless (message = update.message) && (info = message.from)
       return
     end

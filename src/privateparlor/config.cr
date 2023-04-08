@@ -28,7 +28,7 @@ module Configuration
     getter database_history : Bool? = false
 
     # Command Toggles
-    
+
     @[YAML::Field(key: "enable_start")]
     getter enable_start : Array(Bool) = [true, true]
 
@@ -94,16 +94,67 @@ module Configuration
 
     # Relay Toggles
 
-    @[YAML::Field(key: "relay-luck")]
-    getter relay_luck : Bool? = true
+    @[YAML::Field(key: "relay_text")]
+    getter relay_text : Bool? = true
 
-    @[YAML::Field(key: "relay-venue")]
+    @[YAML::Field(key: "relay_animation")]
+    getter relay_animation : Bool? = true
+
+    @[YAML::Field(key: "relay_audio")]
+    getter relay_audio : Bool? = true
+
+    @[YAML::Field(key: "relay_document")]
+    getter relay_document : Bool? = true
+
+    @[YAML::Field(key: "relay_video")]
+    getter relay_video : Bool? = true
+
+    @[YAML::Field(key: "relay_video_note")]
+    getter relay_video_note : Bool? = true
+
+    @[YAML::Field(key: "relay_voice")]
+    getter relay_voice : Bool? = true
+
+    @[YAML::Field(key: "relay_photo")]
+    getter relay_photo : Bool? = true
+
+    @[YAML::Field(key: "relay_media_group")]
+    getter relay_media_group : Bool? = true
+
+    @[YAML::Field(key: "relay_poll")]
+    getter relay_poll : Bool? = true
+
+    @[YAML::Field(key: "relay_forwarded_message")]
+    getter relay_forwarded_message : Bool? = true
+
+    @[YAML::Field(key: "relay_sticker")]
+    getter relay_sticker : Bool? = true
+
+    @[YAML::Field(key: "relay_dice")]
+    getter relay_dice : Bool? = false
+
+    @[YAML::Field(key: "relay_dart")]
+    getter relay_dart : Bool? = false
+
+    @[YAML::Field(key: "relay_basketball")]
+    getter relay_basketball : Bool? = false
+
+    @[YAML::Field(key: "relay_soccerball")]
+    getter relay_soccerball : Bool? = false
+
+    @[YAML::Field(key: "relay_slot_machine")]
+    getter relay_slot_machine : Bool? = false
+
+    @[YAML::Field(key: "relay_bowling")]
+    getter relay_bowling : Bool? = false
+
+    @[YAML::Field(key: "relay_venue")]
     getter relay_venue : Bool? = false
 
-    @[YAML::Field(key: "relay-location")]
+    @[YAML::Field(key: "relay_location")]
     getter relay_location : Bool? = false
 
-    @[YAML::Field(key: "relay-contact")]
+    @[YAML::Field(key: "relay_contact")]
     getter relay_contact : Bool? = false
 
     @[YAML::Field(key: "media_limit_period")]

@@ -60,10 +60,28 @@ enable_purge: [true, false]
 enable_blacklist: [true, false]
 
 # Relaying toggles
-#relay-luck: true
-#relay-venue: true
-#relay-location: true
-#relay-contact: true
+# Set any to false to disable relaying messages of that type
+relay_text: true
+relay_animation: true
+relay_audio: true
+relay_document: true
+relay_video: true
+relay_video_note: true
+relay_voice: true
+relay_photo: true
+relay_media_group: true
+relay_poll: true
+relay_forwarded_message: true
+relay_sticker: true
+relay_dice: false
+relay_dart: false
+relay_basketball: false
+relay_soccerball: false
+relay_slot_machine: false
+relay_bowling: false
+relay_venue: false
+relay_location: false
+relay_contact: false
 
 # Duration (hours) in which new users cannot send media
 #media_limit_period: 3
