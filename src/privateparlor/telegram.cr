@@ -201,11 +201,11 @@ class PrivateParlor < Tourmaline::Client
   def get_history_type(db : DB::Database, config : Configuration::Config) : History | DatabaseHistory
     if config.database_history
       DatabaseHistory.new(db, config.lifetime.hours)
-    elsif (config.enable_downvotes || config.enable_upvotes) && config.enable_warnings
+    elsif (config.enable_downvote || config.enable_upvote) && config.enable_warn
       HistoryRatingsAndWarnings.new(config.lifetime.hours)
-    elsif config.enable_downvotes || config.enable_upvotes
+    elsif config.enable_downvote || config.enable_upvote
       HistoryRatings.new(config.lifetime.hours)
-    elsif config.enable_warnings
+    elsif config.enable_warn
       HistoryWarnings.new(config.lifetime.hours)
     else
       HistoryBase.new(config.lifetime.hours)
@@ -213,30 +213,40 @@ class PrivateParlor < Tourmaline::Client
   end
 
   def initialize_handlers(descriptions : Hash(Symbol, String), config : Configuration::Config) : Nil
-    add_event_handler(CommandHandler.new("start", register: true, description: descriptions[:start]) {|ctx| start_command(ctx)})
-    add_event_handler(CommandHandler.new(["stop", "leave"], register: true, description: descriptions[:stop]) {|ctx| stop_command(ctx)})
-    add_event_handler(CommandHandler.new("info", register: true, description: descriptions[:info]) {|ctx| info_command(ctx)})
-    add_event_handler(CommandHandler.new("users", register: true, description: descriptions[:users]) {|ctx| users_command(ctx)})
-    add_event_handler(CommandHandler.new("version", register: true, description: descriptions[:version]) {|ctx| version_command(ctx)})
-    add_event_handler(CommandHandler.new(["togglekarma", "toggle_karma"], register: true, description: descriptions[:toggle_karma]) {|ctx| toggle_karma_command(ctx)})
-    add_event_handler(CommandHandler.new(["toggledebug", "toggle_debug"], register: true, description: descriptions[:toggle_debug]) {|ctx| toggle_debug_command(ctx)})
-    add_event_handler(CommandHandler.new("tripcode", register: true, description: descriptions[:tripcode]) {|ctx| tripcode_command(ctx)})
-    add_event_handler(CommandHandler.new(["rules", "motd"], register: true, description: descriptions[:motd]) {|ctx| motd_command(ctx)})
-    add_event_handler(CommandHandler.new("help", register: true, description: descriptions[:help]) {|ctx| help_command(ctx)})
+    {% for command in [
+      "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help", "upvote", 
+      "downvote", "mod", "admin", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist"] 
+    %}
+
+    if config.enable_{{command.id}}[0]
+      add_event_handler(
+        CommandHandler.new(
+          {% if command == "stop" %}
+          ["stop", "leave"],
+          {% elsif command == "toggle_karma" %}
+          ["togglekarma", "toggle_karma"],
+          {% elsif command == "toggle_debug" %}
+          ["toggledebug", "toggle_debug"],
+          {% elsif command == "motd" %}
+          ["rules", "motd"],
+          {% elsif command == "upvote" %}
+          "1", "+",
+          {% elsif command == "downvote" %}
+          "1", "-",
+          {% elsif command == "blacklist" %}
+          ["blacklist", "ban"],
+          {% else %}
+          "{{command.id}}",
+          {% end %}
+           register: config.enable_{{command.id}}[1],
+           description: descriptions[:{{command.id}}]
+        ) {|ctx| {{command.id}}_command(ctx)}
+      )
+    end
+
+    {% end %}
 
     register_commands_with_botfather if @set_commands
-
-    add_event_handler(CommandHandler.new("1", "+") {|ctx| upvote_command(ctx)})
-    add_event_handler(CommandHandler.new("1", "-") {|ctx| downvote_command(ctx)})
-    add_event_handler(CommandHandler.new("mod") {|ctx| mod_command(ctx)})
-    add_event_handler(CommandHandler.new("admin") {|ctx| admin_command(ctx)})
-    add_event_handler(CommandHandler.new("demote") {|ctx| demote_command(ctx)})
-    add_event_handler(CommandHandler.new("warn") {|ctx| warn_command(ctx)})
-    add_event_handler(CommandHandler.new("delete") {|ctx| delete_command(ctx)})
-    add_event_handler(CommandHandler.new("uncooldown") {|ctx| uncooldown_command(ctx)})
-    add_event_handler(CommandHandler.new("remove") {|ctx| remove_command(ctx)})
-    add_event_handler(CommandHandler.new("purge") {|ctx| purge_command(ctx)})
-    add_event_handler(CommandHandler.new(["blacklist", "ban"]) {|ctx| blacklist_command(ctx)})
 
     add_event_handler(UpdateHandler.new(:text) {|update| handle_text(update)})
     {% for captioned_type in ["animation", "audio", "document", "video", "video_note", "voice", "photo"] %}

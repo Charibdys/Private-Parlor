@@ -27,14 +27,71 @@ module Configuration
     @[YAML::Field(key: "database-history")]
     getter database_history : Bool? = false
 
-    @[YAML::Field(key: "enable-upvotes")]
-    getter enable_upvotes : Bool? = true
+    # Command Toggles
+    @[YAML::Field(key: "enable_start")]
+    getter enable_start : Array(Bool) = [true, true]
 
-    @[YAML::Field(key: "enable-downvotes")]
-    getter enable_downvotes : Bool? = true
+    @[YAML::Field(key: "enable_stop")]
+    getter enable_stop : Array(Bool) = [true, true]
 
-    @[YAML::Field(key: "enable-warnings")]
-    getter enable_warnings : Bool? = true
+    @[YAML::Field(key: "enable_info")]
+    getter enable_info : Array(Bool) = [true, true]
+
+    @[YAML::Field(key: "enable_users")]
+    getter enable_users : Array(Bool) = [true, true]
+
+    @[YAML::Field(key: "enable_version")]
+    getter enable_version : Array(Bool) = [true, true]
+
+    @[YAML::Field(key: "enable_toggle_karma")]
+    getter enable_toggle_karma : Array(Bool) = [false, true]
+
+    @[YAML::Field(key: "enable_toggle_debug")]
+    getter enable_toggle_debug : Array(Bool) = [true, true]
+
+    @[YAML::Field(key: "enable_tripcode")]
+    getter enable_tripcode : Array(Bool) = [true, true]
+
+    @[YAML::Field(key: "enable_motd")]
+    getter enable_motd : Array(Bool) = [true, true]
+
+    @[YAML::Field(key: "enable_help")]
+    getter enable_help : Array(Bool) = [true, true]
+
+    @[YAML::Field(key: "enable_upvotes")]
+    getter enable_upvote : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_downvotes")]
+    getter enable_downvote : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_mod")]
+    getter enable_mod : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_admin")]
+    getter enable_admin : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_demote")]
+    getter enable_demote : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_warn")]
+    getter enable_warn : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_delete")]
+    getter enable_delete : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_uncooldown")]
+    getter enable_uncooldown : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_remove")]
+    getter enable_remove : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_purge")]
+    getter enable_purge : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_blacklist")]
+    getter enable_blacklist : Array(Bool) = [true, false]
+
+    # Relay Toggles
 
     @[YAML::Field(key: "relay-luck")]
     getter relay_luck : Bool? = true

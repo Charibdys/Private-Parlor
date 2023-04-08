@@ -35,9 +35,29 @@ locale: "en-US"
 #database-history: true
 
 # Command toggles
-enable-upvotes: true
-enable-downvotes: true
-enable_warnings: true
+# First value toggles the command (true to enable, false to disable)
+# Second value, if true, will register the command with BotFather
+enable_start: [true, true]
+enable_stop: [true, true]
+enable_info: [true, true]
+enable_users: [true, true]
+enable_version: [true, true]
+enable_toggle_karma: [true, true]
+enable_toggle_debug: [true, true]
+enable_tripcode: [true, true]
+enable_motd: [true, true]
+enable_help: [true, true]
+enable_upvotes: [true, false]
+enable_downvotes: [true, false]
+enable_mod: [true, false]
+enable_admin: [true, false]
+enable_demote: [true, false]
+enable_warn: [true, false]
+enable_delete: [true, false]
+enable_uncooldown: [true, false]
+enable_remove: [true, false]
+enable_purge: [true, false]
+enable_blacklist: [true, false]
 
 # Relaying toggles
 #relay-luck: true

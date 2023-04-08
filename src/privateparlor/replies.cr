@@ -54,7 +54,7 @@ class Replies
 
     command_keys = %i(
       start stop info users version upvote downvote toggle_karma toggle_debug tripcode mod admin demote
-      warn delete uncooldown remove purge blacklist motd help motd_set rankded_info
+      warn delete uncooldown remove purge blacklist motd help motd_set ranked_info
     )
 
     @entity_types = entities
