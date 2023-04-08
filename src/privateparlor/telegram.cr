@@ -26,8 +26,9 @@ class PrivateParlor < Tourmaline::Client
   getter media_limit_period : Int32
   getter registration_open : Bool?
   getter full_usercount : Bool?
-  getter allow_signing : Bool?
-  getter allow_tripcodes : Bool?
+  getter enable_sign : Bool?
+  getter enable_tripsign : Bool?
+  getter enable_ranksay : Bool?
   getter sign_limit_interval : Int32
   getter upvote_limit_interval : Int32
   getter downvote_limit_interval : Int32
@@ -58,8 +59,9 @@ class PrivateParlor < Tourmaline::Client
     @media_limit_period = config.media_limit_period
     @registration_open = config.registration_open
     @full_usercount = config.full_usercount
-    @allow_signing = config.allow_signing
-    @allow_tripcodes = config.allow_tripcodes
+    @enable_sign = config.enable_sign[0]
+    @enable_tripsign = config.enable_tripsign[0]
+    @enable_ranksay = config.enable_ranksay[0]
     @sign_limit_interval = config.sign_limit_interval
     @upvote_limit_interval = config.upvote_limit_interval
     @downvote_limit_interval = config.downvote_limit_interval
@@ -399,6 +401,26 @@ class PrivateParlor < Tourmaline::Client
     end
 
     {% end %}
+
+    # Handle embedded commands (sign, tsign, say) differently 
+    # These are only here to register the commands with BotFather; the commands cannot be disabled here
+    if config.enable_sign[0]
+      add_event_handler(CommandHandler.new("/sign", register: config.enable_sign[1], description: descriptions[:sign]) {|ctx| command_disabled(ctx)})
+    else
+      add_event_handler(CommandHandler.new("/sign", register: config.enable_sign[1], description: descriptions[:sign]) {|ctx| command_disabled(ctx)})
+    end
+
+    if config.enable_tripsign[0]
+      add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions[:tsign]) {|ctx| command_disabled(ctx)})
+    else
+      add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions[:tsign]) {|ctx| command_disabled(ctx)})
+    end
+
+    if config.enable_ranksay[0]
+      add_event_handler(CommandHandler.new("/ranksay", register: config.enable_ranksay[1], description: descriptions[:ranksay]) {|ctx| command_disabled(ctx)})
+    else
+      add_event_handler(CommandHandler.new("/ranksay", register: config.enable_ranksay[1], description: descriptions[:ranksay]) {|ctx| command_disabled(ctx)})
+    end
 
     register_commands_with_botfather if @set_commands
 
@@ -1201,7 +1223,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   def handle_sign(text : String, user : Database::User, msid : Int64) : String?
-    unless @allow_signing
+    unless @enable_sign
       return relay_to_one(msid, user.id, :command_disabled)
     end
     if (chat = get_chat(user.id)) && chat.has_private_forwards
@@ -1220,7 +1242,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   def handle_tripcode(text : String, user : Database::User, msid : Int64) : String?
-    unless @allow_tripcodes
+    unless @enable_tripsign
       relay_to_one(msid, user.id, :command_disabled)
     end
     if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
@@ -1241,7 +1263,13 @@ class PrivateParlor < Tourmaline::Client
   end
 
   def handle_ranksay(rank : String, text : String, user : Database::User, msid : Int64) : String?
-    unless (parsed_rank = Ranks.parse?(rank)) && user.authorized?(parsed_rank)
+    unless @enable_ranksay
+      return relay_to_one(msid, user.id, :command_disabled)
+    end
+    unless (parsed_rank = Ranks.parse?(rank)) || (parsed_rank = Ranks.new(user.rank) if rank == "rank")
+      return
+    end
+    unless parsed_rank && user.authorized?(parsed_rank)
       return
     end
 

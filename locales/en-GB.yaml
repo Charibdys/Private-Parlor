@@ -288,6 +288,18 @@ command_descriptions:
  - |-
    Demote a ranked user to the user rank
 
+# sign
+ - |-
+   Sign a message with your username
+
+# tsign
+ - |-
+   Sign a message with your tripcode
+
+# ranksay
+ - |-
+   Sign a message with your current rank (Alias of modsay/adminsay)
+
 # warn
  - |-
    Warns a message without deleting it

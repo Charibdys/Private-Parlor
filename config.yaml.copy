@@ -14,10 +14,6 @@ locale: "en-US"
 # This should be between 1 and 48 hours (inclusive)
 #lifetime: 24
 
-# Enable signing messages using /sign or /tsign
-#allow_signing: false
-#allow_tripcodes: true
-
 # Limit usage of /sign and /tsign for once every interval (seconds)
 # Set to 0 to disable, defaults to 600 seconds
 #sign_limit_interval: 600
@@ -45,6 +41,9 @@ enable_version: [true, true]
 enable_toggle_karma: [true, true]
 enable_toggle_debug: [true, true]
 enable_tripcode: [true, true]
+enable_sign: [true, true]
+enable_tripsign: [true, true]
+enable_ranksay: [true, true]
 enable_motd: [true, true]
 enable_help: [true, true]
 enable_upvotes: [true, false]

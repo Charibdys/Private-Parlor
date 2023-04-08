@@ -53,6 +53,15 @@ module Configuration
     @[YAML::Field(key: "enable_tripcode")]
     getter enable_tripcode : Array(Bool) = [true, true]
 
+    @[YAML::Field(key: "enable_sign")]
+    getter enable_sign : Array(Bool) = [true, true]
+
+    @[YAML::Field(key: "enable_tripsign")]
+    getter enable_tripsign : Array(Bool) = [true, true]
+
+    @[YAML::Field(key: "enable_ranksay")]
+    getter enable_ranksay : Array(Bool) = [true, true]
+
     @[YAML::Field(key: "enable_motd")]
     getter enable_motd : Array(Bool) = [true, true]
 
@@ -264,12 +273,6 @@ module Configuration
 
     @[YAML::Field(key: "full_usercount")]
     getter full_usercount : Bool? = false
-
-    @[YAML::Field(key: "allow_signing")]
-    getter allow_signing : Bool? = false
-
-    @[YAML::Field(key: "allow_tripcodes")]
-    getter allow_tripcodes : Bool? = false
 
     @[YAML::Field(key: "sign_limit_interval")]
     getter sign_limit_interval : Int32 = 600
