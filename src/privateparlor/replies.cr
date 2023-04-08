@@ -19,6 +19,8 @@ class Replies
   getter time_units : Array(String)
   getter time_format : String
   getter toggle : Array(String)
+  getter smileys : Array(String)
+  getter salt : String
 
   # Creates an instance of `Replies`.
   #
@@ -26,7 +28,7 @@ class Replies
   #
   # `entities`
   # :     an array of strings refering to one or more of the possible message entity types
-  def initialize(entities : Array(String), locale : String)
+  def initialize(entities : Array(String), locale : String, smileys : Array(String), salt : String)
     begin
       yaml = File.open("./locales/#{locale}.yaml") do |file|
         YAML.parse(file)
@@ -60,6 +62,8 @@ class Replies
     )
 
     @entity_types = entities
+    @smileys = smileys
+    @salt = salt
     @time_units = yaml["time_units"].as_a.map(&.as_s)
     @time_format = yaml["time_format"].as_s
     @toggle = yaml["toggle"].as_a.map(&.as_s)
@@ -209,19 +213,19 @@ class Replies
   # Generate a 8chan or Secretlounge-ng style tripcode from a given string in the format `name#pass`.
   #
   # Returns a named tuple containing the tripname and tripcode.
-  def generate_tripcode(tripkey : String, salt : String) : NamedTuple
+  def generate_tripcode(tripkey : String) : NamedTuple
     split = tripkey.split('#', 2)
     name = split[0]
     pass = split[1]
 
-    if !salt.empty?
+    if !@salt.empty?
       # Based on 8chan's secure tripcodes
       pass = String.new(pass.encode("Shift_JIS"), "Shift_JIS")
-      tripcode = "!#{Digest::SHA1.base64digest(pass + salt)[0...10]}"
+      tripcode = "!#{Digest::SHA1.base64digest(pass + @salt)[0...10]}"
     else
-      salt = (pass[...8] + "H.")[1...3]
-      salt = String.build do |s|
-        salt.each_char do |c|
+      @salt = (pass[...8] + "H.")[1...3]
+      @salt = String.build do |s|
+        @salt.each_char do |c|
           if ':' <= c <= '@'
             s << c + 7
           elsif '[' <= c <= '`'
@@ -234,7 +238,7 @@ class Replies
         end
       end
 
-      tripcode = "!#{String.new(LibCrypt.crypt(pass[...8], salt))[-10...]}"
+      tripcode = "!#{String.new(LibCrypt.crypt(pass[...8], @salt))[-10...]}"
     end
 
     {name: name, tripcode: tripcode}
@@ -286,15 +290,15 @@ class Replies
     end
   end
 
-  def format_smiley(warnings : Int32, smileys : Array(String)) : String
+  def format_smiley(warnings : Int32) : String
     if warnings <= 0
-      smileys[0]
+      @smileys[0]
     elsif warnings == 1
-      smileys[1]
+      @smileys[1]
     elsif warnings <= 3
-      smileys[2]
+      @smileys[2]
     else
-      smileys[3]
+      @smileys[3]
     end
   end
 

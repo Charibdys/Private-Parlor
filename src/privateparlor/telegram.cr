@@ -14,7 +14,6 @@ class PrivateParlor < Tourmaline::Client
   getter queue : Deque(QueuedMessage)
   getter replies : Replies
   getter tasks : Hash(Symbol, Tasker::Task)
-  getter config : Configuration::Config
   getter albums : Hash(String, Album)
   getter spam_handler : SpamScoreHandler | Nil
 
@@ -24,6 +23,14 @@ class PrivateParlor < Tourmaline::Client
   getter warn_expire_hours : Int32
   getter karma_warn_penalty : Int32
 
+  getter media_limit_period : Int32
+  getter registration_open : Bool?
+  getter full_usercount : Bool?
+  getter allow_signing : Bool?
+  getter allow_tripcodes : Bool?
+  getter sign_limit_interval : Int32
+  getter upvote_limit_interval : Int32
+  getter downvote_limit_interval : Int32
 
   # Creates a new instance of PrivateParlor.
   #
@@ -37,7 +44,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # `connection`
   # :     the `DB::Databse` object obtained from the database path in the `config.yaml` file
-  def initialize(@config : Configuration::Config)
+  def initialize(config : Configuration::Config)
     super(bot_token: config.token, set_commands: true)
     Client.default_parse_mode = (Tourmaline::ParseMode::MarkdownV2)
 
@@ -48,11 +55,20 @@ class PrivateParlor < Tourmaline::Client
     @warn_expire_hours = config.warn_expire_hours
     @karma_warn_penalty = config.karma_warn_penalty
 
+    @media_limit_period = config.media_limit_period
+    @registration_open = config.registration_open
+    @full_usercount = config.full_usercount
+    @allow_signing = config.allow_signing
+    @allow_tripcodes = config.allow_tripcodes
+    @sign_limit_interval = config.sign_limit_interval
+    @upvote_limit_interval = config.upvote_limit_interval
+    @downvote_limit_interval = config.downvote_limit_interval
+
     db = DB.open("sqlite3://#{Path.new(config.database)}") # TODO: We'll want check if this works on Windows later
     @database = Database.new(db)
     @history = get_history_type(db, config)
     @queue = Deque(QueuedMessage).new
-    @replies = Replies.new(config.entities, config.locale)
+    @replies = Replies.new(config.entities, config.locale, config.smileys, config.salt)
     @spam_handler = SpamScoreHandler.new(config) if config.spam_interval_seconds != 0
     @tasks = register_tasks(config.spam_interval_seconds)
     @albums = {} of String => Album
@@ -440,7 +456,7 @@ class PrivateParlor < Tourmaline::Client
         relay_to_one(message.message_id, user.id, :already_in_chat)
       end
     else
-      unless @config.registration_open
+      unless @registration_open
         return relay_to_one(nil, info.id, :registration_closed)
       end
 
@@ -512,7 +528,7 @@ class PrivateParlor < Tourmaline::Client
         "karma"          => user.karma,
         "warnings"       => user.warnings,
         "warn_expiry"    => @replies.format_time(user.warn_expiry),
-        "smiley"         => @replies.format_smiley(user.warnings, @config.smileys),
+        "smiley"         => @replies.format_smiley(user.warnings),
         "cooldown_until" => user.remove_cooldown ? nil : @replies.format_time(user.cooldown_until),
       })
     end
@@ -538,7 +554,7 @@ class PrivateParlor < Tourmaline::Client
 
     counts = database.get_user_counts
 
-    if user.authorized?(Ranks::Moderator) || config.full_usercount
+    if user.authorized?(Ranks::Moderator) || @full_usercount
       relay_to_one(nil, user.id, :user_count_full, {
         "joined"      => counts[:total] - counts[:left],
         "left"        => counts[:left],
@@ -582,7 +598,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    if (spam = @spam_handler) && spam.spammy_upvote?(user.id, @config.upvote_limit_interval)
+    if (spam = @spam_handler) && spam.spammy_upvote?(user.id, @upvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :upvote_spam)
     end
     unless reply = message.reply_message
@@ -624,7 +640,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @config.downvote_limit_interval)
+    if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @downvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :downvote_spam)
     end
     unless reply = message.reply_message
@@ -713,7 +729,7 @@ class PrivateParlor < Tourmaline::Client
       user.set_tripcode(arg)
       @database.modify_user(user)
 
-      results = @replies.generate_tripcode(arg, @config.salt)
+      results = @replies.generate_tripcode(arg)
       relay_to_one(message.message_id, user.id, :tripcode_set, {"name" => results[:name], "tripcode" => results[:tripcode]})
     else
       relay_to_one(message.message_id, user.id, :tripcode_info, {"tripcode" => user.tripcode})
@@ -1177,11 +1193,11 @@ class PrivateParlor < Tourmaline::Client
     when !text.starts_with?('/')
       return text
     when text.starts_with?("/s"), text.starts_with?("/sign")
-      if config.allow_signing
+      if @allow_signing
         if (chat = get_chat(user.id)) && chat.has_private_forwards
           relay_to_one(msid, user.id, :private_sign)
         else
-          if (spam = @spam_handler) && spam.spammy_sign?(user.id, @config.sign_limit_interval)
+          if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
             relay_to_one(msid, user.id, :sign_spam)
           else
             if (args = @replies.get_args(text)) && args.size > 0
@@ -1196,13 +1212,13 @@ class PrivateParlor < Tourmaline::Client
         relay_to_one(msid, user.id, :command_disabled)
       end
     when text.starts_with?("/t"), text.starts_with?("/tsign")
-      if config.allow_tripcodes
-        if (spam = @spam_handler) && spam.spammy_sign?(user.id, @config.sign_limit_interval)
+      if @allow_tripcodes
+        if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
           relay_to_one(msid, user.id, :sign_spam)
         else
           if tripkey = user.tripcode
             if (args = @replies.get_args(text)) && args.size > 0
-              pair = @replies.generate_tripcode(tripkey, config.salt)
+              pair = @replies.generate_tripcode(tripkey)
               return String.build do |str|
                 str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
                 str << "\n"
@@ -1320,7 +1336,7 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?(@config.media_limit_period.hours)
+    unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:{{captioned_type}}))
@@ -1369,7 +1385,7 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?(@config.media_limit_period.hours)
+    unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
     end
 
@@ -1489,7 +1505,7 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?(@config.media_limit_period.hours)
+    unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:forward))
@@ -1521,7 +1537,7 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?(@config.media_limit_period.hours)
+    unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:sticker))
@@ -1710,8 +1726,8 @@ class PrivateParlor < Tourmaline::Client
       relay_to_one(nil, user.id, :blacklisted, {"reason" => user.blacklist_reason})
     elsif cooldown_until = user.cooldown_until
       relay_to_one(nil, user.id, :on_cooldown, {"time" => @replies.format_time(cooldown_until)})
-    elsif Time.utc - user.joined < @config.media_limit_period.hours
-      relay_to_one(nil, user.id, :media_limit, {"total" => (@config.media_limit_period.hours - (Time.utc - user.joined)).hours})
+    elsif Time.utc - user.joined < @media_limit_period.hours
+      relay_to_one(nil, user.id, :media_limit, {"total" => (@media_limit_period.hours - (Time.utc - user.joined)).hours})
     else
       relay_to_one(nil, user.id, :not_in_chat)
     end
