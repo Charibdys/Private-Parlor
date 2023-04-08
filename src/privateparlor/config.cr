@@ -28,6 +28,7 @@ module Configuration
     getter database_history : Bool? = false
 
     # Command Toggles
+    
     @[YAML::Field(key: "enable_start")]
     getter enable_start : Array(Bool) = [true, true]
 
@@ -44,7 +45,7 @@ module Configuration
     getter enable_version : Array(Bool) = [true, true]
 
     @[YAML::Field(key: "enable_toggle_karma")]
-    getter enable_toggle_karma : Array(Bool) = [false, true]
+    getter enable_toggle_karma : Array(Bool) = [true, true]
 
     @[YAML::Field(key: "enable_toggle_debug")]
     getter enable_toggle_debug : Array(Bool) = [true, true]
