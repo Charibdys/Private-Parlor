@@ -3,8 +3,8 @@ version: 0.6.5
 
 dependencies:
   tourmaline:
-    github: protoncr/tourmaline
-    version: ~> 0.27.0
+    github: Charibdys/tourmaline
+    branch: master
   tasker:
     github: spider-gazelle/tasker
     branch: master
