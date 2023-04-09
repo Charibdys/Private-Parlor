@@ -109,7 +109,7 @@ class Replies
         when "warn_expiry"
           if variables[placeholder]
             # Skip replace.to_md to prevent escaping Markdown twice
-            next replace = @replies[:info_warning].gsub("#{warn_expiry}") { "#{variables[placeholder]}".to_md }
+            next replace = @replies[:info_warning].gsub("#\{warn_expiry\}") { "#{variables[placeholder]}".to_md }
           end
         when "reason"
           if variables[placeholder]

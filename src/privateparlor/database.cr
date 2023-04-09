@@ -540,12 +540,14 @@ class DatabaseHistory
       messageGroupID BIGINT NOT NULL,
       PRIMARY KEY (receiverMSID),
       FOREIGN KEY (messageGroupID) REFERENCES message_groups(messageGroupID)
+      ON DELETE CASCADE
     )")
     db.exec("CREATE TABLE IF NOT EXISTS karma (
       messageGroupID BIGINT NOT NULL,
       userID BIGINT NOT NULL,
       PRIMARY KEY (messageGroupID),
       FOREIGN KEY (messageGroupID) REFERENCES receivers(receiverMSID)
+      ON DELETE CASCADE
     )")
   end
 end
