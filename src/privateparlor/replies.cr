@@ -5,6 +5,8 @@ lib LibCrypt
   fun crypt(password : UInt8*, salt : UInt8*) : UInt8*
 end
 
+alias LocaleParameters = Hash(String, String | Time | Int32 | Bool | Ranks | Nil)
+
 class Replies
   include Tourmaline::Format
   include Tourmaline::Helpers
@@ -17,6 +19,8 @@ class Replies
   getter time_units : Array(String)
   getter time_format : String
   getter toggle : Array(String)
+  getter smileys : Array(String)
+  getter tripcode_salt : String
 
   # Creates an instance of `Replies`.
   #
@@ -24,7 +28,16 @@ class Replies
   #
   # `entities`
   # :     an array of strings refering to one or more of the possible message entity types
-  def initialize(entities : Array(String), locale : String)
+  #
+  # `locale`
+  # :     a language code, corresponding to one of the locales in the locales folder
+  #
+  # `smileys`
+  # :     an array of four smileys
+  #
+  # `salt`
+  # :     a salt used for hashing tripcodes
+  def initialize(entities : Array(String), locale : String, smileys : Array(String), salt : String)
     begin
       yaml = File.open("./locales/#{locale}.yaml") do |file|
         YAML.parse(file)
@@ -39,11 +52,11 @@ class Replies
 
     reply_keys = %i(
       joined rejoined left already_in_chat registration_closed not_in_chat not_in_cooldown rejected_message deanon_poll
-      missing_args command_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found
+      missing_args command_disabled media_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found
       promoted toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted
       gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming
       sign_spam upvote_spam downvote_spam invalid_tripcode_format tripcode_set tripcode_info
-      tripcode_unset user_info ranked_info cooldown_true cooldown_false user_count user_count_full
+      tripcode_unset user_info info_warning ranked_info cooldown_true cooldown_false user_count user_count_full
       message_deleted message_removed reason_prefix cooldown_given on_cooldown media_limit blacklisted purge_complete success
     )
 
@@ -54,10 +67,12 @@ class Replies
 
     command_keys = %i(
       start stop info users version upvote downvote toggle_karma toggle_debug tripcode mod admin demote
-      warn delete uncooldown remove purge blacklist motd help motd_set rankded_info
+      sign tsign ranksay warn delete uncooldown remove purge blacklist motd help motd_set ranked_info
     )
 
     @entity_types = entities
+    @smileys = smileys
+    @tripcode_salt = salt
     @time_units = yaml["time_units"].as_a.map(&.as_s)
     @time_format = yaml["time_format"].as_s
     @toggle = yaml["toggle"].as_a.map(&.as_s)
@@ -90,6 +105,11 @@ class Replies
             replace = "#{@replies[:cooldown_true]} #{variables[placeholder]}"
           else
             replace = @replies[:cooldown_false]
+          end
+        when "warn_expiry"
+          if variables[placeholder]
+            # Skip replace.to_md to prevent escaping Markdown twice
+            next replace = @replies[:info_warning].gsub("#\{warn_expiry\}") { "#{variables[placeholder]}".to_md }
           end
         when "reason"
           if variables[placeholder]
@@ -202,11 +222,12 @@ class Replies
   # Generate a 8chan or Secretlounge-ng style tripcode from a given string in the format `name#pass`.
   #
   # Returns a named tuple containing the tripname and tripcode.
-  def generate_tripcode(tripkey : String, salt : String) : NamedTuple
+  def generate_tripcode(tripkey : String) : NamedTuple
     split = tripkey.split('#', 2)
     name = split[0]
     pass = split[1]
 
+    salt = @tripcode_salt
     if !salt.empty?
       # Based on 8chan's secure tripcodes
       pass = String.new(pass.encode("Shift_JIS"), "Shift_JIS")
@@ -279,18 +300,20 @@ class Replies
     end
   end
 
-  def format_smiley(warnings : Int32, smileys : Array(String)) : String
+  # Returns a smiley based on the number of given warnings
+  def format_smiley(warnings : Int32) : String
     if warnings <= 0
-      smileys[0]
+      @smileys[0]
     elsif warnings == 1
-      smileys[1]
+      @smileys[1]
     elsif warnings <= 3
-      smileys[2]
+      @smileys[2]
     else
-      smileys[3]
+      @smileys[3]
     end
   end
 
+  # Formats a timestamp according to the locale settings
   def format_time(time : Time?) : String?
     if time
       time.to_s(@time_format)
@@ -309,7 +332,6 @@ class Replies
     Section.new(text).to_md
   end
 
-  # TODO: Move command descriptions to locale
   # Returns a message containing the commands the a moderator can use.
   def mod_help : String
     Section.new(
@@ -324,7 +346,6 @@ class Replies
     ).to_md
   end
 
-  # TODO: Move command descriptions to locale
   # Returns a message containing the commands the an admin can use.
   def admin_help : String
     Section.new(
@@ -341,7 +362,6 @@ class Replies
     ).to_md
   end
 
-  # TODO: Move command descriptions to locale
   # Returns a message containing the commands the a host can use.
   def host_help : String
     Section.new(

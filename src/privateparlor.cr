@@ -4,6 +4,8 @@ require "tasker"
 require "sqlite3"
 require "./privateparlor/*"
 
+VERSION = "0.6.5"
+
 bot = PrivateParlor.new(Configuration.parse_config)
 
 Log.info { bot.replies.substitute_log(:start, {"version" => VERSION}) }

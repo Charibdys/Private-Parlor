@@ -1,36 +1,72 @@
+enum Ranks
+  Banned =  -10
+  User   =    0
+  Mod    =   10
+  Admin  =  100
+  Host   = 1000
+end
+
+alias MessageProc = Proc(Int64, Int64 | Nil, Tourmaline::Message) | Proc(Int64, Int64 | Nil, Array(Tourmaline::Message))
+
 class PrivateParlor < Tourmaline::Client
   getter database : Database
   getter history : History | DatabaseHistory
   getter queue : Deque(QueuedMessage)
   getter replies : Replies
   getter tasks : Hash(Symbol, Tasker::Task)
-  getter config : Configuration::Config
   getter albums : Hash(String, Album)
-  getter spam : SpamScoreHandler
+  getter spam_handler : SpamScoreHandler | Nil
 
-  # Creates a new instance of PrivateParlor.
+  getter cooldown_time_begin : Array(Int32)
+  getter cooldown_time_linear_m : Int32
+  getter cooldown_time_linear_b : Int32
+  getter warn_expire_hours : Int32
+  getter karma_warn_penalty : Int32
+
+  getter media_limit_period : Int32
+  getter registration_open : Bool?
+  getter full_usercount : Bool?
+  getter enable_sign : Bool?
+  getter enable_tripsign : Bool?
+  getter enable_ranksay : Bool?
+  getter sign_limit_interval : Int32
+  getter upvote_limit_interval : Int32
+  getter downvote_limit_interval : Int32
+
+  # Creates a new instance of `PrivateParlor`.
   #
   # ## Arguments:
   #
-  # `bot_token`
-  # :     the bot token given by `@BotFather`
-  #
   # `config`
   # :     a `Configuration::Config` from parsing the `config.yaml` file
-  #
-  # `connection`
-  # :     the `DB::Databse` object obtained from the database path in the `config.yaml` file
-  def initialize(@config : Configuration::Config)
+  def initialize(config : Configuration::Config)
     super(bot_token: config.token, set_commands: true)
     Client.default_parse_mode = (Tourmaline::ParseMode::MarkdownV2)
+
+    # Init warn/karma variables
+    @cooldown_time_begin = config.cooldown_time_begin
+    @cooldown_time_linear_m = config.cooldown_time_linear_m
+    @cooldown_time_linear_b = config.cooldown_time_linear_b
+    @warn_expire_hours = config.warn_expire_hours
+    @karma_warn_penalty = config.karma_warn_penalty
+
+    @media_limit_period = config.media_limit_period
+    @registration_open = config.registration_open
+    @full_usercount = config.full_usercount
+    @enable_sign = config.enable_sign[0]
+    @enable_tripsign = config.enable_tripsign[0]
+    @enable_ranksay = config.enable_ranksay[0]
+    @sign_limit_interval = config.sign_limit_interval
+    @upvote_limit_interval = config.upvote_limit_interval
+    @downvote_limit_interval = config.downvote_limit_interval
 
     db = DB.open("sqlite3://#{Path.new(config.database)}") # TODO: We'll want check if this works on Windows later
     @database = Database.new(db)
     @history = get_history_type(db, config)
     @queue = Deque(QueuedMessage).new
-    @replies = Replies.new(config.entities, config.locale)
-    @spam = SpamScoreHandler.new
-    @tasks = register_tasks()
+    @replies = Replies.new(config.entities, config.locale, config.smileys, config.salt)
+    @spam_handler = SpamScoreHandler.new(config) if config.spam_interval_seconds != 0
+    @tasks = register_tasks(config.spam_interval_seconds)
     @albums = {} of String => Album
 
     initialize_handlers(@replies.command_descriptions, config)
@@ -75,6 +111,15 @@ class PrivateParlor < Tourmaline::Client
     property message_ids : Array(Int64)
     property media_ids : Array(InputMediaPhoto | InputMediaVideo | InputMediaAudio | InputMediaDocument)
 
+    # Creates and instance of `Album`, representing a prepared media group to queue and relay
+    #
+    # ## Arguments:
+    #
+    # `msid`
+    # :     the message ID of the first media file in the album
+    #
+    # `media`
+    # :     the media type corresponding with the given MSID
     def initialize(msid : Int64, media : InputMediaPhoto | InputMediaVideo | InputMediaAudio | InputMediaDocument)
       @message_ids = [msid]
       @media_ids = [media]
@@ -87,11 +132,72 @@ class PrivateParlor < Tourmaline::Client
     getter upvote_last_used : Hash(Int64, Time)
     getter downvote_last_used : Hash(Int64, Time)
 
-    def initialize
+    getter spam_limit : Float32
+    getter spam_limit_hit : Float32
+
+    getter score_base_message : Float32
+    getter score_text_character : Float32
+    getter score_text_linebreak : Float32
+    getter score_animation : Float32
+    getter score_audio : Float32
+    getter score_document : Float32
+    getter score_video : Float32
+    getter score_video_note : Float32
+    getter score_voice : Float32
+    getter score_photo : Float32
+    getter score_media_group : Float32
+    getter score_poll : Float32
+    getter score_forwarded_message : Float32
+    getter score_sticker : Float32
+    getter score_dice : Float32
+    getter score_dart : Float32
+    getter score_basketball : Float32
+    getter score_soccerball : Float32
+    getter score_slot_machine : Float32
+    getter score_bowling : Float32
+    getter score_venue : Float32
+    getter score_location : Float32
+    getter score_contact : Float32
+
+    # Creates a new instance of a `SpamScoreHandler`.
+    #
+    # ## Arguments:
+    #
+    # `config`
+    # :     a `Configuration::Config` passed from initializing a `PrivateParlor`
+    def initialize(config : Configuration::Config)
       @scores = {} of Int64 => Float32
       @sign_last_used = {} of Int64 => Time
       @upvote_last_used = {} of Int64 => Time
       @downvote_last_used = {} of Int64 => Time
+
+      # Init spam score constants
+      @spam_limit = config.spam_limit
+      @spam_limit_hit = config.spam_limit_hit
+
+      @score_base_message = config.score_base_message
+      @score_text_character = config.score_text_character
+      @score_text_linebreak = config.score_text_linebreak
+      @score_animation = config.score_animation
+      @score_audio = config.score_audio
+      @score_document = config.score_document
+      @score_video = config.score_video
+      @score_video_note = config.score_video_note
+      @score_voice = config.score_voice
+      @score_photo = config.score_photo
+      @score_media_group = config.score_media_group
+      @score_poll = config.score_poll
+      @score_forwarded_message = config.score_forwarded_message
+      @score_sticker = config.score_sticker
+      @score_dice = config.score_dice
+      @score_dart = config.score_dart
+      @score_basketball = config.score_basketball
+      @score_soccerball = config.score_soccerball
+      @score_slot_machine = config.score_slot_machine
+      @score_bowling = config.score_bowling
+      @score_venue = config.score_venue
+      @score_location = config.score_location
+      @score_contact = config.score_contact
     end
 
     # Check if user's spam score triggers the spam filter
@@ -100,11 +206,11 @@ class PrivateParlor < Tourmaline::Client
     def spammy?(user : Int64, increment : Float32) : Bool
       score = 0 unless score = @scores[user]?
 
-      if score > SPAM_LIMIT
+      if score > spam_limit
         return true
-      elsif score + increment > SPAM_LIMIT
-        @scores[user] = SPAM_LIMIT_HIT
-        return score + increment >= SPAM_LIMIT_HIT
+      elsif score + increment > spam_limit
+        @scores[user] = spam_limit_hit
+        return score + increment >= spam_limit_hit
       end
 
       @scores[user] = score + increment
@@ -169,21 +275,56 @@ class PrivateParlor < Tourmaline::Client
       false
     end
 
+    # Returns the associated spam score contant from a given type
     def calculate_spam_score(type : Symbol) : Float32
       case type
-      when :forward
-        SCORE_BASE_FORWARD
-      when :sticker
-        SCORE_STICKER
+      when :animation
+        score_animation
+      when :audio
+        score_audio
+      when :document
+        score_document
+      when :video
+        score_video
+      when :video_note
+        score_video_note
+      when :voice
+        score_voice
+      when :photo
+        score_photo
       when :album
-        SCORE_ALBUM
+        score_media_group
+      when :poll
+        score_poll
+      when :forward
+        score_forwarded_message
+      when :sticker
+        score_sticker
+      when :dice
+        score_dice
+      when :dart
+        score_dart
+      when :basketball
+        score_basketball
+      when :soccerball
+        score_soccerball
+      when :slot_machine
+        score_slot_machine
+      when :bowling
+        score_bowling
+      when :venue
+        score_venue
+      when :location
+        score_location
+      when :contact
+        score_contact
       else
-        SCORE_BASE_MESSAGE
+        score_base_message
       end
     end
 
     def calculate_spam_score_text(text : String) : Float32
-      SCORE_BASE_MESSAGE + (text.size * SCORE_TEXT_CHARACTER) + (text.count('\n') * SCORE_TEXT_LINEBREAK)
+      score_base_message + (text.size * score_text_character) + (text.count('\n') * score_text_linebreak)
     end
 
     def expire
@@ -201,66 +342,123 @@ class PrivateParlor < Tourmaline::Client
   def get_history_type(db : DB::Database, config : Configuration::Config) : History | DatabaseHistory
     if config.database_history
       DatabaseHistory.new(db, config.lifetime.hours)
-    elsif (config.enable_downvotes || config.enable_upvotes) && config.enable_warnings
+    elsif (config.enable_downvote || config.enable_upvote) && config.enable_warn
       HistoryRatingsAndWarnings.new(config.lifetime.hours)
-    elsif config.enable_downvotes || config.enable_upvotes
+    elsif config.enable_downvote || config.enable_upvote
       HistoryRatings.new(config.lifetime.hours)
-    elsif config.enable_warnings
+    elsif config.enable_warn
       HistoryWarnings.new(config.lifetime.hours)
     else
       HistoryBase.new(config.lifetime.hours)
     end
   end
 
+  # Initializes CommandHandlers and UpdateHandlers
+  # Also checks whether or not a command or media type is enabled via the config, and registers commands with BotFather
   def initialize_handlers(descriptions : Hash(Symbol, String), config : Configuration::Config) : Nil
-    add_event_handler(CommandHandler.new("start", register: true, description: descriptions[:start]) {|ctx| start_command(ctx)})
-    add_event_handler(CommandHandler.new(["stop", "leave"], register: true, description: descriptions[:stop]) {|ctx| stop_command(ctx)})
-    add_event_handler(CommandHandler.new("info", register: true, description: descriptions[:info]) {|ctx| info_command(ctx)})
-    add_event_handler(CommandHandler.new("users", register: true, description: descriptions[:users]) {|ctx| users_command(ctx)})
-    add_event_handler(CommandHandler.new("version", register: true, description: descriptions[:version]) {|ctx| version_command(ctx)})
-    add_event_handler(CommandHandler.new(["togglekarma", "toggle_karma"], register: true, description: descriptions[:toggle_karma]) {|ctx| toggle_karma_command(ctx)})
-    add_event_handler(CommandHandler.new(["toggledebug", "toggle_debug"], register: true, description: descriptions[:toggle_debug]) {|ctx| toggle_debug_command(ctx)})
-    add_event_handler(CommandHandler.new("tripcode", register: true, description: descriptions[:tripcode]) {|ctx| tripcode_command(ctx)})
-    add_event_handler(CommandHandler.new(["rules", "motd"], register: true, description: descriptions[:motd]) {|ctx| motd_command(ctx)})
-    add_event_handler(CommandHandler.new("help", register: true, description: descriptions[:help]) {|ctx| help_command(ctx)})
+    {% for command in [
+                        "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help", "upvote",
+                        "downvote", "mod", "admin", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist",
+                      ] %}
+
+    if config.enable_{{command.id}}[0]
+      add_event_handler(
+        CommandHandler.new(
+          {% if command == "stop" %}
+          ["stop", "leave"],
+          {% elsif command == "toggle_karma" %}
+          ["togglekarma", "toggle_karma"],
+          {% elsif command == "toggle_debug" %}
+          ["toggledebug", "toggle_debug"],
+          {% elsif command == "motd" %}
+          ["rules", "motd"],
+          {% elsif command == "upvote" %}
+          "1", "+",
+          {% elsif command == "downvote" %}
+          "1", "-",
+          {% elsif command == "blacklist" %}
+          ["blacklist", "ban"],
+          {% else %}
+          "{{command.id}}",
+          {% end %}
+           register: config.enable_{{command.id}}[1],
+           description: descriptions[:{{command.id}}]
+        ) {|ctx| {{command.id}}_command(ctx)}
+      )
+    else
+      add_event_handler(
+        CommandHandler.new(
+          {% if command == "stop" %}
+          ["stop", "leave"],
+          {% elsif command == "toggle_karma" %}
+          ["togglekarma", "toggle_karma"],
+          {% elsif command == "toggle_debug" %}
+          ["toggledebug", "toggle_debug"],
+          {% elsif command == "motd" %}
+          ["rules", "motd"],
+          {% elsif command == "upvote" %}
+          "1", "+",
+          {% elsif command == "downvote" %}
+          "1", "-",
+          {% elsif command == "blacklist" %}
+          ["blacklist", "ban"],
+          {% else %}
+          "{{command.id}}",
+          {% end %}
+           register: config.enable_{{command.id}}[1],
+           description: descriptions[:{{command.id}}]
+        ) {|ctx| command_disabled(ctx)}
+      )
+    end
+
+    {% end %}
+
+    # Handle embedded commands (sign, tsign, say) differently
+    # These are only here to register the commands with BotFather; the commands cannot be disabled here
+    if config.enable_sign[0]
+      add_event_handler(CommandHandler.new("/sign", register: config.enable_sign[1], description: descriptions[:sign]) { |ctx| command_disabled(ctx) })
+    else
+      add_event_handler(CommandHandler.new("/sign", register: config.enable_sign[1], description: descriptions[:sign]) { |ctx| command_disabled(ctx) })
+    end
+
+    if config.enable_tripsign[0]
+      add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions[:tsign]) { |ctx| command_disabled(ctx) })
+    else
+      add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions[:tsign]) { |ctx| command_disabled(ctx) })
+    end
+
+    if config.enable_ranksay[0]
+      add_event_handler(CommandHandler.new("/ranksay", register: config.enable_ranksay[1], description: descriptions[:ranksay]) { |ctx| command_disabled(ctx) })
+    else
+      add_event_handler(CommandHandler.new("/ranksay", register: config.enable_ranksay[1], description: descriptions[:ranksay]) { |ctx| command_disabled(ctx) })
+    end
 
     register_commands_with_botfather if @set_commands
 
-    add_event_handler(CommandHandler.new("1", "+") {|ctx| upvote_command(ctx)})
-    add_event_handler(CommandHandler.new("1", "-") {|ctx| downvote_command(ctx)})
-    add_event_handler(CommandHandler.new("mod") {|ctx| mod_command(ctx)})
-    add_event_handler(CommandHandler.new("admin") {|ctx| admin_command(ctx)})
-    add_event_handler(CommandHandler.new("demote") {|ctx| demote_command(ctx)})
-    add_event_handler(CommandHandler.new("warn") {|ctx| warn_command(ctx)})
-    add_event_handler(CommandHandler.new("delete") {|ctx| delete_command(ctx)})
-    add_event_handler(CommandHandler.new("uncooldown") {|ctx| uncooldown_command(ctx)})
-    add_event_handler(CommandHandler.new("remove") {|ctx| remove_command(ctx)})
-    add_event_handler(CommandHandler.new("purge") {|ctx| purge_command(ctx)})
-    add_event_handler(CommandHandler.new(["blacklist", "ban"]) {|ctx| blacklist_command(ctx)})
+    {% for media_type in [
+                           "text", "animation", "audio", "document", "video", "video_note", "voice", "photo",
+                           "media_group", "poll", "forwarded_message", "sticker", "dice", "dart", "basketball",
+                           "soccerball", "slot_machine", "bowling", "venue", "location", "contact",
+                         ] %}
 
-    add_event_handler(UpdateHandler.new(:text) {|update| handle_text(update)})
-    {% for captioned_type in ["animation", "audio", "document", "video", "video_note", "voice", "photo"] %}
-    add_event_handler(UpdateHandler.new(:{{captioned_type.id}}) {|update| handle_{{captioned_type.id}}(update)})
+    if config.relay_{{media_type.id}}
+      add_event_handler(UpdateHandler.new(:{{media_type.id}}) {|update| handle_{{media_type.id}}(update)})
+    else
+      add_event_handler(UpdateHandler.new(:{{media_type.id}}) {|update| media_disabled(update, "{{media_type.id}}")})
+    end
+
     {% end %}
-    add_event_handler(UpdateHandler.new(:media_group) {|update| handle_albums(update)})
-    add_event_handler(UpdateHandler.new(:poll) {|update| handle_poll(update)})
-    add_event_handler(UpdateHandler.new(:forwarded_message) {|update| handle_forward(update)})
-    add_event_handler(UpdateHandler.new(:sticker) {|update| handle_sticker(update)})
-    {% for luck_type in ["dice", "dart", "basketball", "soccerball", "slot_machine", "bowling"] %}
-    add_event_handler(UpdateHandler.new(:{{luck_type.id}}) {|update| handle_{{luck_type.id}}(update)})
-    {% end %}
-    add_event_handler(UpdateHandler.new(:venue) {|update| handle_venue(update)})
-    add_event_handler(UpdateHandler.new(:location) {|update| handle_location(update)})
-    add_event_handler(UpdateHandler.new(:contact) {|update| handle_contact(update)})
   end
 
   # Starts various background tasks and stores them in a hash.
-  def register_tasks : Hash
-    {
-      :cache    => Tasker.every(@history.lifespan * (1/4)) { @history.expire },
-      :spam     => Tasker.every(SPAM_INTERVAL_SECONDS.seconds) { @spam.expire },
-      :warnings => Tasker.every(15.minutes) { @database.expire_warnings },
-    } of Symbol => Tasker::Task
+  def register_tasks(spam_interval_seconds : Int32) : Hash
+    tasks = {} of Symbol => Tasker::Task
+    tasks[:cache] = Tasker.every(@history.lifespan * (1/4)) { @history.expire }
+    tasks[:warnings] = Tasker.every(15.minutes) { @database.expire_warnings(warn_expire_hours) }
+    if spam = @spam_handler
+      tasks[:spam] = Tasker.every(spam_interval_seconds.seconds) { spam.expire }
+    end
+    tasks
   end
 
   # User starts the bot and begins receiving messages.
@@ -290,7 +488,7 @@ class PrivateParlor < Tourmaline::Client
         relay_to_one(message.message_id, user.id, :already_in_chat)
       end
     else
-      unless @config.registration_open
+      unless @registration_open
         return relay_to_one(nil, info.id, :registration_closed)
       end
 
@@ -344,7 +542,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     if reply = message.reply_message
-      if user.authorized?(Ranks::Moderator)
+      if user.authorized?(Ranks::Mod)
         if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
           relay_to_one(message.message_id, user.id, :ranked_info, {
             "oid"            => reply_user.get_obfuscated_id,
@@ -362,7 +560,7 @@ class PrivateParlor < Tourmaline::Client
         "karma"          => user.karma,
         "warnings"       => user.warnings,
         "warn_expiry"    => @replies.format_time(user.warn_expiry),
-        "smiley"         => @replies.format_smiley(user.warnings, @config.smileys),
+        "smiley"         => @replies.format_smiley(user.warnings),
         "cooldown_until" => user.remove_cooldown ? nil : @replies.format_time(user.cooldown_until),
       })
     end
@@ -388,7 +586,7 @@ class PrivateParlor < Tourmaline::Client
 
     counts = database.get_user_counts
 
-    if user.authorized?(Ranks::Moderator) || config.full_usercount
+    if user.authorized?(Ranks::Mod) || @full_usercount
       relay_to_one(nil, user.id, :user_count_full, {
         "joined"      => counts[:total] - counts[:left],
         "left"        => counts[:left],
@@ -432,7 +630,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    if @spam.spammy_upvote?(user.id, @config.upvote_limit_interval)
+    if (spam = @spam_handler) && spam.spammy_upvote?(user.id, @upvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :upvote_spam)
     end
     unless reply = message.reply_message
@@ -474,7 +672,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    if @spam.spammy_downvote?(user.id, @config.upvote_limit_interval)
+    if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @downvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :downvote_spam)
     end
     unless reply = message.reply_message
@@ -563,7 +761,7 @@ class PrivateParlor < Tourmaline::Client
       user.set_tripcode(arg)
       @database.modify_user(user)
 
-      results = @replies.generate_tripcode(arg, @config.salt)
+      results = @replies.generate_tripcode(arg)
       relay_to_one(message.message_id, user.id, :tripcode_set, {"name" => results[:name], "tripcode" => results[:tripcode]})
     else
       relay_to_one(message.message_id, user.id, :tripcode_info, {"tripcode" => user.tripcode})
@@ -598,15 +796,15 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    unless promoted_user.left? || promoted_user.rank >= Ranks::Moderator.value
-      promoted_user.set_rank(Ranks::Moderator)
+    unless promoted_user.left? || promoted_user.rank >= Ranks::Mod.value
+      promoted_user.set_rank(Ranks::Mod)
       @database.modify_user(promoted_user)
-      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => Ranks::Moderator})
+      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => Ranks::Mod})
 
       Log.info { @replies.substitute_log(:promoted, {
         "id"      => promoted_user.id.to_s,
         "name"    => promoted_user.get_formatted_name,
-        "rank"    => Ranks::Moderator,
+        "rank"    => Ranks::Mod,
         "invoker" => user.get_formatted_name,
       }) }
       relay_to_one(message.message_id, user.id, :success)
@@ -700,7 +898,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Moderator)
+    unless user.authorized?(Ranks::Mod)
       return
     end
     unless reply = message.reply_message
@@ -718,7 +916,9 @@ class PrivateParlor < Tourmaline::Client
 
     reason = @replies.get_args(ctx.message.text)
 
-    duration = @replies.format_timespan(reply_user.cooldown_and_warn)
+    duration = @replies.format_timespan(reply_user.cooldown_and_warn(
+      cooldown_time_begin, cooldown_time_linear_m, cooldown_time_linear_b, warn_expire_hours, karma_warn_penalty
+    ))
     history_with_warnings.add_warning(reply.message_id)
     @database.modify_user(reply_user)
 
@@ -747,7 +947,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Moderator)
+    unless user.authorized?(Ranks::Mod)
       return
     end
     unless reply = message.reply_message
@@ -763,7 +963,9 @@ class PrivateParlor < Tourmaline::Client
     reason = @replies.get_args(message.text)
     cached_msid = delete_messages(reply.message_id, reply_user.id)
 
-    duration = @replies.format_timespan(reply_user.cooldown_and_warn)
+    duration = @replies.format_timespan(reply_user.cooldown_and_warn(
+      cooldown_time_begin, cooldown_time_linear_m, cooldown_time_linear_b, warn_expire_hours, karma_warn_penalty
+    ))
     @database.modify_user(reply_user)
 
     relay_to_one(cached_msid, reply_user.id, :message_deleted, {"reason" => reason, "duration" => duration})
@@ -814,7 +1016,7 @@ class PrivateParlor < Tourmaline::Client
     end
 
     uncooldown_user.remove_cooldown(true)
-    uncooldown_user.remove_warning
+    uncooldown_user.remove_warning(1, warn_expire_hours)
     @database.modify_user(uncooldown_user)
 
     Log.info { @replies.substitute_log(:removed_cooldown, {
@@ -837,7 +1039,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Moderator)
+    unless user.authorized?(Ranks::Mod)
       return
     end
     unless reply = message.reply_message
@@ -984,7 +1186,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     case user.rank
-    when Ranks::Moderator.value
+    when Ranks::Mod.value
       relay_to_one(message.message_id, user.id, @replies.mod_help)
     when Ranks::Admin.value
       relay_to_one(message.message_id, user.id, @replies.admin_help)
@@ -993,108 +1195,113 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Sends a message to the user if a disabled command is used
+  def command_disabled(ctx : CommandHandler::Context) : Nil
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, :not_in_chat)
+    end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    relay_to_one(message.message_id, user.id, :command_disabled)
+  end
+
   # Checks if the text contains a special font or starts a sign command.
   #
   # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
   def check_text(text : String, user : Database::User, msid : Int64) : String?
     if !@replies.allow_text?(text)
-      relay_to_one(msid, user.id, :rejected_message)
-      return
+      return relay_to_one(msid, user.id, :rejected_message)
     end
 
     case
     when !text.starts_with?('/')
       return text
-    when text.starts_with?("/s"), text.starts_with?("/sign")
-      if config.allow_signing
-        if (chat = get_chat(user.id)) && chat.has_private_forwards
-          relay_to_one(msid, user.id, :private_sign)
-        else
-          if @spam.spammy_sign?(user.id, @config.sign_limit_interval)
-            relay_to_one(msid, user.id, :sign_spam)
-          else
-            if (args = @replies.get_args(text)) && args.size > 0
-              return String.build do |str|
-                str << args
-                str << @replies.format_user_sign(user.id, user.get_formatted_name)
-              end
-            end
-          end
-        end
-      else
-        relay_to_one(msid, user.id, :command_disabled)
+    when text.starts_with?("/s "), text.starts_with?("/sign ")
+      return handle_sign(text, user, msid)
+    when text.starts_with?("/t "), text.starts_with?("/tsign ")
+      return handle_tripcode(text, user, msid)
+    when match = /^\/(.*)say/.match(text).try &.[1]
+      return handle_ranksay(match, text, user, msid)
+    end
+  end
+
+  # Given a command text, checks if signs are enabled, user has private forwards,
+  # or sign would be spammy, then returns the argument with a username signature
+  def handle_sign(text : String, user : Database::User, msid : Int64) : String?
+    unless @enable_sign
+      return relay_to_one(msid, user.id, :command_disabled)
+    end
+    if (chat = get_chat(user.id)) && chat.has_private_forwards
+      return relay_to_one(msid, user.id, :private_sign)
+    end
+    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
+      return relay_to_one(msid, user.id, :sign_spam)
+    end
+
+    if (args = @replies.get_args(text)) && args.size > 0
+      String.build do |str|
+        str << args
+        str << @replies.format_user_sign(user.id, user.get_formatted_name)
       end
-    when text.starts_with?("/t"), text.starts_with?("/tsign")
-      if config.allow_tripcodes
-        if @spam.spammy_sign?(user.id, @config.sign_limit_interval)
-          relay_to_one(msid, user.id, :sign_spam)
-        else
-          if tripkey = user.tripcode
-            if (args = @replies.get_args(text)) && args.size > 0
-              pair = @replies.generate_tripcode(tripkey, config.salt)
-              return String.build do |str|
-                str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
-                str << "\n"
-                str << args
-              end
-            end
-          else
-            relay_to_one(msid, user.id, :no_tripcode_set)
-          end
-        end
-      else
-        relay_to_one(msid, user.id, :command_disabled)
+    end
+  end
+
+  # Given a command text, checks if tripcodes are enabled, if tripcode would be spammy,
+  # or if user does not have a tripcode set, then returns the argument with a tripcode header
+  def handle_tripcode(text : String, user : Database::User, msid : Int64) : String?
+    unless @enable_tripsign
+      return relay_to_one(msid, user.id, :command_disabled)
+    end
+    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
+      return relay_to_one(msid, user.id, :sign_spam)
+    end
+    unless tripkey = user.tripcode
+      return relay_to_one(msid, user.id, :no_tripcode_set)
+    end
+
+    if (args = @replies.get_args(text)) && args.size > 0
+      pair = @replies.generate_tripcode(tripkey)
+      String.build do |str|
+        str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
+        str << "\n"
+        str << args
       end
-    when text.starts_with?("/modsay")
-      if user.authorized?(Ranks::Moderator)
-        if (args = @replies.get_args(text)) && args.size > 0
-          Log.info { @replies.substitute_log(:ranked_message, {
-            "id"   => user.id.to_s,
-            "name" => user.get_formatted_name,
-            "rank" => Ranks::Moderator,
-            "text" => args,
-          }) }
-          return String.build do |str|
-            str << args
-            str << @replies.format_user_say("mod")
-          end
-        end
-      end
-    when text.starts_with?("/adminsay")
-      if user.authorized?(Ranks::Admin)
-        if (args = @replies.get_args(text)) && args.size > 0
-          Log.info { @replies.substitute_log(:ranked_message, {
-            "id"   => user.id.to_s,
-            "name" => user.get_formatted_name,
-            "rank" => Ranks::Admin,
-            "text" => args,
-          }) }
-          return String.build do |str|
-            str << args
-            str << @replies.format_user_say("admin")
-          end
-        end
-      end
-    when text.starts_with?("/hostsay")
-      if user.authorized?(Ranks::Host)
-        if (args = @replies.get_args(text)) && args.size > 0
-          Log.info { @replies.substitute_log(:ranked_message, {
-            "id"   => user.id.to_s,
-            "name" => user.get_formatted_name,
-            "rank" => Ranks::Host,
-            "text" => args,
-          }) }
-          return String.build do |str|
-            str << args
-            str << @replies.format_user_say("host")
-          end
-        end
-      end
-    else
+    end
+  end
+
+  # Given a ranked say command, checks if ranked says are enabled and determines the rank
+  # (either given or the user's current rank), then returns the argument with a ranked signature
+  def handle_ranksay(rank : String, text : String, user : Database::User, msid : Int64) : String?
+    unless @enable_ranksay
+      return relay_to_one(msid, user.id, :command_disabled)
+    end
+    unless (parsed_rank = Ranks.parse?(rank)) || (parsed_rank = Ranks.new(user.rank) if rank == "rank")
+      return
+    end
+    unless parsed_rank && user.authorized?(parsed_rank)
       return
     end
 
-    return
+    if (args = @replies.get_args(text)) && args.size > 0
+      Log.info { @replies.substitute_log(:ranked_message, {
+        "id"   => user.id.to_s,
+        "name" => user.get_formatted_name,
+        "rank" => parsed_rank,
+        "text" => args,
+      }) }
+      String.build do |str|
+        str << args
+        str << @replies.format_user_say(parsed_rank.to_s)
+      end
+    end
   end
 
   # Prepares a text message for relaying.
@@ -1114,7 +1321,7 @@ class PrivateParlor < Tourmaline::Client
     unless (raw_text = message.text) && (text = check_text(@replies.strip_format(raw_text, message.entities), user, message.message_id))
       return
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score_text(text))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score_text(text))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1125,7 +1332,7 @@ class PrivateParlor < Tourmaline::Client
       message.reply_message,
       user,
       @history.new_message(user.id, message.message_id),
-      ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, reply_to_message: reply) }
+      ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, link_preview: true, reply_to_message: reply) }
     )
   end
 
@@ -1149,10 +1356,10 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?(@config.media_limit_period.hours)
+    unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:{{captioned_type}}))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:{{captioned_type}}))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
     {% if captioned_type == "photo" %}
@@ -1184,8 +1391,8 @@ class PrivateParlor < Tourmaline::Client
   end
   {% end %}
 
-  # Prepares a album message for relaying.
-  def handle_albums(update : Tourmaline::Update) : Nil
+  # Prepares an album message for relaying.
+  def handle_media_group(update : Tourmaline::Update) : Nil
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1198,7 +1405,7 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?(@config.media_limit_period.hours)
+    unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
     end
 
@@ -1235,7 +1442,7 @@ class PrivateParlor < Tourmaline::Client
         unless temp_album = @albums.delete(album)
           next
         end
-        if @spam.spammy?(info.id, @spam.calculate_spam_score(:album))
+        if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:album))
           next relay_to_one(message.message_id, user.id, :spamming)
         end
 
@@ -1272,7 +1479,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:poll))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:poll))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1305,8 +1512,8 @@ class PrivateParlor < Tourmaline::Client
     )
   end
 
-  # Prepares a poll message for relaying.
-  def handle_forward(update : Tourmaline::Update) : Nil
+  # Prepares a forwarded message for relaying.
+  def handle_forwarded_message(update : Tourmaline::Update) : Nil
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1318,10 +1525,10 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?(@config.media_limit_period.hours)
+    unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:forward))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:forward))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1350,10 +1557,10 @@ class PrivateParlor < Tourmaline::Client
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, :not_in_chat)
     end
-    unless user.can_chat?(@config.media_limit_period.hours)
+    unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:sticker))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:sticker))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1371,9 +1578,6 @@ class PrivateParlor < Tourmaline::Client
   {% for luck_type in ["dice", "dart", "basketball", "soccerball", "slot_machine", "bowling"] %}
   # Prepares a {{luck_type}} message for relaying.
   def handle_{{luck_type.id}}(update : Tourmaline::Update) : Nil
-    unless config.relay_luck
-      return
-    end
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1386,8 +1590,8 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:{{luck_type}}))
-    return relay_to_one(message.message_id, user.id, :spamming)
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:{{luck_type}}))
+      return relay_to_one(message.message_id, user.id, :spamming)
     end
 
     user.set_active(info.username, info.full_name)
@@ -1404,9 +1608,6 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a venue message for relaying.
   def handle_venue(update : Tourmaline::Update) : Nil
-    unless config.relay_venue
-      return
-    end
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1422,7 +1623,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:venue))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:venue))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1450,9 +1651,6 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a location message for relaying.
   def handle_location(update : Tourmaline::Update) : Nil
-    unless config.relay_location
-      return
-    end
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1468,7 +1666,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:location))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:location))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1490,9 +1688,6 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a contact message for relaying.
   def handle_contact(update : Tourmaline::Update) : Nil
-    unless config.relay_contact
-      return
-    end
     unless (message = update.message) && (info = message.from)
       return
     end
@@ -1508,7 +1703,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
-    if @spam.spammy?(info.id, @spam.calculate_spam_score(:contact))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score(:contact))
       return relay_to_one(message.message_id, user.id, :spamming)
     end
 
@@ -1528,14 +1723,32 @@ class PrivateParlor < Tourmaline::Client
     )
   end
 
+  # Sends a message to the user if a disabled media type is sent
+  def media_disabled(update : Tourmaline::Update, type : String) : Nil
+    unless (message = update.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, :not_in_chat)
+    end
+    unless user.can_chat?
+      return deny_user(user)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    relay_to_one(message.message_id, user.id, :media_disabled, {"type" => type})
+  end
+
   # Sends a message to the user explaining why they cannot chat at this time
   def deny_user(user : Database::User) : Nil
     if user.blacklisted?
       relay_to_one(nil, user.id, :blacklisted, {"reason" => user.blacklist_reason})
     elsif cooldown_until = user.cooldown_until
       relay_to_one(nil, user.id, :on_cooldown, {"time" => @replies.format_time(cooldown_until)})
-    elsif Time.utc - user.joined < @config.media_limit_period.hours
-      relay_to_one(nil, user.id, :media_limit, {"total" => (@config.media_limit_period.hours - (Time.utc - user.joined)).hours})
+    elsif Time.utc - user.joined < @media_limit_period.hours
+      relay_to_one(nil, user.id, :media_limit, {"total" => (@media_limit_period.hours - (Time.utc - user.joined)).hours})
     else
       relay_to_one(nil, user.id, :not_in_chat)
     end

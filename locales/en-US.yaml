@@ -58,6 +58,10 @@ replies:
  - |-
     _This command is disabled\._
 
+# media_disabled: type
+ - |-
+   _Messages of type `#{type}` are disabled\._
+
 # no_reply
  - |-
     _You need to reply to a message to use this command\._
@@ -165,8 +169,12 @@ replies:
  - |-
     *id*: #{oid}, *username*: #{username}, *rank*: #{rank_val} \(#{rank}\)
     *karma*: #{karma}
-    *warnings*: #{warnings} #{smiley} \(one warning will expire at #{warn_expiry}\)
+    *warnings*: #{warnings} #{smiley} #{warn_expiry}
     *cooldown*: #{cooldown_until}
+
+# info_warning: warn_expiry
+ - |-
+    \(one warning will expire at #{warn_expiry}\)
 
 # ranked_info: oid, karma, cooldown_until
  - |-
@@ -203,7 +211,7 @@ replies:
 
 # cooldown_given: duration, reason
  - |-
-    _You've been given a cooldown of #{duration} #{reason}_
+    _You've been given a cooldown of #{duration}#{reason}_
 
 # on_cooldown: time
  - |-
@@ -215,7 +223,7 @@ replies:
 
 # blacklisted: reason
  - |-
-    _You have been blacklisted #{reason}_
+    _You have been blacklisted#{reason}_
 
 # purge_complete: msgs_deleted
  - |-
@@ -279,6 +287,18 @@ command_descriptions:
 # demote
  - |-
    Demote a ranked user to the user rank
+
+# sign
+ - |-
+   Sign a message with your username
+
+# tsign
+ - |-
+   Sign a message with your tripcode
+
+# ranksay
+ - |-
+   Sign a message with your current rank (Alias of modsay/adminsay)
 
 # warn
  - |-

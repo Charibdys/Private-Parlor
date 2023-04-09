@@ -1,4 +1,4 @@
-api-token: API token received from @BotFather
+api_token: API token received from @BotFather
 
 database: "Path to SQLite database"
 
@@ -7,16 +7,12 @@ locale: "en-US"
 
 # Path to an optional log file
 # Where info is any of the following: TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, FATAL
-#log-level: "info"
-#log-file: "./log.txt"
+#log_level: "info"
+#log_file: "./log.txt"
 
 # Modify lifetime of a message, in hours (24 hours is the default)
 # This should be between 1 and 48 hours (inclusive)
 #lifetime: 24
-
-# Enable signing messages using /sign or /tsign
-#allow_signing: false
-#allow_tripcodes: true
 
 # Limit usage of /sign and /tsign for once every interval (seconds)
 # Set to 0 to disable, defaults to 600 seconds
@@ -28,22 +24,101 @@ locale: "en-US"
 #downvote_limit_interval: 0
 
 # Toggle whether or not users can see the full count of joined, left, and blacklisted users.
-#full-usercount: false
+#full_usercount: false
 
 # Persist message history
 # Use the database in place of the message cache; message history remains if bot restarts 
-#database-history: true
+#database_history: true
 
 # Command toggles
-enable-upvotes: true
-enable-downvotes: true
-enable_warnings: true
+# First value toggles the command (true to enable, false to disable)
+# Second value, if true, will register the command with BotFather
+enable_start: [true, true]
+enable_stop: [true, true]
+enable_info: [true, true]
+enable_users: [true, true]
+enable_version: [true, true]
+enable_toggle_karma: [true, true]
+enable_toggle_debug: [true, true]
+enable_tripcode: [true, true]
+enable_sign: [true, true]
+enable_tripsign: [true, true]
+enable_ranksay: [true, true]
+enable_motd: [true, true]
+enable_help: [true, true]
+enable_upvotes: [true, false]
+enable_downvotes: [true, false]
+enable_mod: [true, false]
+enable_admin: [true, false]
+enable_demote: [true, false]
+enable_warn: [true, false]
+enable_delete: [true, false]
+enable_uncooldown: [true, false]
+enable_remove: [true, false]
+enable_purge: [true, false]
+enable_blacklist: [true, false]
 
 # Relaying toggles
-#relay-luck: true
-#relay-venue: true
-#relay-location: true
-#relay-contact: true
+# Set any to false to disable relaying messages of that type
+relay_text: true
+relay_animation: true
+relay_audio: true
+relay_document: true
+relay_video: true
+relay_video_note: true
+relay_voice: true
+relay_photo: true
+relay_media_group: true
+relay_poll: true
+relay_forwarded_message: true
+relay_sticker: true
+relay_dice: false
+relay_dart: false
+relay_basketball: false
+relay_soccerball: false
+relay_slot_machine: false
+relay_bowling: false
+relay_venue: false
+relay_location: false
+relay_contact: false
+
+# Cooldown Constants
+cooldown_time_begin: [1, 5, 25, 120, 720, 4320] # begins with 1m, 5m, 25m, 2h, 12h, 3d
+cooldown_time_linear_m: 4320 # continues 7d, 10d, 13d, 16d, ... (linear)
+cooldown_time_linear_b: 10080
+warn_expire_hours: 168 # 7 days
+karma_warn_penalty: 10
+
+# Spam Limits
+# Set spam interval to 0 to disable spam checking 
+spam_limit: 3.0
+spam_limit_hit: 6.0
+spam_interval_seconds: 10
+
+# Spam Score Constants
+score_base_message: 0.75
+score_text_character: 0.002
+score_text_linebreak: 0.1
+score_animation: 1.0
+score_audio: 1.0
+score_document: 1.0
+score_video: 1.0
+score_video_note: 1.5
+score_voice: 1.5
+score_photo: 1.0
+score_media_group: 2.5
+score_poll: 2.5
+score_forwarded_message: 1.25
+score_sticker: 1.5
+score_dice: 2.0
+score_dart: 2.0
+score_basketball: 2.0
+score_soccerball: 2.0
+score_slot_machine: 2.0
+score_bowling: 2.0
+score_venue: 2.0
+score_location: 2.0
+score_contact: 2.0
 
 # Duration (hours) in which new users cannot send media
 #media_limit_period: 3
@@ -55,7 +130,7 @@ registration_open: true
 # MessageEntity toggles
 # Entity types specified here will be stripped from every user message
 # The defaults remove bold, italics, and inline links; it's recommended to keep these
-# strip-format: ["bold", "italic", "text_link"]
+# strip_format: ["bold", "italic", "text_link"]
 
 # Smileys
 # Emoticons that are appened to /info messages
@@ -64,4 +139,4 @@ smileys: [":)", ":|", ":/", ":("]
 
 # Secure Tripcode toggle
 # Uncomment (and change the value of the salt) to generate secure tripcodes
-# tripcode-salt: "abcdefghijklmnopqrstuvwxyz0123456789"
+# tripcode_salt: "abcdefghijklmnopqrstuvwxyz0123456789"

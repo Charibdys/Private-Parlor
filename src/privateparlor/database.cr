@@ -145,17 +145,17 @@ class Database
     end
 
     # Sets user's cooldown and increments total warnings
-    def cooldown_and_warn : Time::Span
-      if @warnings < COOLDOWN_TIME_BEGIN.size
-        cooldown_time = COOLDOWN_TIME_BEGIN[@warnings]
+    def cooldown_and_warn(cooldown_time_begin : Array(Int32), linear_m : Int32, linear_b : Int32, warn_expire_hours : Int32, penalty : Int32) : Time::Span
+      if @warnings < cooldown_time_begin.size
+        cooldown_time = cooldown_time_begin[@warnings]
       else
-        cooldown_time = COOLDOWN_TIME_LINEAR_M * (@warnings - COOLDOWN_TIME_BEGIN.size) + COOLDOWN_TIME_LINEAR_B
+        cooldown_time = linear_m * (@warnings - cooldown_time_begin.size) + linear_b
       end
 
       @cooldown_until = Time.utc + cooldown_time.minutes
       @warnings += 1
-      @warn_expiry = Time.utc + WARN_EXPIRE_HOURS.hours
-      self.decrement_karma(KARMA_WARN_PENALTY)
+      @warn_expiry = Time.utc + warn_expire_hours.hours
+      self.decrement_karma(penalty)
       cooldown_time.minutes
     end
 
@@ -175,11 +175,11 @@ class Database
     end
 
     # Removes one or multiple warnings from a user and resets the `warn_expiry`
-    def remove_warning(amount : Int32 = 1) : Nil
+    def remove_warning(amount : Int32, warn_expire_hours : Int32) : Nil
       @warnings -= amount
 
       if @warnings > 0
-        @warn_expiry = Time.utc + WARN_EXPIRE_HOURS.hours
+        @warn_expiry = Time.utc + warn_expire_hours.hours
       else
         @warn_expiry = nil
       end
@@ -331,11 +331,11 @@ class Database
   end
 
   # Queries the database for warned users and removes warnings they have expired.
-  def expire_warnings : Nil
+  def expire_warnings(warn_expire_hours : Int32) : Nil
     get_warned_users.each do |user|
       if expiry = user.warn_expiry
         if expiry <= Time.utc
-          user.remove_warning
+          user.remove_warning(1, warn_expire_hours)
           modify_user(user)
         end
       end
@@ -431,17 +431,11 @@ class DatabaseHistory
 
   # Get all receivers for a message group associated with the given MSID
   def get_all_msids(msid : Int64) : Hash
-    origin_msid = get_origin_msid(msid)
-
     db.query_all(
-      "SELECT senderID, messageGroupID
-      FROM message_groups
-      WHERE messageGroupID = ?
-      UNION
-      SELECT receiverID, receiverMSID
-      FROM receivers
-      WHERE messageGroupID = ?",
-      origin_msid, origin_msid,
+      "SELECT r1.receiverID, r1.receiverMSID
+      FROM receivers r1, receivers r2
+      WHERE r1.messageGroupID = r2.messageGroupID AND r2.receiverMSID = ?",
+      msid,
       as: {Int64, Int64}
     ).to_h
   end
@@ -546,12 +540,14 @@ class DatabaseHistory
       messageGroupID BIGINT NOT NULL,
       PRIMARY KEY (receiverMSID),
       FOREIGN KEY (messageGroupID) REFERENCES message_groups(messageGroupID)
+      ON DELETE CASCADE
     )")
     db.exec("CREATE TABLE IF NOT EXISTS karma (
       messageGroupID BIGINT NOT NULL,
       userID BIGINT NOT NULL,
       PRIMARY KEY (messageGroupID),
       FOREIGN KEY (messageGroupID) REFERENCES receivers(receiverMSID)
+      ON DELETE CASCADE
     )")
   end
 end
