@@ -3,6 +3,8 @@
 A rewrite of [secretlounge-ng](https://github.com/secretlounge/secretlounge-ng), a bot to make an anonymous group chat on Telegram. 
 Written in Crystal with the aim of being a fast, memory efficient, and featureful alternative.
 
+Using the [Tourmaline](https://github.com/protoncr/tourmaline) Telegram bot library.
+
 [Updates posted on Telegram](https://t.me/privateparlor)
 ## Installation
 
@@ -40,6 +42,8 @@ tsign - Sign a message with your tripcode
 s - Alias of sign
 t - Alias of tsign
 ~~~
+
+Commands can also be registered with BotFather in the config file. These commands will overwrite the command list above.
 
 ## Usage
 
@@ -84,13 +88,13 @@ The following features are planned and being worked on:
 	- [ ] Configurable roles and command permissions 
 	- [X] Configurable cache contents/data
 	- [x] Configurable cache life
-	- [ ] Configurable time and content limits for spam filter
+	- [x] Configurable time and content limits for spam filter
 - [ ] Inactivity timeout
 - [ ] CLI tools and utility scripts
 
 ## Contributing
 
-This project has a [Trello board](https://trello.com/b/6W5ZX7BD/private-parlor-development) which you can use to see open tasks and progress.
+Open tasks and current planned features can be found in this repo's project, [Private Parlor Development](https://github.com/users/Charibdys/projects/1)
 
 If you would like to make a contribution, follow these steps:
 
