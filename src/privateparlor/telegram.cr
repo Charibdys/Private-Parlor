@@ -1,9 +1,9 @@
 enum Ranks
-  Banned    =  -10
-  User      =    0
-  Mod =   10
-  Admin     =  100
-  Host      = 1000
+  Banned =  -10
+  User   =    0
+  Mod    =   10
+  Admin  =  100
+  Host   = 1000
 end
 
 alias MessageProc = Proc(Int64, Int64 | Nil, Tourmaline::Message) | Proc(Int64, Int64 | Nil, Array(Tourmaline::Message))
@@ -33,18 +33,12 @@ class PrivateParlor < Tourmaline::Client
   getter upvote_limit_interval : Int32
   getter downvote_limit_interval : Int32
 
-  # Creates a new instance of PrivateParlor.
+  # Creates a new instance of `PrivateParlor`.
   #
   # ## Arguments:
   #
-  # `bot_token`
-  # :     the bot token given by `@BotFather`
-  #
   # `config`
   # :     a `Configuration::Config` from parsing the `config.yaml` file
-  #
-  # `connection`
-  # :     the `DB::Databse` object obtained from the database path in the `config.yaml` file
   def initialize(config : Configuration::Config)
     super(bot_token: config.token, set_commands: true)
     Client.default_parse_mode = (Tourmaline::ParseMode::MarkdownV2)
@@ -117,6 +111,15 @@ class PrivateParlor < Tourmaline::Client
     property message_ids : Array(Int64)
     property media_ids : Array(InputMediaPhoto | InputMediaVideo | InputMediaAudio | InputMediaDocument)
 
+    # Creates and instance of `Album`, representing a prepared media group to queue and relay
+    #
+    # ## Arguments:
+    #
+    # `msid`
+    # :     the message ID of the first media file in the album
+    #
+    # `media`
+    # :     the media type corresponding with the given MSID
     def initialize(msid : Int64, media : InputMediaPhoto | InputMediaVideo | InputMediaAudio | InputMediaDocument)
       @message_ids = [msid]
       @media_ids = [media]
@@ -142,10 +145,10 @@ class PrivateParlor < Tourmaline::Client
     getter score_video_note : Float32
     getter score_voice : Float32
     getter score_photo : Float32
-    getter score_media_group : Float32 
+    getter score_media_group : Float32
     getter score_poll : Float32
     getter score_forwarded_message : Float32
-    getter score_sticker : Float32 
+    getter score_sticker : Float32
     getter score_dice : Float32
     getter score_dart : Float32
     getter score_basketball : Float32
@@ -156,6 +159,12 @@ class PrivateParlor < Tourmaline::Client
     getter score_location : Float32
     getter score_contact : Float32
 
+    # Creates a new instance of a `SpamScoreHandler`.
+    #
+    # ## Arguments:
+    #
+    # `config`
+    # :     a `Configuration::Config` passed from initializing a `PrivateParlor`
     def initialize(config : Configuration::Config)
       @scores = {} of Int64 => Float32
       @sign_last_used = {} of Int64 => Time
@@ -266,6 +275,7 @@ class PrivateParlor < Tourmaline::Client
       false
     end
 
+    # Returns the associated spam score contant from a given type
     def calculate_spam_score(type : Symbol) : Float32
       case type
       when :animation
@@ -343,12 +353,13 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Initializes CommandHandlers and UpdateHandlers
+  # Also checks whether or not a command or media type is enabled via the config, and registers commands with BotFather
   def initialize_handlers(descriptions : Hash(Symbol, String), config : Configuration::Config) : Nil
     {% for command in [
-      "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help", "upvote", 
-      "downvote", "mod", "admin", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist"
-    ] 
-    %}
+                        "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help", "upvote",
+                        "downvote", "mod", "admin", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist",
+                      ] %}
 
     if config.enable_{{command.id}}[0]
       add_event_handler(
@@ -402,34 +413,33 @@ class PrivateParlor < Tourmaline::Client
 
     {% end %}
 
-    # Handle embedded commands (sign, tsign, say) differently 
+    # Handle embedded commands (sign, tsign, say) differently
     # These are only here to register the commands with BotFather; the commands cannot be disabled here
     if config.enable_sign[0]
-      add_event_handler(CommandHandler.new("/sign", register: config.enable_sign[1], description: descriptions[:sign]) {|ctx| command_disabled(ctx)})
+      add_event_handler(CommandHandler.new("/sign", register: config.enable_sign[1], description: descriptions[:sign]) { |ctx| command_disabled(ctx) })
     else
-      add_event_handler(CommandHandler.new("/sign", register: config.enable_sign[1], description: descriptions[:sign]) {|ctx| command_disabled(ctx)})
+      add_event_handler(CommandHandler.new("/sign", register: config.enable_sign[1], description: descriptions[:sign]) { |ctx| command_disabled(ctx) })
     end
 
     if config.enable_tripsign[0]
-      add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions[:tsign]) {|ctx| command_disabled(ctx)})
+      add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions[:tsign]) { |ctx| command_disabled(ctx) })
     else
-      add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions[:tsign]) {|ctx| command_disabled(ctx)})
+      add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions[:tsign]) { |ctx| command_disabled(ctx) })
     end
 
     if config.enable_ranksay[0]
-      add_event_handler(CommandHandler.new("/ranksay", register: config.enable_ranksay[1], description: descriptions[:ranksay]) {|ctx| command_disabled(ctx)})
+      add_event_handler(CommandHandler.new("/ranksay", register: config.enable_ranksay[1], description: descriptions[:ranksay]) { |ctx| command_disabled(ctx) })
     else
-      add_event_handler(CommandHandler.new("/ranksay", register: config.enable_ranksay[1], description: descriptions[:ranksay]) {|ctx| command_disabled(ctx)})
+      add_event_handler(CommandHandler.new("/ranksay", register: config.enable_ranksay[1], description: descriptions[:ranksay]) { |ctx| command_disabled(ctx) })
     end
 
     register_commands_with_botfather if @set_commands
 
     {% for media_type in [
-      "text", "animation", "audio", "document", "video", "video_note", "voice", "photo",
-      "media_group", "poll", "forwarded_message", "sticker", "dice", "dart", "basketball", 
-      "soccerball", "slot_machine", "bowling", "venue", "location", "contact"
-    ]
-    %}
+                           "text", "animation", "audio", "document", "video", "video_note", "voice", "photo",
+                           "media_group", "poll", "forwarded_message", "sticker", "dice", "dart", "basketball",
+                           "soccerball", "slot_machine", "bowling", "venue", "location", "contact",
+                         ] %}
 
     if config.relay_{{media_type.id}}
       add_event_handler(UpdateHandler.new(:{{media_type.id}}) {|update| handle_{{media_type.id}}(update)})
@@ -446,7 +456,7 @@ class PrivateParlor < Tourmaline::Client
     tasks[:cache] = Tasker.every(@history.lifespan * (1/4)) { @history.expire }
     tasks[:warnings] = Tasker.every(15.minutes) { @database.expire_warnings(warn_expire_hours) }
     if spam = @spam_handler
-      tasks[:spam] = Tasker.every(spam_interval_seconds.seconds) { spam.expire } 
+      tasks[:spam] = Tasker.every(spam_interval_seconds.seconds) { spam.expire }
     end
     tasks
   end
@@ -1185,6 +1195,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Sends a message to the user if a disabled command is used
   def command_disabled(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -1222,6 +1233,8 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Given a command text, checks if signs are enabled, user has private forwards,
+  # or sign would be spammy, then returns the argument with a username signature
   def handle_sign(text : String, user : Database::User, msid : Int64) : String?
     unless @enable_sign
       return relay_to_one(msid, user.id, :command_disabled)
@@ -1241,6 +1254,8 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Given a command text, checks if tripcodes are enabled, if tripcode would be spammy,
+  # or if user does not have a tripcode set, then returns the argument with a tripcode header
   def handle_tripcode(text : String, user : Database::User, msid : Int64) : String?
     unless @enable_tripsign
       return relay_to_one(msid, user.id, :command_disabled)
@@ -1262,6 +1277,8 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Given a ranked say command, checks if ranked says are enabled and determines the rank
+  # (either given or the user's current rank), then returns the argument with a ranked signature
   def handle_ranksay(rank : String, text : String, user : Database::User, msid : Int64) : String?
     unless @enable_ranksay
       return relay_to_one(msid, user.id, :command_disabled)
@@ -1285,7 +1302,6 @@ class PrivateParlor < Tourmaline::Client
         str << @replies.format_user_say(parsed_rank.to_s)
       end
     end
-  
   end
 
   # Prepares a text message for relaying.
@@ -1707,6 +1723,7 @@ class PrivateParlor < Tourmaline::Client
     )
   end
 
+  # Sends a message to the user if a disabled media type is sent
   def media_disabled(update : Tourmaline::Update, type : String) : Nil
     unless (message = update.message) && (info = message.from)
       return

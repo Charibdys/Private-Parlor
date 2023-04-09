@@ -123,6 +123,8 @@ end
 
 class HistoryBase < History
   class MessageGroupBase < MessageGroup
+    
+    # :inherit:
     def initialize(sender_id : Int64, msid : Int64)
       @sender = sender_id
       @origin_msid = msid

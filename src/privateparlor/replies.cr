@@ -28,6 +28,15 @@ class Replies
   #
   # `entities`
   # :     an array of strings refering to one or more of the possible message entity types
+  #
+  # `locale`
+  # :     a language code, corresponding to one of the locales in the locales folder
+  #
+  # `smileys`
+  # :     an array of four smileys
+  #
+  # `salt`
+  # :     a salt used for hashing tripcodes
   def initialize(entities : Array(String), locale : String, smileys : Array(String), salt : String)
     begin
       yaml = File.open("./locales/#{locale}.yaml") do |file|
@@ -100,7 +109,7 @@ class Replies
         when "warn_expiry"
           if variables[placeholder]
             # Skip replace.to_md to prevent escaping Markdown twice
-            next replace = @replies[:info_warning].gsub("#\{warn_expiry\}") {"#{variables[placeholder]}".to_md}
+            next replace = @replies[:info_warning].gsub("#{warn_expiry}") { "#{variables[placeholder]}".to_md }
           end
         when "reason"
           if variables[placeholder]
@@ -291,6 +300,7 @@ class Replies
     end
   end
 
+  # Returns a smiley based on the number of given warnings
   def format_smiley(warnings : Int32) : String
     if warnings <= 0
       @smileys[0]
@@ -303,6 +313,7 @@ class Replies
     end
   end
 
+  # Formats a timestamp according to the locale settings
   def format_time(time : Time?) : String?
     if time
       time.to_s(@time_format)
@@ -321,7 +332,6 @@ class Replies
     Section.new(text).to_md
   end
 
-  # TODO: Move command descriptions to locale
   # Returns a message containing the commands the a moderator can use.
   def mod_help : String
     Section.new(
@@ -336,7 +346,6 @@ class Replies
     ).to_md
   end
 
-  # TODO: Move command descriptions to locale
   # Returns a message containing the commands the an admin can use.
   def admin_help : String
     Section.new(
@@ -353,7 +362,6 @@ class Replies
     ).to_md
   end
 
-  # TODO: Move command descriptions to locale
   # Returns a message containing the commands the a host can use.
   def host_help : String
     Section.new(

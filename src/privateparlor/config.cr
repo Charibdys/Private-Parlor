@@ -172,7 +172,7 @@ module Configuration
     getter cooldown_time_begin : Array(Int32) = [1, 5, 25, 120, 720, 4320]
 
     @[YAML::Field(key: "cooldown_time_linear_m")]
-    getter cooldown_time_linear_m : Int32 = 4320 # continues 7d, 10d, 13d, 16d, ... (linear)
+    getter cooldown_time_linear_m : Int32 = 4320
 
     @[YAML::Field(key: "cooldown_time_linear_b")]
     getter cooldown_time_linear_b : Int32 = 10080
@@ -231,7 +231,7 @@ module Configuration
 
     @[YAML::Field(key: "score_poll")]
     getter score_poll : Float32 = 2.5
-    
+
     @[YAML::Field(key: "score_forwarded_message")]
     getter score_forwarded_message : Float32 = 1.25
 
@@ -258,10 +258,10 @@ module Configuration
 
     @[YAML::Field(key: "score_venue")]
     getter score_venue : Float32 = 2.0
-    
+
     @[YAML::Field(key: "score_location")]
     getter score_location : Float32 = 2.0
-    
+
     @[YAML::Field(key: "score_contact")]
     getter score_contact : Float32 = 2.0
 
