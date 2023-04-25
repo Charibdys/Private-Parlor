@@ -431,11 +431,17 @@ class DatabaseHistory
 
   # Get all receivers for a message group associated with the given MSID
   def get_all_msids(msid : Int64) : Hash
+    origin_msid = get_origin_msid(msid)
+
     db.query_all(
-      "SELECT r1.receiverID, r1.receiverMSID
-      FROM receivers r1, receivers r2
-      WHERE r1.messageGroupID = r2.messageGroupID AND r2.receiverMSID = ?",
-      msid,
+      "SELECT senderID, messageGroupID 
+      FROM message_groups
+      WHERE messageGroupID = ?
+      UNION
+      SELECT receiverID, receiverMSID
+      FROM receivers
+      WHERE messageGroupID = ?",
+      origin_msid, origin_msid,
       as: {Int64, Int64}
     ).to_h
   end

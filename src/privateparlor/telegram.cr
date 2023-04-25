@@ -961,7 +961,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     reason = @replies.get_args(message.text)
-    cached_msid = delete_messages(reply.message_id, reply_user.id)
+    cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
     duration = @replies.format_timespan(reply_user.cooldown_and_warn(
       cooldown_time_begin, cooldown_time_linear_m, cooldown_time_linear_b, warn_expire_hours, karma_warn_penalty
@@ -1052,7 +1052,7 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    cached_msid = delete_messages(reply.message_id, reply_user.id)
+    cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
     relay_to_one(cached_msid, reply_user.id, :message_removed, {"reason" => @replies.get_args(message.text)})
     Log.info { @replies.substitute_log(:message_removed, {
@@ -1087,7 +1087,7 @@ class PrivateParlor < Tourmaline::Client
 
       banned_users.each do |banned_user|
         @history.get_msids_from_user(banned_user.id).each do |msid|
-          delete_messages(msid, banned_user.id)
+          delete_messages(msid, banned_user.id, banned_user.debug_enabled)
           delete_msids += 1
         end
       end
@@ -1129,7 +1129,7 @@ class PrivateParlor < Tourmaline::Client
       @queue.reject! do |msg|
         msg.receiver == user.id || msg.sender == user.id
       end
-      cached_msid = delete_messages(reply.message_id, reply_user.id)
+      cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
       relay_to_one(cached_msid, reply_user.id, :blacklisted, {"reason" => reason})
       Log.info { @replies.substitute_log(:blacklisted, {
@@ -1757,12 +1757,17 @@ class PrivateParlor < Tourmaline::Client
   # Deletes the given message for all receivers and removes it from the message history.
   #
   # Returns the sender's (user_id) original message id upon success.
-  def delete_messages(msid : Int64, user_id : Int64) : Int64?
+  def delete_messages(msid : Int64, user_id : Int64, debug_enabled : Bool?) : Int64?
     if reply_msids = @history.get_all_msids(msid)
-      reply_msids.each do |receiver_id, _|
-        delete_message(receiver_id, reply_msids[receiver_id])
+      if !debug_enabled
+        reply_msids.delete(user_id)
       end
-      return @history.del_message_group(msid)
+
+      reply_msids.each do |receiver_id, receiver_msid|
+        delete_message(receiver_id, receiver_msid)
+      end
+      
+      @history.del_message_group(msid)
     end
   end
 
@@ -1771,7 +1776,7 @@ class PrivateParlor < Tourmaline::Client
     if reply_message
       if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
         @database.get_prioritized_users.each do |receiver_id|
-          if receiver_id != user.id || user.debug_enabled
+          if (receiver_id != user.id) || user.debug_enabled
             add_to_queue(cached_msid, user.id, receiver_id, reply_msids[receiver_id], proc)
           end
         end
