@@ -11,7 +11,8 @@ locale: "en-US"
 #log_file: "./log.txt"
 
 # Modify lifetime of a message, in hours (24 hours is the default)
-# This should be between 1 and 48 hours (inclusive)
+# Can be set greater than or equal to 1
+# NOTE: Increasing this value will increase RAM usage if database history is not enabled
 #lifetime: 24
 
 # Limit usage of /sign and /tsign for once every interval (seconds)
