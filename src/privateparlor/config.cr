@@ -22,7 +22,7 @@ module Configuration
     getter log_file : String? = nil
 
     @[YAML::Field(key: "lifetime")]
-    getter lifetime : Int32 = 24
+    property lifetime : Int32 = 24
 
     @[YAML::Field(key: "database_history")]
     getter database_history : Bool? = false
@@ -284,15 +284,16 @@ module Configuration
     getter downvote_limit_interval : Int32 = 0
 
     @[YAML::Field(key: "smileys")]
-    getter smileys : Array(String) = [":)", ":|", ":/", ":("]
+    property smileys : Array(String) = [":)", ":|", ":/", ":("]
 
     @[YAML::Field(key: "strip_format")]
-    getter entities : Array(String) = ["bold", "italic", "text_link"]
+    property entities : Array(String) = ["bold", "italic", "text_link"]
 
     @[YAML::Field(key: "tripcode_salt")]
     getter salt : String = ""
 
-    def initialize(@token : String, @database : String)
+    def after_initialize
+      Configuration.set_log(self)
     end
   end
 
@@ -300,13 +301,7 @@ module Configuration
   #
   # Values that aren't specified in the config file will be set to a default value.
   def parse_config : Config
-    config = Config.from_yaml(File.open(File.expand_path("config.yaml")))
-    if check_config(config) == false
-      config = Config.new(config.token, config.database)
-    end
-
-    set_log(config)
-    config
+    config = check_config(Config.from_yaml(File.open("config.yaml")))
   rescue ex : YAML::ParseException
     Log.error(exception: ex) { "Could not parse the given value at row #{ex.line_number}. This could be because a required value was not set or the wrong type was given." }
     exit
@@ -320,21 +315,28 @@ module Configuration
   # Check bounds on `config.lifetime`.
   # Check size of `config.smileys`; should be 4
   # Check contents of `config.entities` for mispellings or duplicates.
-  def check_config(config : Config) : Bool
+  #
+  # Returns the given config, or an updated config if any values were invalid.
+  def check_config(config : Config) : Config
     message_entities = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold", "italic",
                         "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention", "custom_emoji"]
 
     if (1..).includes?(config.lifetime) == false
       Log.notice { "Message lifetime not within range, was #{config.lifetime}; defaulting to 24 hours." }
-      return false
-    elsif config.smileys.size != 4
-      Log.notice { "Not enough or too many smileys. Should be four, was #{config.smileys}; defaulting to [:), :|, :/, :(]" }
-    elsif (config.entities & message_entities).size != config.entities.size
-      Log.notice { "Could not determine strip_format, was #{config.entities}; check for duplicates or mispellings. Using defaults." }
-      return false
+      config.lifetime = 24
     end
 
-    true
+    if config.smileys.size != 4
+      Log.notice { "Not enough or too many smileys. Should be four, was #{config.smileys}; defaulting to [:), :|, :/, :(]" }
+      config.smileys = [":)", ":|", ":/", ":("]
+    end
+
+    if (config.entities & message_entities).size != config.entities.size
+      Log.notice { "Could not determine strip_format, was #{config.entities}; check for duplicates or mispellings. Using defaults." }
+      config.entities = ["bold", "italic", "text_link"]
+    end
+
+    config
   end
 
   # Reset log with the severity level defined in `config.yaml`.
