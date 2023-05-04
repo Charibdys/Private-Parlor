@@ -27,6 +27,9 @@ module Configuration
     @[YAML::Field(key: "database_history")]
     getter database_history : Bool? = false
 
+    @[YAML::Field(key: "allow_media_spoilers")]
+    getter allow_media_spoilers : Bool? = false
+
     # Command Toggles
 
     @[YAML::Field(key: "enable_start")]

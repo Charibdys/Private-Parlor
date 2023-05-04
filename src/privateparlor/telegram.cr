@@ -23,6 +23,7 @@ class PrivateParlor < Tourmaline::Client
   getter warn_expire_hours : Int32
   getter karma_warn_penalty : Int32
 
+  getter allow_media_spoilers : Bool?
   getter media_limit_period : Int32
   getter registration_open : Bool?
   getter full_usercount : Bool?
@@ -50,6 +51,7 @@ class PrivateParlor < Tourmaline::Client
     @warn_expire_hours = config.warn_expire_hours
     @karma_warn_penalty = config.karma_warn_penalty
 
+    @allow_media_spoilers = config.allow_media_spoilers
     @media_limit_period = config.media_limit_period
     @registration_open = config.registration_open
     @full_usercount = config.full_usercount
@@ -1386,7 +1388,17 @@ class PrivateParlor < Tourmaline::Client
       message.reply_message,
       user,
       @history.new_message(user.id, message.message_id),
-      ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, file_id, caption: caption, reply_to_message: reply) }
+      {% if ["animation", "video", "photo"].includes?(captioned_type) %}
+        ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(
+            receiver, 
+            file_id, 
+            caption: caption, 
+            reply_to_message: reply, 
+            has_spoiler: message.has_media_spoiler? && @allow_media_spoilers
+            ) }
+      {% else %}
+        ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, file_id, caption: caption, reply_to_message: reply) }
+      {% end %}
     )
   end
   {% end %}
@@ -1418,10 +1430,11 @@ class PrivateParlor < Tourmaline::Client
     if entities = message.caption_entities
       entities = @replies.remove_entities(entities)
     end
+
     if media = message.photo.last?
-      input = InputMediaPhoto.new(media.file_id, caption: caption, caption_entities: entities)
+      input = InputMediaPhoto.new(media.file_id, caption: caption, caption_entities: entities, has_spoiler: message.has_media_spoiler? && @allow_media_spoilers)
     elsif media = message.video
-      input = InputMediaVideo.new(media.file_id, caption: caption, caption_entities: entities)
+      input = InputMediaVideo.new(media.file_id, caption: caption, caption_entities: entities, has_spoiler: message.has_media_spoiler? && @allow_media_spoilers)
     elsif media = message.audio
       input = InputMediaAudio.new(media.file_id, caption: caption, caption_entities: entities)
     elsif media = message.document
@@ -1766,7 +1779,7 @@ class PrivateParlor < Tourmaline::Client
       reply_msids.each do |receiver_id, receiver_msid|
         delete_message(receiver_id, receiver_msid)
       end
-      
+
       @history.del_message_group(msid)
     end
   end
