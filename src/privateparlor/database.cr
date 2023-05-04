@@ -434,7 +434,7 @@ class DatabaseHistory
     origin_msid = get_origin_msid(msid)
 
     db.query_all(
-      "SELECT senderID, messageGroupID 
+      "SELECT senderID, messageGroupID
       FROM message_groups
       WHERE messageGroupID = ?
       UNION
