@@ -13,7 +13,7 @@ module Configuration
     getter database : String
 
     @[YAML::Field(key: "locale")]
-    getter locale : String = "en"
+    getter locale : String = "en-US"
 
     @[YAML::Field(key: "log_level")]
     getter log_level : Log::Severity = Log::Severity::Info
