@@ -223,7 +223,12 @@ replies:
 
 # blacklisted: reason
  - |-
-    _You have been blacklisted#{reason}_
+    _You have been blacklisted#{reason}
+    #{contact}_
+
+# blacklist_contact: contact
+ - |-
+    Contact: #{contact}
 
 # purge_complete: msgs_deleted
  - |-

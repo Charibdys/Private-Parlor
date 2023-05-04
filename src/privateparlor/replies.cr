@@ -20,6 +20,7 @@ class Replies
   getter time_format : String
   getter toggle : Array(String)
   getter smileys : Array(String)
+  getter blacklist_contact : String?
   getter tripcode_salt : String
 
   # Creates an instance of `Replies`.
@@ -37,7 +38,7 @@ class Replies
   #
   # `salt`
   # :     a salt used for hashing tripcodes
-  def initialize(entities : Array(String), locale : String, smileys : Array(String), salt : String)
+  def initialize(entities : Array(String), locale : String, smileys : Array(String), contact : String?, salt : String)
     begin
       yaml = File.open("./locales/#{locale}.yaml") do |file|
         YAML.parse(file)
@@ -54,10 +55,11 @@ class Replies
       joined rejoined left already_in_chat registration_closed not_in_chat not_in_cooldown rejected_message deanon_poll
       missing_args command_disabled media_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found
       promoted toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted
-      gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming
-      sign_spam upvote_spam downvote_spam invalid_tripcode_format tripcode_set tripcode_info
-      tripcode_unset user_info info_warning ranked_info cooldown_true cooldown_false user_count user_count_full
-      message_deleted message_removed reason_prefix cooldown_given on_cooldown media_limit blacklisted purge_complete success
+      gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming sign_spam 
+      upvote_spam downvote_spam invalid_tripcode_format tripcode_set tripcode_info tripcode_unset 
+      user_info info_warning ranked_info cooldown_true cooldown_false user_count user_count_full
+      message_deleted message_removed reason_prefix cooldown_given on_cooldown media_limit blacklisted 
+      blacklist_contact purge_complete success
     )
 
     log_keys = %i(
@@ -72,6 +74,7 @@ class Replies
 
     @entity_types = entities
     @smileys = smileys
+    @blacklist_contact = contact
     @tripcode_salt = salt
     @time_units = yaml["time_units"].as_a.map(&.as_s)
     @time_format = yaml["time_format"].as_s
@@ -120,6 +123,12 @@ class Replies
             replace = variables[placeholder].to_s
           else
             replace = @replies[:tripcode_unset]
+          end
+        when "contact"
+          if blacklist_contact
+            replace = @replies[:blacklist_contact].gsub("#\{contact\}") { "#{blacklist_contact}"}
+          else
+            replace = ""
           end
         else
           replace = variables[placeholder]?.to_s

@@ -66,7 +66,7 @@ class PrivateParlor < Tourmaline::Client
     @database = Database.new(db)
     @history = get_history_type(db, config)
     @queue = Deque(QueuedMessage).new
-    @replies = Replies.new(config.entities, config.locale, config.smileys, config.salt)
+    @replies = Replies.new(config.entities, config.locale, config.smileys, config.blacklist_contact, config.salt)
     @spam_handler = SpamScoreHandler.new(config) if config.spam_interval_seconds != 0
     @tasks = register_tasks(config.spam_interval_seconds)
     @albums = {} of String => Album

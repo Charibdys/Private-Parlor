@@ -24,6 +24,9 @@ locale: "en-US"
 #upvote_limit_interval: 0
 #downvote_limit_interval: 0
 
+# Contact link or username shown to blacklisted users
+#blacklist_contact: "t.me/pointofcontact_"
+
 # Toggle whether or not users can see the full count of joined, left, and blacklisted users.
 #full_usercount: false
 
