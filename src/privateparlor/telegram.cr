@@ -16,7 +16,6 @@ class PrivateParlor < Tourmaline::Client
   getter tasks : Hash(Symbol, Tasker::Task)
   getter albums : Hash(String, Album)
   getter spam_handler : SpamScoreHandler | Nil
-  getter ranks : Hash(Int32, Rank)
 
   getter cooldown_time_begin : Array(Int32)
   getter cooldown_time_linear_m : Int32
@@ -71,13 +70,6 @@ class PrivateParlor < Tourmaline::Client
     @spam_handler = SpamScoreHandler.new(config) if config.spam_interval_seconds != 0
     @tasks = register_tasks(config.spam_interval_seconds)
     @albums = {} of String => Album
-    @ranks = {
-      -10 => Rank.new("Banned", -10, Set.new([] of Symbol)),
-      0 => Rank.new("User", 0, Set.new([] of Symbol)),
-      10 => Rank.new("Mod", 10, Set.new([] of Symbol)),
-      100 => Rank.new("Admin", 100, Set.new([] of Symbol)),
-      1000 => Rank.new("Host", 1000, Set.new([] of Symbol)),
-    }
 
     initialize_handlers(@replies.command_descriptions, config)
   end
@@ -552,7 +544,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     if reply = message.reply_message
-      if user.authorized?(Ranks::Mod)
+      if database.authorized?(user.rank, :ranked_info)
         if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
           relay_to_one(message.message_id, user.id, :ranked_info, {
             "oid"            => reply_user.get_obfuscated_id,
@@ -596,7 +588,7 @@ class PrivateParlor < Tourmaline::Client
 
     counts = database.get_user_counts
 
-    if user.authorized?(Ranks::Mod) || @full_usercount
+    if database.authorized?(user.rank, :users) || @full_usercount
       relay_to_one(nil, user.id, :user_count_full, {
         "joined"      => counts[:total] - counts[:left],
         "left"        => counts[:left],
@@ -793,7 +785,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Host)
+    unless database.authorized?(user.rank, :mod)
       return
     end
     unless arg = @replies.get_args(message.text)
@@ -832,7 +824,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Host)
+    unless database.authorized?(user.rank, :admin)
       return
     end
     unless arg = @replies.get_args(message.text)
@@ -871,7 +863,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Host)
+    unless database.authorized?(user.rank, :demote)
       return
     end
     unless arg = @replies.get_args(message.text)
@@ -908,7 +900,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Mod)
+    unless database.authorized?(user.rank, :warn)
       return
     end
     unless reply = message.reply_message
@@ -957,7 +949,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Mod)
+    unless database.authorized?(user.rank, :delete)
       return
     end
     unless reply = message.reply_message
@@ -1001,7 +993,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Admin)
+    unless database.authorized?(user.rank, :uncooldown)
       return
     end
     unless arg = @replies.get_args(message.text)
@@ -1049,7 +1041,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Mod)
+    unless database.authorized?(user.rank, :remove)
       return
     end
     unless reply = message.reply_message
@@ -1086,7 +1078,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Admin)
+    unless database.authorized?(user.rank, :purge)
       return
     end
     user.set_active(info.username, info.full_name)
@@ -1117,7 +1109,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless user.authorized?(Ranks::Admin)
+    unless database.authorized?(user.rank, :blacklist)
       return
     end
     unless reply = message.reply_message
@@ -1169,7 +1161,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     if arg = @replies.get_args(ctx.message.text)
-      if user.authorized?(Ranks::Host)
+      if database.authorized?(user.rank, :motd_set)
         @database.set_motd(arg)
         relay_to_one(message.message_id, user.id, :success)
       end
@@ -1296,7 +1288,7 @@ class PrivateParlor < Tourmaline::Client
     unless (parsed_rank = Ranks.parse?(rank)) || (parsed_rank = Ranks.new(user.rank) if rank == "rank")
       return
     end
-    unless parsed_rank && user.authorized?(parsed_rank)
+    unless parsed_rank && database.authorized?(user.rank, :ranksay)
       return
     end
 
