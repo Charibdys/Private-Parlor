@@ -16,6 +16,7 @@ class PrivateParlor < Tourmaline::Client
   getter tasks : Hash(Symbol, Tasker::Task)
   getter albums : Hash(String, Album)
   getter spam_handler : SpamScoreHandler | Nil
+  getter ranks : Hash(Int32, Rank)
 
   getter cooldown_time_begin : Array(Int32)
   getter cooldown_time_linear_m : Int32
@@ -70,6 +71,13 @@ class PrivateParlor < Tourmaline::Client
     @spam_handler = SpamScoreHandler.new(config) if config.spam_interval_seconds != 0
     @tasks = register_tasks(config.spam_interval_seconds)
     @albums = {} of String => Album
+    @ranks = {
+      -10 => Rank.new("Banned", -10, Set.new([] of Symbol)),
+      0 => Rank.new("User", 0, Set.new([] of Symbol)),
+      10 => Rank.new("Mod", 10, Set.new([] of Symbol)),
+      100 => Rank.new("Admin", 100, Set.new([] of Symbol)),
+      1000 => Rank.new("Host", 1000, Set.new([] of Symbol)),
+    }
 
     initialize_handlers(@replies.command_descriptions, config)
   end
