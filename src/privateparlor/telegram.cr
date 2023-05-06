@@ -540,20 +540,26 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
 
-    user.set_active(info.username, info.full_name)
-    @database.modify_user(user)
-
     if reply = message.reply_message
-      if database.authorized?(user.rank, :ranked_info)
-        if reply_user = database.get_user(@history.get_sender_id(reply.message_id))
-          relay_to_one(message.message_id, user.id, :ranked_info, {
-            "oid"            => reply_user.get_obfuscated_id,
-            "karma"          => reply_user.get_obfuscated_karma,
-            "cooldown_until" => reply_user.remove_cooldown ? nil : @replies.format_time(reply_user.cooldown_until),
-          })
-        end
+      unless database.authorized?(user.rank, :ranked_info)
+        return
       end
+      unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+        return
+      end
+
+      user.set_active(info.username, info.full_name)
+      @database.modify_user(user)
+
+      relay_to_one(message.message_id, user.id, :ranked_info, {
+          "oid"            => reply_user.get_obfuscated_id,
+          "karma"          => reply_user.get_obfuscated_karma,
+          "cooldown_until" => reply_user.remove_cooldown ? nil : @replies.format_time(reply_user.cooldown_until),
+        })
     else
+      user.set_active(info.username, info.full_name)
+      @database.modify_user(user)
+
       relay_to_one(message.message_id, user.id, :user_info, {
         "oid"            => user.get_obfuscated_id,
         "username"       => user.get_formatted_name,
@@ -632,6 +638,9 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
+    unless database.authorized?(user.rank, :upvote)
+      return
+    end
     if (spam = @spam_handler) && spam.spammy_upvote?(user.id, @upvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :upvote_spam)
     end
@@ -673,6 +682,9 @@ class PrivateParlor < Tourmaline::Client
     end
     unless user.can_use_command?
       return deny_user(user)
+    end
+    unless database.authorized?(user.rank, :downvote)
+      return
     end
     if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @downvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :downvote_spam)
@@ -1157,18 +1169,23 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
 
-    user.set_active(info.username, info.full_name)
-    @database.modify_user(user)
-
     if arg = @replies.get_args(ctx.message.text)
-      if database.authorized?(user.rank, :motd_set)
-        @database.set_motd(arg)
-        relay_to_one(message.message_id, user.id, :success)
+      unless database.authorized?(user.rank, :motd_set)
+        return
       end
+      user.set_active(info.username, info.full_name)
+      @database.modify_user(user)
+
+      @database.set_motd(arg)
+      relay_to_one(message.message_id, user.id, :success)
     else
-      if motd = @database.get_motd
-        relay_to_one(message.message_id, user.id, @replies.custom(motd))
+      unless motd = @database.get_motd
+        return
       end
+      user.set_active(info.username, info.full_name)
+      @database.modify_user(user)
+
+      relay_to_one(message.message_id, user.id, @replies.custom(motd))
     end
   end
 
@@ -1241,6 +1258,9 @@ class PrivateParlor < Tourmaline::Client
     unless @enable_sign
       return relay_to_one(msid, user.id, :command_disabled)
     end
+    unless database.authorized?(user.rank, :sign)
+      return
+    end
     if (chat = get_chat(user.id)) && chat.has_private_forwards
       return relay_to_one(msid, user.id, :private_sign)
     end
@@ -1261,6 +1281,9 @@ class PrivateParlor < Tourmaline::Client
   def handle_tripcode(text : String, user : Database::User, msid : Int64) : String?
     unless @enable_tripsign
       return relay_to_one(msid, user.id, :command_disabled)
+    end
+    unless database.authorized?(user.rank, :tsign)
+      return
     end
     if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
       return relay_to_one(msid, user.id, :sign_spam)

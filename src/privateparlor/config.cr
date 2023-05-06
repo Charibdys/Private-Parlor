@@ -34,7 +34,9 @@ module Configuration
     getter intermediary_ranks : Array(IntermediaryRank)
 
     @[YAML::Field(ignore: true)]
-    getter ranks : Hash(Int32, Rank) = {0 => Rank.new("User", Set.new([] of Symbol))}
+    getter ranks : Hash(Int32, Rank) = {
+      0 => Rank.new("User", Set.new([:upvote, :downvote, :sign, :tsign]))
+    }
 
     # Command Toggles
 
@@ -370,8 +372,8 @@ module Configuration
   # Returns an updated `Config` object
   def check_and_init_ranks(config : Config) : Config
     command_keys = %i(
-      start stop info users version upvote downvote toggle_karma toggle_debug tripcode mod admin demote
-      sign tsign ranksay warn delete uncooldown remove purge blacklist motd help motd_set ranked_info
+      users upvote downvote mod admin demote sign tsign ranksay warn 
+      delete uncooldown remove purge blacklist motd_set ranked_info
     )
 
     config.intermediary_ranks.each do |ri|
