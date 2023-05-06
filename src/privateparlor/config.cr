@@ -35,6 +35,7 @@ module Configuration
 
     @[YAML::Field(ignore: true)]
     getter ranks : Hash(Int32, Rank) = {
+      -10 => Rank.new("Banned", Set.new([] of Symbol)),
       0 => Rank.new("User", Set.new([:upvote, :downvote, :sign, :tsign]))
     }
 
