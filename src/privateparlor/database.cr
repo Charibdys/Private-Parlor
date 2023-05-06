@@ -3,25 +3,10 @@ class Database
   getter ranks : Hash(Int32, Rank)
 
   # Create an instance of Database and create the appropriate schema in the SQLite database.
-  def initialize(database : DB::Database)
+  def initialize(database : DB::Database, ranks : Hash(Int32, Rank))
     @db = database
-    @ranks = {
-      -10 => Rank.new("Banned", -10, Set.new([] of Symbol)),
-      0 => Rank.new("User", 0, Set.new([] of Symbol)),
-      10 => Rank.new("Mod", 10, Set.new([
-        :ranked_info, :users, :warn, :delete, :remove, :ranksay
-      ] of Symbol)),
-      100 => Rank.new("Admin", 100, Set.new([
-        :ranked_info, :users, :warn, :delete, :uncooldown, :remove, :purge, :blacklist,
-        :ranksay
-      ] of Symbol)),
-      1000 => Rank.new("Host", 1000, Set.new([
-        :ranked_info, :users, :mod, :admin, :demote, :warn, :delete, :uncooldown, 
-        :remove, :purge, :blacklist, :motd_set, :ranksay
-      ] of Symbol)),
-    }
+    @ranks = ranks
 
-    check_permissions()
     ensure_schema()
   end
 
@@ -254,22 +239,6 @@ class Database
     # Returns false otherwise.
     def can_use_command? : Bool
       !self.blacklisted? && !self.left?
-    end
-  end
-
-  # Checks every rank for invalid or otherwise undefined permissions
-  def check_permissions()
-    command_keys = %i(
-      start stop info users version upvote downvote toggle_karma toggle_debug tripcode mod admin demote
-      sign tsign ranksay warn delete uncooldown remove purge blacklist motd help motd_set ranked_info
-    )
-
-    @ranks.each do |value, rank|
-      if (invalid = rank.permissions - command_keys.to_set) && !invalid.empty?
-        Log.notice { 
-          "Rank #{rank.name} (#{rank.value}) has the following invalid permissions: [#{invalid.join(", ")}]" 
-        }
-      end
     end
   end
 

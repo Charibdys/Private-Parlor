@@ -63,7 +63,7 @@ class PrivateParlor < Tourmaline::Client
     @downvote_limit_interval = config.downvote_limit_interval
 
     db = DB.open("sqlite3://#{Path.new(config.database)}") # TODO: We'll want check if this works on Windows later
-    @database = Database.new(db)
+    @database = Database.new(db, config.ranks)
     @history = get_history_type(db, config)
     @queue = Deque(QueuedMessage).new
     @replies = Replies.new(config.entities, config.locale, config.smileys, config.blacklist_contact, config.salt)

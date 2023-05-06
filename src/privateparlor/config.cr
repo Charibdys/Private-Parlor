@@ -30,6 +30,12 @@ module Configuration
     @[YAML::Field(key: "allow_media_spoilers")]
     getter allow_media_spoilers : Bool? = false
 
+    @[YAML::Field(key: "ranks")]
+    getter intermediary_ranks : Array(IntermediaryRank)
+
+    @[YAML::Field(ignore: true)]
+    getter ranks : Hash(Int32, Rank) = {0 => Rank.new("User", Set.new([] of Symbol))}
+
     # Command Toggles
 
     @[YAML::Field(key: "enable_start")]
@@ -303,6 +309,19 @@ module Configuration
     end
   end
 
+  class IntermediaryRank
+    include YAML::Serializable
+
+    @[YAML::Field(key: "name")]
+    getter name : String
+
+    @[YAML::Field(key: "value")]
+    getter value : Int32
+
+    @[YAML::Field(key: "permissions")]
+    getter permissions : Array(String)
+  end
+
   # Parse config.yaml and returns a `Config` object.
   #
   # Values that aren't specified in the config file will be set to a default value.
@@ -340,6 +359,32 @@ module Configuration
     if (config.entities & message_entities).size != config.entities.size
       Log.notice { "Could not determine strip_format, was #{config.entities}; check for duplicates or mispellings. Using defaults." }
       config.entities = ["bold", "italic", "text_link"]
+    end
+
+    config = check_and_init_ranks(config)
+  end
+
+  # Checks every intermediate rank for invalid or otherwise undefined permissions
+  # and initializes the Ranks hash
+  #
+  # Returns an updated `Config` object
+  def check_and_init_ranks(config : Config) : Config
+    command_keys = %i(
+      start stop info users version upvote downvote toggle_karma toggle_debug tripcode mod admin demote
+      sign tsign ranksay warn delete uncooldown remove purge blacklist motd help motd_set ranked_info
+    )
+
+    config.intermediary_ranks.each do |ri|
+      if (invalid = ri.permissions.to_set - command_keys.map {|key| key.to_s}.to_set ) && !invalid.empty?
+        Log.notice { 
+          "Rank #{ri.name} (#{ri.value}) has the following invalid permissions: [#{invalid.join(", ")}]" 
+        }
+      end
+
+      config.ranks[ri.value] = Rank.new(
+        ri.name,
+        command_keys.compact_map {|key| key if ri.permissions.includes?(key.to_s)}.to_set
+      )
     end
 
     config
