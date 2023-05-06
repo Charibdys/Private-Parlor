@@ -1,11 +1,3 @@
-enum Ranks
-  Banned =  -10
-  User   =    0
-  Mod    =   10
-  Admin  =  100
-  Host   = 1000
-end
-
 alias MessageProc = Proc(Int64, Int64 | Nil, Tourmaline::Message) | Proc(Int64, Int64 | Nil, Array(Tourmaline::Message))
 
 class PrivateParlor < Tourmaline::Client
@@ -495,7 +487,7 @@ class PrivateParlor < Tourmaline::Client
       end
 
       if database.no_users?
-        user = database.add_user(info.id, info.username, info.full_name, rank: 1000)
+        user = database.add_user(info.id, info.username, info.full_name, database.ranks.keys.max)
       else
         user = database.add_user(info.id, info.username, info.full_name)
       end
@@ -564,7 +556,7 @@ class PrivateParlor < Tourmaline::Client
         "oid"            => user.get_obfuscated_id,
         "username"       => user.get_formatted_name,
         "rank_val"       => user.rank,
-        "rank"           => Ranks.new(user.rank),
+        "rank"           => database.ranks[user.rank]?.try &.name,
         "karma"          => user.karma,
         "warnings"       => user.warnings,
         "warn_expiry"    => @replies.format_time(user.warn_expiry),
@@ -810,15 +802,15 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    unless promoted_user.left? || promoted_user.rank >= Ranks::Mod.value
-      promoted_user.set_rank(Ranks::Mod)
+    unless promoted_user.left? || promoted_user.rank >= 10
+      promoted_user.set_rank(10)
       @database.modify_user(promoted_user)
-      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => Ranks::Mod})
+      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => database.ranks[10]?.try &.name})
 
       Log.info { @replies.substitute_log(:promoted, {
         "id"      => promoted_user.id.to_s,
         "name"    => promoted_user.get_formatted_name,
-        "rank"    => Ranks::Mod,
+        "rank"    => database.ranks[user.rank]?.try &.name,
         "invoker" => user.get_formatted_name,
       }) }
       relay_to_one(message.message_id, user.id, :success)
@@ -849,15 +841,15 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    unless promoted_user.left? || promoted_user.rank >= Ranks::Admin.value
-      promoted_user.set_rank(Ranks::Admin)
+    unless promoted_user.left? || promoted_user.rank >= 100
+      promoted_user.set_rank(100)
       @database.modify_user(promoted_user)
-      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => Ranks::Admin})
+      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => database.ranks[user.rank]?.try &.name})
 
       Log.info { @replies.substitute_log(:promoted, {
         "id"      => promoted_user.id.to_s,
         "name"    => promoted_user.get_formatted_name,
-        "rank"    => Ranks::Admin,
+        "rank"    => database.ranks[user.rank]?.try &.name,
         "invoker" => user.get_formatted_name,
       }) }
       relay_to_one(message.message_id, user.id, :success)
@@ -888,7 +880,7 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    demoted_user.set_rank(Ranks::User)
+    demoted_user.set_rank(0)
     @database.modify_user(demoted_user)
     Log.info { @replies.substitute_log(:demoted, {
       "id"      => demoted_user.id.to_s,
@@ -1205,11 +1197,11 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     case user.rank
-    when Ranks::Mod.value
+    when 10
       relay_to_one(message.message_id, user.id, @replies.mod_help)
-    when Ranks::Admin.value
+    when 100
       relay_to_one(message.message_id, user.id, @replies.admin_help)
-    when Ranks::Host.value
+    when 1000
       relay_to_one(message.message_id, user.id, @replies.host_help)
     end
   end
@@ -1308,7 +1300,7 @@ class PrivateParlor < Tourmaline::Client
     unless @enable_ranksay
       return relay_to_one(msid, user.id, :command_disabled)
     end
-    unless (parsed_rank = Ranks.parse?(rank)) || (parsed_rank = Ranks.new(user.rank) if rank == "rank")
+    unless (parsed_rank = database.ranks.find {|k, v| v.name == rank}.try &.try &.[1].name) || (parsed_rank = database.ranks[user.rank]?.try &.name if rank == "rank")
       return
     end
     unless parsed_rank && database.authorized?(user.rank, :ranksay)

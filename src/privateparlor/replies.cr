@@ -5,7 +5,7 @@ lib LibCrypt
   fun crypt(password : UInt8*, salt : UInt8*) : UInt8*
 end
 
-alias LocaleParameters = Hash(String, String | Time | Int32 | Bool | Ranks | Nil)
+alias LocaleParameters = Hash(String, String | Time | Int32 | Bool | Rank | Nil)
 
 class Replies
   include Tourmaline::Format
@@ -102,7 +102,7 @@ class Replies
         when "toggle"
           replace = variables[placeholder] ? @toggle[1] : @toggle[0]
         when "rank"
-          replace = variables[placeholder]?.to_s.downcase
+          replace = variables[placeholder]?.to_s
         when "cooldown_until"
           if variables[placeholder]
             replace = "#{@replies[:cooldown_true]} #{variables[placeholder]}"
