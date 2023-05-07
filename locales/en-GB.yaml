@@ -242,6 +242,9 @@ replies:
  - |-
    ✅ 
 
+# fail
+ - |-
+   ❌
 
 # Special characters in MarkdownV2 must be escaped
 command_descriptions:

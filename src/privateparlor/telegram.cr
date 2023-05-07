@@ -534,7 +534,7 @@ class PrivateParlor < Tourmaline::Client
 
     if reply = message.reply_message
       unless database.authorized?(user.rank, :ranked_info)
-        return
+        return relay_to_one(message.message_id, user.id, :fail)
       end
       unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
         return
@@ -631,7 +631,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :upvote)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     if (spam = @spam_handler) && spam.spammy_upvote?(user.id, @upvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :upvote_spam)
@@ -676,7 +676,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :downvote)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @downvote_limit_interval)
       return relay_to_one(message.message_id, user.id, :downvote_spam)
@@ -789,7 +789,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :promote)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     unless (args = @replies.get_args(message.text, count: 2)) && (args.size == 2)
       return relay_to_one(message.message_id, user.id, :missing_args)
@@ -803,7 +803,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, :no_user_found)
     end
     if tuple[0] <= promoted_user.rank || tuple[0] >= user.rank || tuple[0] == -10 || promoted_user.left?
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
 
     user.set_active(info.username, info.full_name)
@@ -837,7 +837,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :demote)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     unless (args = @replies.get_args(message.text, count: 2)) && (args.size == 2)
       return relay_to_one(message.message_id, user.id, :missing_args)
@@ -851,7 +851,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, :no_user_found)
     end
     if tuple[0] >= demoted_user.rank || tuple[0] >= user.rank || tuple[0] == -10 || demoted_user.left?
-      return 
+      return relay_to_one(message.message_id, user.id, :fail)
     end
 
     user.set_active(info.username, info.full_name)
@@ -884,7 +884,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :warn)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, :no_reply)
@@ -933,7 +933,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :delete)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, :no_reply)
@@ -977,7 +977,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :uncooldown)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     unless arg = @replies.get_arg(message.text)
       return relay_to_one(message.message_id, user.id, :missing_args)
@@ -1025,7 +1025,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :remove)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, :no_reply)
@@ -1062,7 +1062,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :purge)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
@@ -1093,7 +1093,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
     unless database.authorized?(user.rank, :blacklist)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, :no_reply)
@@ -1142,7 +1142,7 @@ class PrivateParlor < Tourmaline::Client
 
     if arg = @replies.get_arg(ctx.message.text)
       unless database.authorized?(user.rank, :motd_set)
-        return
+        return relay_to_one(message.message_id, user.id, :fail)
       end
       user.set_active(info.username, info.full_name)
       @database.modify_user(user)
@@ -1230,7 +1230,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, :command_disabled)
     end
     unless database.authorized?(user.rank, :sign)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     if (chat = get_chat(user.id)) && chat.has_private_forwards
       return relay_to_one(msid, user.id, :private_sign)
@@ -1254,7 +1254,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, :command_disabled)
     end
     unless database.authorized?(user.rank, :tsign)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
     if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
       return relay_to_one(msid, user.id, :sign_spam)
@@ -1283,7 +1283,7 @@ class PrivateParlor < Tourmaline::Client
       return
     end
     unless parsed_rank && database.authorized?(user.rank, :ranksay)
-      return
+      return relay_to_one(message.message_id, user.id, :fail)
     end
 
     if (args = @replies.get_arg(text)) && args.size > 0
