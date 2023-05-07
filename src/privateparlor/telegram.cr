@@ -1230,7 +1230,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, :command_disabled)
     end
     unless database.authorized?(user.rank, :sign)
-      return relay_to_one(message.message_id, user.id, :fail)
+      return relay_to_one(msid, user.id, :fail)
     end
     if (chat = get_chat(user.id)) && chat.has_private_forwards
       return relay_to_one(msid, user.id, :private_sign)
@@ -1254,7 +1254,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, :command_disabled)
     end
     unless database.authorized?(user.rank, :tsign)
-      return relay_to_one(message.message_id, user.id, :fail)
+      return relay_to_one(msid, user.id, :fail)
     end
     if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
       return relay_to_one(msid, user.id, :sign_spam)
@@ -1283,7 +1283,7 @@ class PrivateParlor < Tourmaline::Client
       return
     end
     unless parsed_rank && database.authorized?(user.rank, :ranksay)
-      return relay_to_one(message.message_id, user.id, :fail)
+      return relay_to_one(msid, user.id, :fail)
     end
 
     if (args = @replies.get_arg(text)) && args.size > 0
