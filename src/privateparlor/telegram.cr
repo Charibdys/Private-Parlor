@@ -351,8 +351,8 @@ class PrivateParlor < Tourmaline::Client
   # Also checks whether or not a command or media type is enabled via the config, and registers commands with BotFather
   def initialize_handlers(descriptions : Hash(Symbol, String), config : Configuration::Config) : Nil
     {% for command in [
-                        "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help", "upvote",
-                        "downvote", "mod", "admin", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist",
+                        "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help",
+                        "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist",
                       ] %}
 
     if config.enable_{{command.id}}[0]
@@ -759,7 +759,7 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    if arg = @replies.get_args(ctx.message.text)
+    if arg = @replies.get_arg(ctx.message.text)
       if !((index = arg.index('#')) && (0 < index < arg.size - 1)) || arg.includes?('\n') || arg.size > 30
         return relay_to_one(message.message_id, user.id, :invalid_tripcode_format)
       end
@@ -778,8 +778,7 @@ class PrivateParlor < Tourmaline::Client
   # ADMIN COMMANDS #
   ##################
 
-  # Promote a user to the moderator rank.
-  def mod_command(ctx : CommandHandler::Context) : Nil
+  def promote_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
     end
@@ -789,71 +788,41 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless database.authorized?(user.rank, :mod)
+    unless database.authorized?(user.rank, :promote)
       return
     end
-    unless arg = @replies.get_args(message.text)
+    unless (args = @replies.get_args(message.text, count: 2)) && (args.size == 2)
       return relay_to_one(message.message_id, user.id, :missing_args)
     end
-    unless promoted_user = database.get_user_by_name(arg)
+    unless tuple = database.ranks.find {|k, v| v.name.downcase == args[1].downcase || k == args[1].to_i? }
+      return relay_to_one(message.message_id, user.id, :no_rank_found, {
+        "ranks" => database.ranks.compact_map {|k, v| v.name if k < user.rank}
+      })
+    end
+    unless promoted_user = database.get_user_by_arg(args[0])
       return relay_to_one(message.message_id, user.id, :no_user_found)
+    end
+    if tuple[0] <= promoted_user.rank || tuple[0] >= user.rank || tuple[0] == -10 || promoted_user.left?
+      return
     end
 
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    unless promoted_user.left? || promoted_user.rank >= 10
-      promoted_user.set_rank(10)
-      @database.modify_user(promoted_user)
-      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => database.ranks[10]?.try &.name})
+    promoted_user.set_rank(tuple[0])
+    @database.modify_user(promoted_user)
 
-      Log.info { @replies.substitute_log(:promoted, {
-        "id"      => promoted_user.id.to_s,
-        "name"    => promoted_user.get_formatted_name,
-        "rank"    => database.ranks[user.rank]?.try &.name,
-        "invoker" => user.get_formatted_name,
-      }) }
-      relay_to_one(message.message_id, user.id, :success)
-    end
-  end
-
-  # Promote a user to the administrator rank.
-  def admin_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, :not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
-    unless database.authorized?(user.rank, :admin)
-      return
-    end
-    unless arg = @replies.get_args(message.text)
-      return relay_to_one(message.message_id, user.id, :missing_args)
-    end
-    unless promoted_user = database.get_user_by_name(arg)
-      return relay_to_one(message.message_id, user.id, :no_user_found)
+    unless tuple[0] < 0
+      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => tuple[1].name})
     end
 
-    user.set_active(info.username, info.full_name)
-    @database.modify_user(user)
-
-    unless promoted_user.left? || promoted_user.rank >= 100
-      promoted_user.set_rank(100)
-      @database.modify_user(promoted_user)
-      relay_to_one(nil, promoted_user.id, :promoted, {"rank" => database.ranks[user.rank]?.try &.name})
-
-      Log.info { @replies.substitute_log(:promoted, {
-        "id"      => promoted_user.id.to_s,
-        "name"    => promoted_user.get_formatted_name,
-        "rank"    => database.ranks[user.rank]?.try &.name,
-        "invoker" => user.get_formatted_name,
-      }) }
-      relay_to_one(message.message_id, user.id, :success)
-    end
+    Log.info { @replies.substitute_log(:promoted, {
+      "id"      => promoted_user.id.to_s,
+      "name"    => promoted_user.get_formatted_name,
+      "rank"    => tuple[1].name,
+      "invoker" => user.get_formatted_name,
+    }) }
+    relay_to_one(message.message_id, user.id, :success)
   end
 
   # Returns a ranked user to the user rank
@@ -870,21 +839,31 @@ class PrivateParlor < Tourmaline::Client
     unless database.authorized?(user.rank, :demote)
       return
     end
-    unless arg = @replies.get_args(message.text)
+    unless (args = @replies.get_args(message.text, count: 2)) && (args.size == 2)
       return relay_to_one(message.message_id, user.id, :missing_args)
     end
-    unless demoted_user = database.get_user_by_name(arg)
+    unless tuple = database.ranks.find {|k, v| v.name.downcase == args[1].downcase || k == args[1].to_i? }
+      return relay_to_one(message.message_id, user.id, :no_rank_found, {
+        "ranks" => database.ranks.compact_map {|k, v| v.name if k < user.rank}
+      })
+    end
+    unless demoted_user = database.get_user_by_arg(args[0])
       return relay_to_one(message.message_id, user.id, :no_user_found)
+    end
+    if tuple[0] >= demoted_user.rank || tuple[0] >= user.rank || tuple[0] == -10 || demoted_user.left?
+      return 
     end
 
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    demoted_user.set_rank(0)
+    demoted_user.set_rank(tuple[0])
     @database.modify_user(demoted_user)
+
     Log.info { @replies.substitute_log(:demoted, {
       "id"      => demoted_user.id.to_s,
       "name"    => demoted_user.get_formatted_name,
+      "rank"    => tuple[1].name,
       "invoker" => user.get_formatted_name,
     }) }
     relay_to_one(message.message_id, user.id, :success)
@@ -920,7 +899,7 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    reason = @replies.get_args(ctx.message.text)
+    reason = @replies.get_arg(ctx.message.text)
 
     duration = @replies.format_timespan(reply_user.cooldown_and_warn(
       cooldown_time_begin, cooldown_time_linear_m, cooldown_time_linear_b, warn_expire_hours, karma_warn_penalty
@@ -966,7 +945,7 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    reason = @replies.get_args(message.text)
+    reason = @replies.get_arg(message.text)
     cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
     duration = @replies.format_timespan(reply_user.cooldown_and_warn(
@@ -1000,7 +979,7 @@ class PrivateParlor < Tourmaline::Client
     unless database.authorized?(user.rank, :uncooldown)
       return
     end
-    unless arg = @replies.get_args(message.text)
+    unless arg = @replies.get_arg(message.text)
       return relay_to_one(message.message_id, user.id, :missing_args)
     end
 
@@ -1060,13 +1039,13 @@ class PrivateParlor < Tourmaline::Client
 
     cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
-    relay_to_one(cached_msid, reply_user.id, :message_removed, {"reason" => @replies.get_args(message.text)})
+    relay_to_one(cached_msid, reply_user.id, :message_removed, {"reason" => @replies.get_arg(message.text)})
     Log.info { @replies.substitute_log(:message_removed, {
       "id"     => user.id.to_s,
       "name"   => user.get_formatted_name,
       "msid"   => cached_msid.to_s,
       "oid"    => reply_user.get_obfuscated_id,
-      "reason" => @replies.get_args(message.text),
+      "reason" => @replies.get_arg(message.text),
     }) }
     relay_to_one(message.message_id, user.id, :success)
   end
@@ -1127,7 +1106,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     if reply_user.rank < user.rank
-      reason = @replies.get_args(ctx.message.text)
+      reason = @replies.get_arg(ctx.message.text)
       reply_user.blacklist(reason)
       @database.modify_user(reply_user)
 
@@ -1161,7 +1140,7 @@ class PrivateParlor < Tourmaline::Client
       return deny_user(user)
     end
 
-    if arg = @replies.get_args(ctx.message.text)
+    if arg = @replies.get_arg(ctx.message.text)
       unless database.authorized?(user.rank, :motd_set)
         return
       end
@@ -1260,7 +1239,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, :sign_spam)
     end
 
-    if (args = @replies.get_args(text)) && args.size > 0
+    if (args = @replies.get_arg(text)) && args.size > 0
       String.build do |str|
         str << args
         str << @replies.format_user_sign(user.id, user.get_formatted_name)
@@ -1284,7 +1263,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, :no_tripcode_set)
     end
 
-    if (args = @replies.get_args(text)) && args.size > 0
+    if (args = @replies.get_arg(text)) && args.size > 0
       pair = @replies.generate_tripcode(tripkey)
       String.build do |str|
         str << @replies.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
@@ -1307,7 +1286,7 @@ class PrivateParlor < Tourmaline::Client
       return
     end
 
-    if (args = @replies.get_args(text)) && args.size > 0
+    if (args = @replies.get_arg(text)) && args.size > 0
       Log.info { @replies.substitute_log(:ranked_message, {
         "id"   => user.id.to_s,
         "name" => user.get_formatted_name,

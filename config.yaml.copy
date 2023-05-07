@@ -57,12 +57,12 @@ ranks:
   - name: "Admin"
     value: 100
     permissions: ["upvote", "downvote", "sign", "tsign", 
-      "ranked_info", "users", "warn", "delete", "uncooldown", 
+      "ranked_info", "users", "warn", "delete", "uncooldown",
       "remove", "purge", "blacklist", "ranksay"]
   - name: "Host"
     value: 1000
     permissions: ["upvote", "downvote", "sign", "tsign", 
-      "ranked_info", "users", "mod", "admin", "demote", 
+      "ranked_info", "users", "promote", "demote", 
       "warn", "delete", "uncooldown", "remove", "purge", 
       "blacklist", "motd_set", "ranksay"]
 
@@ -84,8 +84,7 @@ enable_motd: [true, true]
 enable_help: [true, true]
 enable_upvotes: [true, false]
 enable_downvotes: [true, false]
-enable_mod: [true, false]
-enable_admin: [true, false]
+enable_promote: [true, false]
 enable_demote: [true, false]
 enable_warn: [true, false]
 enable_delete: [true, false]

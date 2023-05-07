@@ -86,11 +86,8 @@ module Configuration
     @[YAML::Field(key: "enable_downvotes")]
     getter enable_downvote : Array(Bool) = [true, false]
 
-    @[YAML::Field(key: "enable_mod")]
-    getter enable_mod : Array(Bool) = [true, false]
-
-    @[YAML::Field(key: "enable_admin")]
-    getter enable_admin : Array(Bool) = [true, false]
+    @[YAML::Field(key: "enable_promote")]
+    getter enable_promote : Array(Bool) = [true, false]
 
     @[YAML::Field(key: "enable_demote")]
     getter enable_demote : Array(Bool) = [true, false]
@@ -373,7 +370,7 @@ module Configuration
   # Returns an updated `Config` object
   def check_and_init_ranks(config : Config) : Config
     command_keys = %i(
-      users upvote downvote mod admin demote sign tsign ranksay warn 
+      users upvote downvote promote demote sign tsign ranksay warn 
       delete uncooldown remove purge blacklist motd_set ranked_info
     )
 

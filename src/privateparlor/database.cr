@@ -115,11 +115,11 @@ class Database
     end
 
     # Set *rank* to the given `Ranks` value.
-    def set_rank(rank : Ranks) : Nil
-      if @rank <= rank.value
-        @rank = rank.value
+    def set_rank(rank_value : Int32) : Nil
+      if @rank <= rank_value
+        @rank = rank_value
       else
-        @rank = rank.value
+        @rank = rank_value
       end
     end
 
@@ -292,6 +292,16 @@ class Database
       if user.get_obfuscated_id == oid
         return user
       end
+    end
+  end
+
+  def get_user_by_arg(arg : String) : User | Nil
+    if arg.size == 4
+      get_user_by_oid(arg)
+    elsif (val = arg.to_i64?) && arg.matches?(/[0-9]{5,}/)
+      get_user(val)
+    else
+      get_user_by_name(arg)
     end
   end
 

@@ -5,7 +5,7 @@ lib LibCrypt
   fun crypt(password : UInt8*, salt : UInt8*) : UInt8*
 end
 
-alias LocaleParameters = Hash(String, String | Time | Int32 | Bool | Rank | Nil)
+alias LocaleParameters = Hash(String, String | Array(String) | Time | Int32 | Bool | Rank | Nil)
 
 class Replies
   include Tourmaline::Format
@@ -54,7 +54,7 @@ class Replies
     reply_keys = %i(
       joined rejoined left already_in_chat registration_closed not_in_chat not_in_cooldown rejected_message deanon_poll
       missing_args command_disabled media_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found
-      promoted toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted
+      no_rank_found promoted toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted
       gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming sign_spam 
       upvote_spam downvote_spam invalid_tripcode_format tripcode_set tripcode_info tripcode_unset 
       user_info info_warning ranked_info cooldown_true cooldown_false user_count user_count_full
@@ -68,7 +68,7 @@ class Replies
     )
 
     command_keys = %i(
-      start stop info users version upvote downvote toggle_karma toggle_debug tripcode mod admin demote
+      start stop info users version upvote downvote toggle_karma toggle_debug tripcode promote demote
       sign tsign ranksay warn delete uncooldown remove purge blacklist motd help motd_set ranked_info
     )
 
@@ -264,18 +264,20 @@ class Replies
   end
 
   # Returns arguments found after a command from a message text.
-  def get_args(msg : String?, count : Int = 1) : String | Array(String) | Nil
-    if msg
-      args = msg.split(count + 1)
-      case args.size
-      when 2
-        return args[1]
-      when 2..
-        return args.shift
-      else
-        return nil
-      end
+  def get_arg(msg : String?) : String | Nil
+    unless msg
+      return
     end
+
+    msg.split(2)[1]
+  end
+
+  def get_args(msg : String?, count : Int) : Array(String) | Nil
+    unless msg
+      return
+    end
+
+    msg.split(count + 1)[1..]
   end
 
   # Returns a link to the given user's account.

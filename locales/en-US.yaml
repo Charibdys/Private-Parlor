@@ -83,6 +83,10 @@ replies:
  - |-
     _There was no user found with that OID\._
 
+# no_rank_found: ranks
+ - |-
+    _There was no rank found with that name\. Ranks are: [#{ranks}]_
+
 # promoted: rank
  - |-
     _You have been promoted to #{rank}\! Type /help to view the commands available to you\._
@@ -281,17 +285,13 @@ command_descriptions:
  - |-
    Set or view your tripcode
 
-# mod
+# promote
  - |-
-   Promote a user to the moderator rank
-
-# admin
- - |-
-   Promote a user to the administrator rank
+   Promote a user to a given rank
 
 # demote
  - |-
-   Demote a ranked user to the user rank
+   Demote a ranked user to a given rank
 
 # sign
  - |-
@@ -368,9 +368,9 @@ logs:
  - |-
    User #{id}, aka #{name}, has been promoted to #{rank} by #{invoker}.
 
-# demoted: id, name, invoker
+# demoted: id, name, rank, invoker
  - |-
-   User #{id}, aka #{name}, has been demoted by #{invoker}.
+   User #{id}, aka #{name}, has been demoted to #{rank} by #{invoker}.
 
 # warned: id, name, oid, duration, reason
  - |-
