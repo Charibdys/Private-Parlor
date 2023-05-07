@@ -1218,7 +1218,7 @@ class PrivateParlor < Tourmaline::Client
       return handle_sign(text, user, msid)
     when text.starts_with?("/t "), text.starts_with?("/tsign ")
       return handle_tripcode(text, user, msid)
-    when match = /^\/(.*)say/.match(text).try &.[1]
+    when match = /^\/(\w*)say/.match(text).try &.[1]
       return handle_ranksay(match, text, user, msid)
     end
   end
@@ -1279,24 +1279,30 @@ class PrivateParlor < Tourmaline::Client
     unless @enable_ranksay
       return relay_to_one(msid, user.id, :command_disabled)
     end
-    unless (parsed_rank = database.ranks.find {|k, v| v.name == rank}.try &.try &.[1].name) || (parsed_rank = database.ranks[user.rank]?.try &.name if rank == "rank")
-      return
-    end
-    unless parsed_rank && database.authorized?(user.rank, :ranksay)
+    unless database.authorized?(user.rank, :ranksay)
       return relay_to_one(msid, user.id, :fail)
     end
+    return relay_to_one(msid, user.id, :fail) unless parsed_rank_tuple = database.ranks.find do |k, v|
+      (v.name.downcase == rank.downcase && v.permissions.includes?(:ranksay)) || 
+      (rank == "rank" && k == user.rank)
+    end
+    unless parsed_rank_tuple[0] <= user.rank && parsed_rank_tuple[0] != -10
+      return relay_to_one(msid, user.id, :fail)
+    end
+    unless (args = @replies.get_arg(text)) && args.size > 0
+      return relay_to_one(msid, user.id, :missing_args)
+    end
 
-    if (args = @replies.get_arg(text)) && args.size > 0
-      Log.info { @replies.substitute_log(:ranked_message, {
-        "id"   => user.id.to_s,
-        "name" => user.get_formatted_name,
-        "rank" => parsed_rank,
-        "text" => args,
-      }) }
-      String.build do |str|
-        str << args
-        str << @replies.format_user_say(parsed_rank.to_s)
-      end
+    Log.info { @replies.substitute_log(:ranked_message, {
+      "id"   => user.id.to_s,
+      "name" => user.get_formatted_name,
+      "rank" => parsed_rank_tuple[1].name,
+      "text" => args,
+    }) }
+    
+    String.build do |str|
+      str << args
+      str << @replies.format_user_say(parsed_rank_tuple[1].name)
     end
   end
 

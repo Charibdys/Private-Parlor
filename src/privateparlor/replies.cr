@@ -269,7 +269,7 @@ class Replies
       return
     end
 
-    msg.split(2)[1]
+    msg.split(2)[1]?
   end
 
   def get_args(msg : String?, count : Int) : Array(String) | Nil
@@ -277,7 +277,7 @@ class Replies
       return
     end
 
-    msg.split(count + 1)[1..]
+    msg.split(count + 1)[1..]?
   end
 
   # Returns a link to the given user's account.
