@@ -1175,14 +1175,7 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    case user.rank
-    when 10
-      relay_to_one(message.message_id, user.id, @replies.mod_help)
-    when 100
-      relay_to_one(message.message_id, user.id, @replies.admin_help)
-    when 1000
-      relay_to_one(message.message_id, user.id, @replies.host_help)
-    end
+    relay_to_one(message.message_id, user.id, @replies.format_help(user, database.ranks))
   end
 
   # Sends a message to the user if a disabled command is used

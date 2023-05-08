@@ -91,6 +91,18 @@ replies:
  - |-
     _You have been promoted to #{rank}\! Type /help to view the commands available to you\._
 
+# help_header
+ - |-
+    __*General Commands*__
+
+# help_rank_commands: rank
+ - |-
+    __*Commands available to #{rank}*__
+
+# help_reply_commands
+ - |-
+    __*Commands that require a reply*__
+
 # toggle_karma: toggle
  - |-
     *Karma notifications*: #{toggle}
@@ -294,7 +306,7 @@ command_descriptions:
 
 # demote
  - |-
-   Demote a ranked user to a given rank
+   Demote a user to a given rank
 
 # sign
  - |-
@@ -306,7 +318,7 @@ command_descriptions:
 
 # ranksay
  - |-
-   Sign a message with your current rank (Alias of modsay/adminsay)
+   Sign a message with your current rank
 
 # warn
  - |-
