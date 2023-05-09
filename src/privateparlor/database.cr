@@ -1,11 +1,9 @@
 class Database
   getter db : DB::Database
-  getter ranks : Hash(Int32, Rank)
 
   # Create an instance of Database and create the appropriate schema in the SQLite database.
-  def initialize(database : DB::Database, ranks : Hash(Int32, Rank))
+  def initialize(database : DB::Database)
     @db = database
-    @ranks = ranks
 
     ensure_schema()
   end
@@ -209,13 +207,6 @@ class Database
       @left != nil
     end
 
-    # Returns `true` if user's rank is greater than or equal to the given rank; user is authorized.
-    #
-    # Returns `false` otherwise.
-    def authorized?(rank : Ranks) : Bool
-      @rank >= rank.value
-    end
-
     # Returns `true` if user is joined, not in cooldown, and not blacklisted; user can chat
     #
     # Returns false otherwise.
@@ -239,24 +230,6 @@ class Database
     # Returns false otherwise.
     def can_use_command? : Bool
       !self.blacklisted? && !self.left?
-    end
-  end
-
-  # Returns `true` if user rank has the given permission; user is authorized.
-  #
-  # Returns `false` otherwise, or `nil` if the user rank does not exist in `ranks`
-  def authorized?(user_rank : Int32, permission : Symbol) : Bool?
-    if rank = @ranks[user_rank]?
-      rank.permissions.includes?(permission)
-    end
-  end
-
-  # Returns `true` if user rank has any of the given permissions; user is authorized.
-  #
-  # Returns `false` otherwise, or `nil` if the user rank does not exist in `ranks`
-  def authorized?(user_rank : Int32, *permissions : Symbol) : Bool?
-    if rank = @ranks[user_rank]?
-      rank.permissions.intersects?(permissions.to_set)
     end
   end
 
