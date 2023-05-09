@@ -251,6 +251,15 @@ class Database
     end
   end
 
+  # Returns `true` if user rank has any of the given permissions; user is authorized.
+  #
+  # Returns `false` otherwise, or `nil` if the user rank does not exist in `ranks`
+  def authorized?(user_rank : Int32, *permissions : Symbol) : Bool?
+    if rank = @ranks[user_rank]?
+      rank.permissions.intersects?(permissions.to_set)
+    end
+  end
+
   # Queries the database for a user record with the given *id*.
   #
   # Returns a `User` object.

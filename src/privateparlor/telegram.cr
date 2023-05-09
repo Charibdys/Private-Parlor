@@ -788,7 +788,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless database.authorized?(user.rank, :promote)
+    unless database.authorized?(user.rank, :promote, :promote_lower, :promote_same)
       return relay_to_one(message.message_id, user.id, :fail)
     end
     unless (args = @replies.get_args(message.text, count: 2)) && (args.size == 2)
@@ -802,8 +802,14 @@ class PrivateParlor < Tourmaline::Client
     unless promoted_user = database.get_user_by_arg(args[0])
       return relay_to_one(message.message_id, user.id, :no_user_found)
     end
-    if tuple[0] <= promoted_user.rank || tuple[0] >= user.rank || tuple[0] == -10 || promoted_user.left?
+    if tuple[0] <= promoted_user.rank || tuple[0] > user.rank || tuple[0] == -10 || promoted_user.left?
       return relay_to_one(message.message_id, user.id, :fail)
+    end
+
+    if tuple[0] <= user.rank && :promote.in?(database.ranks[user.rank].permissions)
+    elsif tuple[0] < user.rank && :promote_lower.in?(database.ranks[user.rank].permissions)
+    elsif tuple[0] == user.rank && :promote_same.in?(database.ranks[user.rank].permissions)
+    else return relay_to_one(message.message_id, user.id, :fail)
     end
 
     user.set_active(info.username, info.full_name)
@@ -1272,14 +1278,18 @@ class PrivateParlor < Tourmaline::Client
     unless @enable_ranksay
       return relay_to_one(msid, user.id, :command_disabled)
     end
-    unless database.authorized?(user.rank, :ranksay)
+    unless database.authorized?(user.rank, :ranksay, :ranksay_lower)
       return relay_to_one(msid, user.id, :fail)
     end
     return relay_to_one(msid, user.id, :fail) unless parsed_rank_tuple = database.ranks.find do |k, v|
-      (v.name.downcase == rank.downcase && v.permissions.includes?(:ranksay)) || 
+      (v.name.downcase == rank.downcase && v.permissions.intersects?([:ranksay, :ranksay_lower].to_set)) || 
       (rank == "rank" && k == user.rank)
     end
-    unless parsed_rank_tuple[0] <= user.rank && parsed_rank_tuple[0] != -10
+    unless parsed_rank_tuple[0] != -10
+      return relay_to_one(msid, user.id, :fail)
+    end
+    unless (parsed_rank_tuple[0] < user.rank) && database.ranks[user.rank].permissions.includes?(:ranksay_lower) ||
+           (parsed_rank_tuple[0] == user.rank)
       return relay_to_one(msid, user.id, :fail)
     end
     unless (args = @replies.get_arg(text)) && args.size > 0

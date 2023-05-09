@@ -41,8 +41,8 @@ locale: "en-US"
 # To add a rank, add a new entry and define the name, value, and permissisons
 # 
 # The following permissions are available: 
-# users upvote downvote mod admin demote sign tsign ranksay warn 
-# delete uncooldown remove purge blacklist motd_set ranked_info
+# users upvote downvote promote promote_lower promote_same demote sign tsign ranksay 
+# ranksay_lower warn delete uncooldown remove purge blacklist motd_set ranked_info
 ranks:
   - name: "Banned"
     value: -10

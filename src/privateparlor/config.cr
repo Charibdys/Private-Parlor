@@ -370,8 +370,8 @@ module Configuration
   # Returns an updated `Config` object
   def check_and_init_ranks(config : Config) : Config
     command_keys = %i(
-      users upvote downvote promote demote sign tsign ranksay warn 
-      delete uncooldown remove purge blacklist motd_set ranked_info
+      users upvote downvote promote promote_lower promote_same demote sign tsign ranksay 
+      ranksay_lower warn delete uncooldown remove purge blacklist motd_set ranked_info
     )
 
     config.intermediary_ranks.each do |ri|
