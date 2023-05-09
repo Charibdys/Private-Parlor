@@ -65,6 +65,7 @@ class PrivateParlor < Tourmaline::Client
     @tasks = register_tasks(config.spam_interval_seconds)
     @albums = {} of String => Album
 
+    revert_ranked_users()
     initialize_handlers(@replies.command_descriptions, config)
   end
 
@@ -346,6 +347,14 @@ class PrivateParlor < Tourmaline::Client
       HistoryWarnings.new(config.lifetime.hours)
     else
       HistoryBase.new(config.lifetime.hours)
+    end
+  end
+
+  def revert_ranked_users : Nil
+    @database.get_invalid_rank_users(@access.ranks.keys).each do |user|
+      Log.notice { "User #{user.id}, aka #{user.get_formatted_name}, had an invalid rank (was #{user.rank}) and was reverted to user rank (0) " }
+      user.set_rank(0)
+      @database.modify_user(user)
     end
   end
 

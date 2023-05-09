@@ -259,6 +259,10 @@ class Database
     db.query_all("SELECT * FROM users WHERE warnings > 0 AND left is NULL", as: User)
   end
 
+  def get_invalid_rank_users(values : Array(Int32)) : Array(User) | Nil
+    db.query_all("SELECT * FROM users WHERE rank NOT IN (#{values.join(", ") {"?"}})", args: values, as: User)
+  end
+
   # Queries the database for a user with a given *username*.
   #
   # Returns a `User` object or Nil if no user was found.
