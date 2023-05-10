@@ -878,16 +878,38 @@ class PrivateParlor < Tourmaline::Client
     unless @access.authorized?(user.rank, :demote)
       return relay_to_one(message.message_id, user.id, :fail)
     end
-    unless (args = @replies.get_args(message.text, count: 2)) && (args.size == 2)
-      return relay_to_one(message.message_id, user.id, :missing_args)
+
+    if reply = message.reply_message
+      arg = @replies.get_arg(ctx.message.text)
+
+      if arg.nil?
+        tuple = {0, @access.ranks[0]}
+      elsif arg
+        tuple = @access.find_rank(arg.downcase, arg.to_i?)
+      else
+        return relay_to_one(message.message_id, user.id, :missing_args)
+      end
+
+      unless tuple
+        return relay_to_one(message.message_id, user.id, :no_rank_found, {"ranks" => @access.rank_names(limit: user.rank)})
+      end
+
+      unless (demoted_user = database.get_user(@history.get_sender_id(reply.message_id))) && !demoted_user.left?
+        return relay_to_one(message.message_id, user.id, :no_user_found)
+      end
+    else
+      unless (args = @replies.get_args(message.text, count: 2)) && (args.size == 2)
+        return relay_to_one(message.message_id, user.id, :missing_args)
+      end
+      unless tuple = @access.find_rank(args[1].downcase, args[1].to_i?)
+        return relay_to_one(message.message_id, user.id, :no_rank_found, {"ranks" => @access.rank_names(limit: user.rank)})
+      end
+      unless demoted_user = database.get_user_by_arg(args[0])
+        return relay_to_one(message.message_id, user.id, :no_user_found)
+      end
     end
-    unless tuple = @access.find_rank(args[1].downcase, args[1].to_i?)
-      return relay_to_one(message.message_id, user.id, :no_rank_found, {"ranks" => @access.rank_names(limit: user.rank)})
-    end
-    unless demoted_user = database.get_user_by_arg(args[0])
-      return relay_to_one(message.message_id, user.id, :no_user_found)
-    end
-    if tuple[0] >= demoted_user.rank || tuple[0] >= user.rank || tuple[0] == -10 || demoted_user.left?
+
+    unless @access.can_demote?(tuple[0], user.rank, demoted_user.rank)
       return relay_to_one(message.message_id, user.id, :fail)
     end
 

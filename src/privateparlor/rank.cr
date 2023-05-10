@@ -69,6 +69,10 @@ class AuthorizedRanks
     end
   end
 
+  def can_demote?(rank : Int32, invoker : Int32, receiver : Int32)
+    rank < receiver && rank < invoker && rank != -10
+  end
+
   def rank_names : Array(String)
     @ranks.compact_map do |k, v| 
       v.name
