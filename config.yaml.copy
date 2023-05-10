@@ -27,9 +27,6 @@ locale: "en-US"
 # Contact link or username shown to blacklisted users
 #blacklist_contact: "t.me/pointofcontact_"
 
-# Toggle whether or not users can see the full count of joined, left, and blacklisted users.
-#full_usercount: false
-
 # Persist message history
 # Use the database in place of the message cache; message history remains if bot restarts 
 #database_history: true
@@ -62,9 +59,9 @@ ranks:
   - name: "Host"
     value: 1000
     permissions: ["upvote", "downvote", "sign", "tsign", 
-      "ranked_info", "users", "promote", "demote", 
+      "ranked_info", "users", "promote_lower", "demote", 
       "warn", "delete", "uncooldown", "remove", "purge", 
-      "blacklist", "motd_set", "ranksay"]
+      "blacklist", "motd_set", "ranksay_lower"]
 
 # Command toggles
 # First value toggles the command (true to enable, false to disable)
