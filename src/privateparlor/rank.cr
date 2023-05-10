@@ -16,9 +16,9 @@ class AuthorizedRanks
   # Returns `true` if user rank has any of the given permissions; user is authorized.
   #
   # Returns `false` otherwise, or `nil` if the user rank does not exist in `ranks`
-  def authorized?(user_rank : Int32, *permissions : Symbol) : Bool?
+  def authorized?(user_rank : Int32, *permissions : Symbol) : Symbol?
     if rank = @ranks[user_rank]?
-      rank.permissions.intersects?(permissions.to_set)
+      (rank.permissions & permissions.to_set).first?
     end
   end
 
@@ -33,8 +33,12 @@ class AuthorizedRanks
   end
 
   def find_rank(name : String, value : Int32? = nil) : Tuple(Int32, Rank)?
-    @ranks.find do |k, v| 
-      v.name.downcase == name || k == value
+    if value && @ranks[value]
+      {value, @ranks[value]}
+    else
+      @ranks.find do |k, v| 
+        v.name.downcase == name || k == value
+      end
     end
   end
 
@@ -49,16 +53,16 @@ class AuthorizedRanks
     ranksay_rank[1].name
   end
 
-  def can_promote?(rank : Int32, invoker : Int32, receiver : Int32) : Bool
+  def can_promote?(rank : Int32, invoker : Int32, receiver : Int32, permission : Symbol) : Bool
     if rank <= receiver || rank > invoker || rank == -10 || rank < 0
       return false
     end
     
-    if rank <= invoker && :promote.in?(@ranks[invoker].permissions)
+    if rank <= invoker && permission == :promote
       true
-    elsif rank < invoker && :promote_lower.in?(@ranks[invoker].permissions)
+    elsif rank < invoker && permission == :promote_lower
       true
-    elsif rank == invoker && :promote_same.in?(@ranks[invoker].permissions)
+    elsif rank == invoker && permission == :promote_same
       true
     else 
       false

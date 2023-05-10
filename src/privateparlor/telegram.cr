@@ -799,19 +799,51 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless @access.authorized?(user.rank, :promote, :promote_lower, :promote_same)
+    unless authority = @access.authorized?(user.rank, :promote, :promote_lower, :promote_same)
       return relay_to_one(message.message_id, user.id, :fail)
     end
-    unless (args = @replies.get_args(message.text, count: 2)) && (args.size == 2)
-      return relay_to_one(message.message_id, user.id, :missing_args)
+
+    if reply = message.reply_message
+      arg = @replies.get_arg(ctx.message.text)
+      
+      if arg.nil? && authority.in?(:promote, :promote_same)
+        tuple = {user.rank, @access.ranks[user.rank]}
+      elsif arg
+        tuple = @access.find_rank(arg.downcase, arg.to_i?)
+      else
+        return relay_to_one(message.message_id, user.id, :missing_args)
+      end
+
+      unless tuple
+        return relay_to_one(message.message_id, user.id, :no_rank_found, {"ranks" => @access.rank_names(limit: user.rank)})
+      end
+      
+      unless (promoted_user = database.get_user(@history.get_sender_id(reply.message_id))) && !promoted_user.left?
+        return relay_to_one(message.message_id, user.id, :no_user_found)
+      end
+    else
+      unless args = @replies.get_args(message.text, count: 2)
+        return relay_to_one(message.message_id, user.id, :missing_args)
+      end
+      
+      if args.size == 1 && authority.in?(:promote, :promote_same)
+        tuple = {user.rank, @access.ranks[user.rank]}
+      elsif args.size == 2
+        tuple = @access.find_rank(args[1].downcase, args[1].to_i?)
+      else
+        return relay_to_one(message.message_id, user.id, :missing_args)
+      end
+
+      unless tuple
+        return relay_to_one(message.message_id, user.id, :no_rank_found, {"ranks" => @access.rank_names(limit: user.rank)})
+      end
+
+      unless (promoted_user = database.get_user_by_arg(args[0])) && !promoted_user.left?
+        return relay_to_one(message.message_id, user.id, :no_user_found)
+      end
     end
-    unless tuple = @access.find_rank(args[1].downcase, args[1].to_i?)
-      return relay_to_one(message.message_id, user.id, :no_rank_found, {"ranks" => @access.rank_names(limit: user.rank)})
-    end
-    unless (promoted_user = database.get_user_by_arg(args[0])) && !promoted_user.left?
-      return relay_to_one(message.message_id, user.id, :no_user_found)
-    end
-    unless @access.can_promote?(tuple[0], user.rank, promoted_user.rank)
+
+    unless @access.can_promote?(tuple[0], user.rank, promoted_user.rank, authority)
       return relay_to_one(message.message_id, user.id, :fail)
     end
 
