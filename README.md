@@ -84,8 +84,8 @@ The following features are planned and being worked on:
 	- [X] Downvotes
 - [x] Message queue
 - [x] Spam prevention
-- [ ] Configuration
-	- [ ] Configurable roles and command permissions 
+- [X] Configuration
+	- [X] Configurable roles and command permissions 
 	- [X] Configurable cache contents/data
 	- [x] Configurable cache life
 	- [x] Configurable time and content limits for spam filter

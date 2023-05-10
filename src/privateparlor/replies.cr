@@ -5,7 +5,7 @@ lib LibCrypt
   fun crypt(password : UInt8*, salt : UInt8*) : UInt8*
 end
 
-alias LocaleParameters = Hash(String, String | Time | Int32 | Bool | Ranks | Nil)
+alias LocaleParameters = Hash(String, String | Array(String) | Time | Int32 | Bool | Rank | Nil)
 
 class Replies
   include Tourmaline::Format
@@ -20,6 +20,7 @@ class Replies
   getter time_format : String
   getter toggle : Array(String)
   getter smileys : Array(String)
+  getter blacklist_contact : String?
   getter tripcode_salt : String
 
   # Creates an instance of `Replies`.
@@ -37,7 +38,7 @@ class Replies
   #
   # `salt`
   # :     a salt used for hashing tripcodes
-  def initialize(entities : Array(String), locale : String, smileys : Array(String), salt : String)
+  def initialize(entities : Array(String), locale : String, smileys : Array(String), contact : String?, salt : String)
     begin
       yaml = File.open("./locales/#{locale}.yaml") do |file|
         YAML.parse(file)
@@ -53,11 +54,12 @@ class Replies
     reply_keys = %i(
       joined rejoined left already_in_chat registration_closed not_in_chat not_in_cooldown rejected_message deanon_poll
       missing_args command_disabled media_disabled no_reply not_in_cache no_tripcode_set no_user_found no_user_oid_found
-      promoted toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted
-      gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming
-      sign_spam upvote_spam downvote_spam invalid_tripcode_format tripcode_set tripcode_info
-      tripcode_unset user_info info_warning ranked_info cooldown_true cooldown_false user_count user_count_full
-      message_deleted message_removed reason_prefix cooldown_given on_cooldown media_limit blacklisted purge_complete success
+      no_rank_found promoted help_header help_rank_commands help_reply_commands toggle_karma toggle_debug gave_upvote got_upvote upvoted_own_message already_voted
+      gave_downvote got_downvote downvoted_own_message already_warned private_sign spamming sign_spam 
+      upvote_spam downvote_spam invalid_tripcode_format tripcode_set tripcode_info tripcode_unset 
+      user_info info_warning ranked_info cooldown_true cooldown_false user_count user_count_full
+      message_deleted message_removed reason_prefix cooldown_given on_cooldown media_limit blacklisted 
+      blacklist_contact purge_complete success fail
     )
 
     log_keys = %i(
@@ -66,12 +68,13 @@ class Replies
     )
 
     command_keys = %i(
-      start stop info users version upvote downvote toggle_karma toggle_debug tripcode mod admin demote
+      start stop info users version upvote downvote toggle_karma toggle_debug tripcode promote demote
       sign tsign ranksay warn delete uncooldown remove purge blacklist motd help motd_set ranked_info
     )
 
     @entity_types = entities
     @smileys = smileys
+    @blacklist_contact = contact
     @tripcode_salt = salt
     @time_units = yaml["time_units"].as_a.map(&.as_s)
     @time_format = yaml["time_format"].as_s
@@ -99,7 +102,7 @@ class Replies
         when "toggle"
           replace = variables[placeholder] ? @toggle[1] : @toggle[0]
         when "rank"
-          replace = variables[placeholder]?.to_s.downcase
+          replace = variables[placeholder]?.to_s
         when "cooldown_until"
           if variables[placeholder]
             replace = "#{@replies[:cooldown_true]} #{variables[placeholder]}"
@@ -120,6 +123,12 @@ class Replies
             replace = variables[placeholder].to_s
           else
             replace = @replies[:tripcode_unset]
+          end
+        when "contact"
+          if blacklist_contact
+            replace = @replies[:blacklist_contact].gsub("#\{contact\}") { "#{blacklist_contact}"}
+          else
+            replace = ""
           end
         else
           replace = variables[placeholder]?.to_s
@@ -255,18 +264,20 @@ class Replies
   end
 
   # Returns arguments found after a command from a message text.
-  def get_args(msg : String?, count : Int = 1) : String | Array(String) | Nil
-    if msg
-      args = msg.split(count + 1)
-      case args.size
-      when 2
-        return args[1]
-      when 2..
-        return args.shift
-      else
-        return nil
-      end
+  def get_arg(msg : String?) : String | Nil
+    unless msg
+      return
     end
+
+    msg.split(2)[1]?
+  end
+
+  def get_args(msg : String?, count : Int) : Array(String) | Nil
+    unless msg
+      return
+    end
+
+    msg.split(count + 1)[1..]?
   end
 
   # Returns a link to the given user's account.
@@ -332,53 +343,82 @@ class Replies
     Section.new(text).to_md
   end
 
-  # Returns a message containing the commands the a moderator can use.
-  def mod_help : String
-    Section.new(
-      Italic.new("The following commands are available to moderators:"),
-      "    /help - Show this text",
-      "    /modsay [text] - Send an offical moderator message",
-      Italic.new("The commands below must be used with a reply:"),
-      "    /info - Get the user info from this message",
-      "    /delete [reason] - Delete a message and give a cooldown",
-      "    /remove [reason] - Delete a message without giving a cooldown",
-      indent: 0
-    ).to_md
-  end
+  # Returns a message containing the commands the user can use.
+  def format_help(user : Database::User, ranks : Hash(Int32, Rank)) : String
+    ranked_keys = %i(
+      promote demote ranksay sign tsign 
+      uncooldown purge motd_set 
+    )
 
-  # Returns a message containing the commands the an admin can use.
-  def admin_help : String
-    Section.new(
-      Italic.new("The following commands are available to admins:"),
-      "    /help - Show this text",
-      "    /purge - Delete all messages from a blacklisted user",
-      "    /adminsay [text] - Send an official admin message",
-      Italic.new("The commands below must be used with a reply:"),
-      "    /info - Get the user info from this message",
-      "    /blacklist [reason] - Ban a user from the chat",
-      "    /delete [reason] - Delete a message and give a cooldown",
-      "    /remove [reason] - Delete a message without giving a cooldown",
-      indent: 0
-    ).to_md
-  end
+    reply_required_keys = %i(
+      upvote downvote warn delete 
+      remove blacklist ranked_info
+    )
 
-  # Returns a message containing the commands the a host can use.
-  def host_help : String
-    Section.new(
-      Italic.new("The following commands are available to hosts:"),
-      "    /help - Show this text",
-      "    /purge - Delete all messages from a blacklisted user",
-      "    /mod [username] - Promote a user to moderator",
-      "    /admin [username] - Promote a user to admin",
-      "    /demote [username] - Demote a user",
-      "    /motd [text] - Set the motd (users will see this when joining)",
-      "    /hostsay [text] - Send an official host message",
-      Italic.new("The commands below must be used with a reply:"),
-      "    /info - Get the user info from this message",
-      "    /blacklist [reason] - Ban a user from the chat",
-      "    /delete [reason] - Delete a message and give a cooldown",
-      "    /remove [reason] - Delete a message without giving a cooldown",
-      indent: 0
-    ).to_md
+    help_text = String.build do |str|
+      str << substitute_reply(:help_header)
+      str << "\n/start - #{@command_descriptions[:start]?}".to_md
+      str << "\n/stop - #{@command_descriptions[:stop]?}".to_md
+      str << "\n/info - #{@command_descriptions[:info]?}".to_md
+      str << "\n/users - #{@command_descriptions[:users]?}".to_md
+      str << "\n/version - #{@command_descriptions[:version]?}".to_md
+      str << "\n/toggle_karma - #{@command_descriptions[:toggle_karma]?}".to_md
+      str << "\n/toggle_debug - #{@command_descriptions[:toggle_debug]?}".to_md
+      str << "\n/tripcode - #{@command_descriptions[:tripcode]?}".to_md
+      str << "\n/motd - #{@command_descriptions[:motd]?}".to_md
+      str << "\n/help - #{@command_descriptions[:help]?}".to_md
+
+      if rank = ranks[user.rank]?
+        rank_commands = [] of String
+        reply_commands = [] of String
+
+        rank.permissions.each do |permission|
+          if ranked_keys.includes?(permission)
+            case permission
+            when :promote, :demote
+              rank_commands << "/#{permission.to_s} [name/OID/ID] [rank] - #{command_descriptions[permission]?}"
+            when :sign, :tsign
+              rank_commands << "/#{permission.to_s} [text] - #{command_descriptions[permission]?}"
+            when :ranksay
+              ranks.each do |k, v|
+                if k <= user.rank && k != -10 && v.permissions.includes?(:ranksay)
+                  rank_commands << "/#{v.name.downcase}say [text] - #{command_descriptions[permission]?}"
+                end
+              end
+            when :uncooldown
+              rank_commands << "/#{permission.to_s} [name/OID] - #{command_descriptions[permission]?}"
+            when :motd_set
+              rank_commands << "/motd [text] - #{command_descriptions[permission]?}"
+            else
+              rank_commands << "/#{permission.to_s} - #{command_descriptions[permission]?}"
+            end
+          elsif reply_required_keys.includes?(permission)
+            case permission
+            when :warn, :delete, :remove, :blacklist
+              reply_commands << "/#{permission.to_s} [reason] - #{command_descriptions[permission]?}"
+            when :ranked_info
+              reply_commands << "/info - #{command_descriptions[permission]?}"
+            when :upvote
+              reply_commands << "+1 - #{command_descriptions[permission]?}"
+            when :downvote
+              reply_commands << "-1 - #{command_descriptions[permission]?}"
+            else
+              reply_commands << "/#{permission.to_s} - #{command_descriptions[permission]?}"
+            end
+          end
+        end
+
+        if !rank_commands.empty?
+          str << "\n\n"
+          str << substitute_reply(:help_rank_commands, {"rank" => rank.name})
+          rank_commands.each {|line| str << "\n#{line}".to_md}
+        end
+        if !reply_commands.empty?
+          str << "\n\n"
+          str << substitute_reply(:help_reply_commands)
+          reply_commands.each {|line| str << "\n#{line}".to_md}
+        end
+      end
+    end
   end
 end

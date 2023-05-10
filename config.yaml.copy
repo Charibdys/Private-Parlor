@@ -11,7 +11,8 @@ locale: "en-US"
 #log_file: "./log.txt"
 
 # Modify lifetime of a message, in hours (24 hours is the default)
-# This should be between 1 and 48 hours (inclusive)
+# Can be set greater than or equal to 1
+# NOTE: Increasing this value will increase RAM usage if database history is not enabled
 #lifetime: 24
 
 # Limit usage of /sign and /tsign for once every interval (seconds)
@@ -23,12 +24,44 @@ locale: "en-US"
 #upvote_limit_interval: 0
 #downvote_limit_interval: 0
 
-# Toggle whether or not users can see the full count of joined, left, and blacklisted users.
-#full_usercount: false
+# Contact link or username shown to blacklisted users
+#blacklist_contact: "t.me/pointofcontact_"
 
 # Persist message history
 # Use the database in place of the message cache; message history remains if bot restarts 
 #database_history: true
+
+# Allow users to send photos, videos, or GIFs with a spoiler overlay
+#allow_media_spoilers: true
+
+# A list of ranks recognized by the bot
+# To add a rank, add a new entry and define the name, value, and permissisons
+# 
+# The following permissions are available: 
+# users upvote downvote promote promote_lower promote_same demote sign tsign ranksay 
+# ranksay_lower warn delete uncooldown remove purge blacklist motd_set ranked_info
+ranks:
+  - name: "Banned"
+    value: -10
+    permissions: []
+  - name: "User"
+    value: 0
+    permissions: ["upvote", "downvote", "sign", "tsign"]
+  - name: "Mod"
+    value: 10
+    permissions: ["upvote", "downvote", "sign", "tsign", 
+      "ranked_info", "users", "warn", "delete", "ranksay"]
+  - name: "Admin"
+    value: 100
+    permissions: ["upvote", "downvote", "sign", "tsign", 
+      "ranked_info", "users", "warn", "delete", "uncooldown",
+      "remove", "purge", "blacklist", "ranksay"]
+  - name: "Host"
+    value: 1000
+    permissions: ["upvote", "downvote", "sign", "tsign", 
+      "ranked_info", "users", "promote_lower", "demote", 
+      "warn", "delete", "uncooldown", "remove", "purge", 
+      "blacklist", "motd_set", "ranksay_lower"]
 
 # Command toggles
 # First value toggles the command (true to enable, false to disable)
@@ -48,8 +81,7 @@ enable_motd: [true, true]
 enable_help: [true, true]
 enable_upvotes: [true, false]
 enable_downvotes: [true, false]
-enable_mod: [true, false]
-enable_admin: [true, false]
+enable_promote: [true, false]
 enable_demote: [true, false]
 enable_warn: [true, false]
 enable_delete: [true, false]

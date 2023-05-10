@@ -4,6 +4,7 @@ class Database
   # Create an instance of Database and create the appropriate schema in the SQLite database.
   def initialize(database : DB::Database)
     @db = database
+
     ensure_schema()
   end
 
@@ -112,11 +113,11 @@ class Database
     end
 
     # Set *rank* to the given `Ranks` value.
-    def set_rank(rank : Ranks) : Nil
-      if @rank <= rank.value
-        @rank = rank.value
+    def set_rank(rank_value : Int32) : Nil
+      if @rank <= rank_value
+        @rank = rank_value
       else
-        @rank = rank.value
+        @rank = rank_value
       end
     end
 
@@ -206,13 +207,6 @@ class Database
       @left != nil
     end
 
-    # Returns `true` if user's rank is greater than or equal to the given rank; user is authorized.
-    #
-    # Returns `false` otherwise.
-    def authorized?(rank : Ranks) : Bool
-      @rank >= rank.value
-    end
-
     # Returns `true` if user is joined, not in cooldown, and not blacklisted; user can chat
     #
     # Returns false otherwise.
@@ -265,6 +259,10 @@ class Database
     db.query_all("SELECT * FROM users WHERE warnings > 0 AND left is NULL", as: User)
   end
 
+  def get_invalid_rank_users(values : Array(Int32)) : Array(User) | Nil
+    db.query_all("SELECT * FROM users WHERE rank NOT IN (#{values.join(", ") {"?"}})", args: values, as: User)
+  end
+
   # Queries the database for a user with a given *username*.
   #
   # Returns a `User` object or Nil if no user was found.
@@ -280,6 +278,16 @@ class Database
       if user.get_obfuscated_id == oid
         return user
       end
+    end
+  end
+
+  def get_user_by_arg(arg : String) : User | Nil
+    if arg.size == 4
+      get_user_by_oid(arg)
+    elsif (val = arg.to_i64?) && arg.matches?(/[0-9]{5,}/)
+      get_user(val)
+    else
+      get_user_by_name(arg)
     end
   end
 
@@ -434,7 +442,7 @@ class DatabaseHistory
     origin_msid = get_origin_msid(msid)
 
     db.query_all(
-      "SELECT senderID, messageGroupID 
+      "SELECT senderID, messageGroupID
       FROM message_groups
       WHERE messageGroupID = ?
       UNION

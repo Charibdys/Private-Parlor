@@ -83,9 +83,25 @@ replies:
  - |-
     _There was no user found with that OID\._
 
+# no_rank_found: ranks
+ - |-
+    _There was no rank found with that name\. Ranks are: [#{ranks}]_
+
 # promoted: rank
  - |-
     _You have been promoted to #{rank}\! Type /help to view the commands available to you\._
+
+# help_header
+ - |-
+    __*General Commands*__
+
+# help_rank_commands: rank
+ - |-
+    __*Commands available to #{rank}*__
+
+# help_reply_commands
+ - |-
+    __*Commands that require a reply*__
 
 # toggle_karma: toggle
  - |-
@@ -223,7 +239,12 @@ replies:
 
 # blacklisted: reason
  - |-
-    _You have been blacklisted#{reason}_
+    _You have been blacklisted#{reason}
+    #{contact}_
+
+# blacklist_contact: contact
+ - |-
+    Contact: #{contact}
 
 # purge_complete: msgs_deleted
  - |-
@@ -233,6 +254,9 @@ replies:
  - |-
    ✅ 
 
+# fail
+ - |-
+   ❌
 
 # Special characters in MarkdownV2 must be escaped
 command_descriptions:
@@ -276,17 +300,13 @@ command_descriptions:
  - |-
    Set or view your tripcode
 
-# mod
+# promote
  - |-
-   Promote a user to the moderator rank
-
-# admin
- - |-
-   Promote a user to the administrator rank
+   Promote a user to a given rank
 
 # demote
  - |-
-   Demote a ranked user to the user rank
+   Demote a user to a given rank
 
 # sign
  - |-
@@ -298,7 +318,7 @@ command_descriptions:
 
 # ranksay
  - |-
-   Sign a message with your current rank (Alias of modsay/adminsay)
+   Sign a message with your current rank
 
 # warn
  - |-
@@ -363,9 +383,9 @@ logs:
  - |-
    User #{id}, aka #{name}, has been promoted to #{rank} by #{invoker}.
 
-# demoted: id, name, invoker
+# demoted: id, name, rank, invoker
  - |-
-   User #{id}, aka #{name}, has been demoted by #{invoker}.
+   User #{id}, aka #{name}, has been demoted to #{rank} by #{invoker}.
 
 # warned: id, name, oid, duration, reason
  - |-
