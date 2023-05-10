@@ -19,7 +19,6 @@ class PrivateParlor < Tourmaline::Client
   getter allow_media_spoilers : Bool?
   getter media_limit_period : Int32
   getter registration_open : Bool?
-  getter full_usercount : Bool?
   getter enable_sign : Bool?
   getter enable_tripsign : Bool?
   getter enable_ranksay : Bool?
@@ -47,7 +46,6 @@ class PrivateParlor < Tourmaline::Client
     @allow_media_spoilers = config.allow_media_spoilers
     @media_limit_period = config.media_limit_period
     @registration_open = config.registration_open
-    @full_usercount = config.full_usercount
     @enable_sign = config.enable_sign[0]
     @enable_tripsign = config.enable_tripsign[0]
     @enable_ranksay = config.enable_ranksay[0]
@@ -579,7 +577,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Return a message containing the number of users in the bot.
   #
-  # If the user is not ranked, or `full_usercount` is false, show the total numbers users.
+  # If the user does not have the "users" permission, show the total numbers of users.
   # Otherwise, return a message containing the number of joined, left, and blacklisted users.
   def users_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
@@ -597,7 +595,7 @@ class PrivateParlor < Tourmaline::Client
 
     counts = database.get_user_counts
 
-    if @access.authorized?(user.rank, :users) || @full_usercount
+    if @access.authorized?(user.rank, :users)
       relay_to_one(nil, user.id, :user_count_full, {
         "joined"      => counts[:total] - counts[:left],
         "left"        => counts[:left],
