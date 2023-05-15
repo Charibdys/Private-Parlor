@@ -1512,7 +1512,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     if raw_caption = message.caption
-      caption = check_text(@replies.strip_format(raw_caption, message.entities), user, message.message_id)
+      caption = check_text(@replies.strip_format(raw_caption, message.caption_entities), user, message.message_id)
       if caption.nil? # Caption contained a special font or used a disabled command
         return
       end
