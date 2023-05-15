@@ -5,6 +5,7 @@ class PrivateParlor < Tourmaline::Client
   getter history : History | DatabaseHistory
   getter access : AuthorizedRanks
   getter queue : Deque(QueuedMessage)
+  getter queue_mutex : Mutex
   getter replies : Replies
   getter tasks : Hash(Symbol, Tasker::Task)
   getter albums : Hash(String, Album)
@@ -58,6 +59,7 @@ class PrivateParlor < Tourmaline::Client
     @access = AuthorizedRanks.new(config.ranks)
     @history = get_history_type(db, config)
     @queue = Deque(QueuedMessage).new
+    @queue_mutex = Mutex.new
     @replies = Replies.new(config.entities, config.locale, config.smileys, config.blacklist_contact, config.salt)
     @spam_handler = SpamScoreHandler.new(config) if config.spam_interval_seconds != 0
     @tasks = register_tasks(config.spam_interval_seconds)
@@ -1221,9 +1223,11 @@ class PrivateParlor < Tourmaline::Client
       reply_user.blacklist(reason)
       @database.modify_user(reply_user)
 
-      # Remove queued messages sent by and directed to blacklisted user.
-      @queue.reject! do |msg|
-        msg.receiver == user.id || msg.sender == user.id
+      # Remove queued messages sent by and directed to the blacklisted user.
+      @queue_mutex.synchronize do 
+        @queue.reject! do |msg|
+          msg.receiver == reply_user.id || msg.sender == reply_user.id
+        end
       end
       cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
@@ -1916,93 +1920,116 @@ class PrivateParlor < Tourmaline::Client
   # Caches a message and sends it to the queue for relaying.
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64 | Array(Int64), proc : MessageProc) : Nil
     if reply_message
-      if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
-        @database.get_prioritized_users.each do |receiver_id|
-          if (receiver_id != user.id) || user.debug_enabled
-            add_to_queue(cached_msid, user.id, receiver_id, reply_msids[receiver_id], proc)
-          end
-        end
-      else # Reply does not exist in cache; remove this message from cache
+      unless (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
         relay_to_one(cached_msid.is_a?(Int64) ? cached_msid : cached_msid[0], user.id, :not_in_cache)
         if cached_msid.is_a?(Int64)
           @history.del_message_group(cached_msid)
         else
           cached_msid.each { |msid| @history.del_message_group(msid) }
         end
-      end
-    else
-      @database.get_prioritized_users.each do |receiver_id|
-        if (receiver_id != user.id) || user.debug_enabled
-          add_to_queue(cached_msid, user.id, receiver_id, nil, proc)
-        end
+
+        return
       end
     end
+
+    add_to_queue(
+      cached_msid,
+      user.id,
+      @database.get_prioritized_users(user),
+      reply_msids,
+      proc
+    )
   end
 
   # Relay a message to a single user. Used for system messages.
   def relay_to_one(reply_message : Int64?, user : Int64, text : String)
     proc = ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, link_preview: true, reply_to_message: reply) }
-    if reply_message
-      add_to_queue_priority(user, reply_message, proc)
-    else
-      add_to_queue_priority(user, nil, proc)
-    end
+    add_to_queue_priority(user, reply_message, proc)
   end
 
   # :ditto:
   def relay_to_one(reply_message : Int64?, user : Int64, key : Symbol, params : LocaleParameters = {"" => ""}) : Nil
     proc = ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(key, params), link_preview: true, reply_to_message: reply) }
-    if reply_message
-      add_to_queue_priority(user, reply_message, proc)
-    else
-      add_to_queue_priority(user, nil, proc)
-    end
+    add_to_queue_priority(user, reply_message, proc)
   end
 
   ###################
   # Queue functions #
   ###################
 
+  # Creates a new `QueuedMessage` with a reply and pushes it to the back of the queue.
+  def add_to_queue(cached_msid : Int64 | Array(Int64), sender_id : Int64 | Nil, receiver_ids : Array(Int64), reply_msids : Hash(Int64, Int64), func : MessageProc) : Nil
+    @queue_mutex.synchronize do 
+      receiver_ids.each do |receiver_id|
+        @queue.push(QueuedMessage.new(cached_msid, sender_id, receiver_id, reply_msids[receiver_id], func))
+      end
+    end
+  end
+
   # Creates a new `QueuedMessage` and pushes it to the back of the queue.
-  def add_to_queue(cached_msid : Int64 | Array(Int64), sender_id : Int64 | Nil, receiver_id : Int64, reply_msid : Int64 | Nil, func : MessageProc) : Nil
-    @queue.push(QueuedMessage.new(cached_msid, sender_id, receiver_id, reply_msid, func))
+  def add_to_queue(cached_msid : Int64 | Array(Int64), sender_id : Int64 | Nil, receiver_ids : Array(Int64), reply_msid : Nil, func : MessageProc) : Nil
+    @queue_mutex.synchronize do 
+      receiver_ids.each do |receiver_id|
+        @queue.push(QueuedMessage.new(cached_msid, sender_id, receiver_id, nil, func))
+      end
+    end
   end
 
   # Creates a new `QueuedMessage` and pushes it to the front of the queue.
   def add_to_queue_priority(receiver_id : Int64, reply_msid : Int64 | Nil, func : MessageProc) : Nil
-    @queue.unshift(QueuedMessage.new(nil, nil, receiver_id, reply_msid, func))
+    @queue_mutex.synchronize do 
+      @queue.unshift(QueuedMessage.new(nil, nil, receiver_id, reply_msid, func))
+    end
   end
 
   # Receives a `Message` from the `queue`, calls its proc, and adds the returned message id to the History
   #
   # This function should be invoked in a Fiber.
-  def send_messages(msg : QueuedMessage) : Nil
-    success = msg.function.call(msg.receiver, msg.reply_to)
-    if msg.origin_msid != nil
-      if !success.is_a?(Array(Tourmaline::Message))
-        @history.add_to_cache(msg.origin_msid.as(Int64), success.message_id, msg.receiver)
-      else
-        sent_msids = success.map(&.message_id)
+  def send_messages() : Bool?
+    @queue_mutex.lock
+    msg = @queue.shift?
 
-        sent_msids.zip(msg.origin_msid.as(Array(Int64))) do |msid, origin_msid|
-          @history.add_to_cache(origin_msid, msid, msg.receiver)
-        end
+    if msg.nil?
+      @queue_mutex.unlock
+      return true
+    end
+
+    begin
+      success = msg.function.call(msg.receiver, msg.reply_to)
+    rescue Tourmaline::Error::BotBlocked | Tourmaline::Error::UserDeactivated
+      return force_leave(msg.receiver)
+    rescue ex
+      return Log.error(exception: ex) { "Error occured when relaying message." }
+    ensure
+      @queue_mutex.unlock
+    end
+
+    unless msg.origin_msid
+      return
+    end
+
+    case success
+    when Tourmaline::Message
+      @history.add_to_cache(msg.origin_msid.as(Int64), success.message_id, msg.receiver)
+    when Array(Tourmaline::Message)
+      sent_msids = success.map(&.message_id)
+
+      sent_msids.zip(msg.origin_msid.as(Array(Int64))) do |msid, origin_msid|
+        @history.add_to_cache(origin_msid, msid, msg.receiver)
       end
     end
-  rescue Tourmaline::Error::BotBlocked | Tourmaline::Error::UserDeactivated
-    force_leave(msg.receiver)
-  rescue ex
-    Log.error(exception: ex) { "Error occured when relaying message." }
   end
 
   # Set blocked user to left in the database and delete all incoming messages from the queue.
+  #
+  # Should only be invoked in `send_messages`, as this does not check the `queue_mutex`
   def force_leave(user_id : Int64) : Nil
     if user = database.get_user(user_id)
       user.set_left
       @database.modify_user(user)
       Log.info { @replies.substitute_log(:force_leave, {"id" => user_id.to_s}) }
     end
-    queue.reject! do |msg|
+    @queue.reject! do |msg|
       msg.receiver == user_id
     end
   end

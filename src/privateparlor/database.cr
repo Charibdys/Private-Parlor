@@ -292,8 +292,18 @@ class Database
   end
 
   # Queries the database for all user ids, ordered by highest ranking users first then most active users.
-  def get_prioritized_users : Array(Int64)
-    db.query_all("SELECT id FROM users WHERE left IS NULL ORDER BY rank DESC, lastActive DESC", &.read(Int64))
+  def get_prioritized_users(user : User) : Array(Int64)
+    if user.debug_enabled
+      db.query_all("SELECT id FROM users WHERE left IS NULL ORDER BY rank DESC, lastActive DESC", &.read(Int64))
+    else
+      db.query_all("SELECT id 
+        FROM users 
+        WHERE left IS NULL AND id IS NOT ? 
+        ORDER BY rank DESC, lastActive DESC", 
+        args: [user.id]
+        &.read(Int64)
+      )
+    end
   end
 
   # Inserts a user with the given *id*, *username*, and *realname* into the database.

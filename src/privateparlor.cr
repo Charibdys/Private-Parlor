@@ -21,12 +21,15 @@ end
 # Start message sending routine
 spawn(name: "private_parlor_loop") do
   loop do
-    if msg = bot.queue.shift?
-      bot.send_messages(msg)
-    else
-      break unless bot.polling
-      Fiber.yield
-    end
+    break unless bot.polling
+
+    bot.send_messages()
+    sleep(0.5)
+  end
+
+  # Send last messages in queue
+  loop do 
+    break if bot.send_messages() == true
   end
 
   # Bot stopped polling from SIGINT/SIGTERM, shut down
