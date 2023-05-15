@@ -34,6 +34,11 @@ locale: "en-US"
 # Allow users to send photos, videos, or GIFs with a spoiler overlay
 #allow_media_spoilers: true
 
+# Relay forwarded messages as if they were a regular message
+# This will prepend the message text with a "Forwarded From" header and a link to the original message.
+# Must have "relay_forwarded_message" enabled for this to work
+#regular_forwards: true
+
 # A list of ranks recognized by the bot
 # To add a rank, add a new entry and define the name, value, and permissisons
 # 

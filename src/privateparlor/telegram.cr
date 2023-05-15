@@ -18,6 +18,7 @@ class PrivateParlor < Tourmaline::Client
   getter karma_warn_penalty : Int32
 
   getter allow_media_spoilers : Bool?
+  getter regular_forwards : Bool?
   getter media_limit_period : Int32
   getter registration_open : Bool?
   getter enable_sign : Bool?
@@ -45,6 +46,7 @@ class PrivateParlor < Tourmaline::Client
     @karma_warn_penalty = config.karma_warn_penalty
 
     @allow_media_spoilers = config.allow_media_spoilers
+    @regular_forwards = config.regular_forwards
     @media_limit_period = config.media_limit_period
     @registration_open = config.registration_open
     @enable_sign = config.enable_sign[0]
@@ -1681,12 +1683,45 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    relay(
-      message.reply_message,
-      user,
-      @history.new_message(user.id, message.message_id),
-      ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
-    )
+    unless @regular_forwards
+      return relay(
+        message.reply_message,
+        user,
+        @history.new_message(user.id, message.message_id),
+        ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+      )
+    end
+
+    # TODO: Handle messages that were already forwarded this way
+
+    if from = message.forward_from
+      if from.bot?
+        header = @replies.format_username_forward(from.full_name, from.username)
+      elsif from.id
+        header = @replies.format_user_forward(from.full_name, from.id)
+      end
+    elsif (from = message.forward_from_chat) && message.forward_from_message_id
+      if from.username
+        header = @replies.format_username_forward(from.name, from.username, message.forward_from_message_id)
+      else
+        header = @replies.format_private_channel_forward(from.name, from.id, message.forward_from_message_id)
+      end
+    elsif from = message.forward_sender_name
+      header = @replies.format_private_user_forward(from)
+    end
+
+    unless header
+      return relay(
+        message.reply_message,
+        user,
+        @history.new_message(user.id, message.message_id),
+        ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+      )
+    end
+
+    # TODO: Modify message entities and combine header with text/caption
+
+    # TODO: Relay message based on forwarded message type
   end
 
   # Prepares a sticker message for relaying.

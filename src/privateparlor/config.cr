@@ -30,6 +30,9 @@ module Configuration
     @[YAML::Field(key: "allow_media_spoilers")]
     getter allow_media_spoilers : Bool? = false
 
+    @[YAML::Field(key: "regular_forwards")]
+    getter regular_forwards : Bool? = false
+
     @[YAML::Field(key: "ranks")]
     getter intermediary_ranks : Array(IntermediaryRank)
 

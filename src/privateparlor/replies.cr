@@ -285,6 +285,30 @@ class Replies
     Link.new("~~#{name}", "tg://user?id=#{id}").to_md
   end
 
+  def format_user_forward(name : String, id : Int64) : String
+    Group.new(Bold.new("Forwarded from "), Bold.new(UserMention.new(name, id))).to_md
+  end
+
+  def format_private_user_forward(name : String) : String
+    Group.new(Bold.new("Forwarded from "), Bold.new(Italic.new(name))).to_md
+  end
+
+  # For bots or public channels
+  def format_username_forward(name : String, username : String?, msid : Int64? = nil)
+    Group.new(
+      Bold.new("Forwarded from "), 
+      Bold.new(Link.new(name, "tg://resolve?domain=#{username}#{"&post=#{msid}" if msid}"))
+    ).to_md
+  end
+
+  # Removes the "-100" prefix for private channels
+  def format_private_channel_forward(name : String, id : Int64, msid : Int64?)
+    Group.new(
+      Bold.new("Forwarded from "), 
+      Bold.new(Link.new(name, "tg://privatepost?channel=#{id.to_s[4..]}#{"&post=#{msid}" if msid}"))
+    ).to_md
+  end
+
   # Returns a bolded signature showing which type of user sent this message.
   def format_user_say(signature : String) : String
     Bold.new("~~#{signature}").to_md
