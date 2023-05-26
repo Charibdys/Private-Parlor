@@ -555,7 +555,7 @@ class PrivateParlor < Tourmaline::Client
         return relay_to_one(message.message_id, user.id, :fail)
       end
       unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
-        return
+        return relay_to_one(message.message_id, user.id, :not_in_cache)
       end
 
       user.set_active(info.username, info.full_name)
@@ -664,7 +664,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, :no_reply)
     end
     unless reply_user = database.get_user(history_with_karma.get_sender_id(reply.message_id))
-      return
+      return relay_to_one(message.message_id, user.id, :not_in_cache)
     end
 
     user.set_active(info.username, info.full_name)
@@ -713,7 +713,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, :no_reply)
     end
     unless reply_user = database.get_user(history_with_karma.get_sender_id(reply.message_id))
-      return
+      return relay_to_one(message.message_id, user.id, :not_in_cache)
     end
 
     user.set_active(info.username, info.full_name)
