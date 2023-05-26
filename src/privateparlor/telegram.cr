@@ -36,7 +36,7 @@ class PrivateParlor < Tourmaline::Client
   # :     a `Configuration::Config` from parsing the `config.yaml` file
   def initialize(config : Configuration::Config)
     super(bot_token: config.token, set_commands: true)
-    Client.default_parse_mode = (Tourmaline::ParseMode::MarkdownV2)
+    Client.default_parse_mode = (Tourmaline::ParseMode::HTML)
 
     # Init warn/karma variables
     @cooldown_time_begin = config.cooldown_time_begin
@@ -1692,22 +1692,29 @@ class PrivateParlor < Tourmaline::Client
       )
     end
 
-    # TODO: Handle messages that were already forwarded this way
+    if @replies.is_regular_forward?(message.text || message.caption, message.text_entities.keys)
+      return relay(
+        message.reply_message,
+        user,
+        @history.new_message(user.id, message.message_id),
+        ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+      )
+    end
 
     if from = message.forward_from
       if from.bot?
-        header = @replies.format_username_forward(from.full_name, from.username)
+        header = @replies.format_username_forward(from.full_name, from.username, Client.default_parse_mode)
       elsif from.id
-        header = @replies.format_user_forward(from.full_name, from.id)
+        header = @replies.format_user_forward(from.full_name, from.id, Client.default_parse_mode)
       end
     elsif (from = message.forward_from_chat) && message.forward_from_message_id
       if from.username
-        header = @replies.format_username_forward(from.name, from.username, message.forward_from_message_id)
+        header = @replies.format_username_forward(from.name, from.username, Client.default_parse_mode, message.forward_from_message_id)
       else
-        header = @replies.format_private_channel_forward(from.name, from.id, message.forward_from_message_id)
+        header = @replies.format_private_channel_forward(from.name, from.id, message.forward_from_message_id, Client.default_parse_mode)
       end
     elsif from = message.forward_sender_name
-      header = @replies.format_private_user_forward(from)
+      header = @replies.format_private_user_forward(from, Client.default_parse_mode,)
     end
 
     unless header
@@ -1718,10 +1725,52 @@ class PrivateParlor < Tourmaline::Client
         ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
       )
     end
+    
+    if text = message.text
+      text = @replies.unparse_text(text, message.entities, Client.default_parse_mode, escape: true)
+    elsif text = message.caption
+      text = @replies.unparse_text(text, message.caption_entities, Client.default_parse_mode, escape: true)
+    end
 
-    # TODO: Modify message entities and combine header with text/caption
+    text = String.build do |str|
+      str << header
+      str << "\n\n"
+      str << text
+    end
 
-    # TODO: Relay message based on forwarded message type
+    if message.text
+      proc = ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text) }
+    elsif file = message.animation
+      return unless file && (file_id = file.file_id)
+      proc = ->(receiver : Int64, reply : Int64 | Nil) {
+        send_animation(receiver, file_id, caption: text, has_spoiler: message.has_media_spoiler?)
+      }
+    elsif file = message.document
+      return unless file && (file_id = file.file_id)
+      proc = ->(receiver : Int64, reply : Int64 | Nil) {
+        send_document(receiver, file_id, caption: text)
+      }
+    elsif file = message.video
+      return unless file && (file_id = file.file_id)
+      proc = ->(receiver : Int64, reply : Int64 | Nil) {
+        send_video(receiver, file_id, caption: text, has_spoiler: message.has_media_spoiler?)
+      }
+    elsif file = message.photo
+      return unless file.last? && (file_id = file.last.file_id)
+      proc = ->(receiver : Int64, reply : Int64 | Nil) {
+        send_photo(receiver, file_id, caption: text, has_spoiler: message.has_media_spoiler?)
+      }
+    # TODO: Add condition for albums
+    else
+      proc = ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+    end
+
+    return relay(
+      message.reply_message,
+      user,
+      @history.new_message(user.id, message.message_id),
+      proc
+    )
   end
 
   # Prepares a sticker message for relaying.

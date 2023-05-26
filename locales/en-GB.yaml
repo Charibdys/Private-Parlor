@@ -16,166 +16,166 @@ toggle: ["disabled", "enabled"]
 replies:
 # joined
  - |-
-    _Welcome to the chat\!_
+    <i>Welcome to the chat!</i>
 
 # rejoined
  - |-
-    _You rejoined the chat\!_
+    <i>You rejoined the chat!</i>
 
 # left
  - |-
-    _You left the chat\._
+    <i>You left the chat.</i>
 
 # already_in_chat
  - |-
-    _You're already in the chat\._
+    <i>You're already in the chat.</i>
 
 # registration_closed 
  - |-
-    _Registration is closed\. Check back later\._
+    <i>Registration is closed. Check back later.</i>
 
 # not_in_chat
  - |-
-    _You're not in this chat\! Type /start to join\._
+    <i>You're not in this chat! Type /start to join.</i>
 
 # not_in_cooldown
  - |-
-    _User found, but the user was not in cooldown\!_
+    <i>User found, but the user was not in cooldown!</i>
 
 # rejected_message
  - |-
-    _Your message was not relayed because it contained a special font\._
+    <i>Your message was not relayed because it contained a special font.</i>
 
 # deanon_poll
  - |-
-    _Your poll was not sent because it does not allow anonymous voting\._
+    <i>Your poll was not sent because it does not allow anonymous voting.</i>
 
 # missing_args
  - |-
-    _You need to give an input to use this command\._
+    <i>You need to give an input to use this command.</i>
 
 # command_disabled
  - |-
-    _This command is disabled\._
+    <i>This command is disabled.</i>
 
 # media_disabled: type
  - |-
-   _Messages of type `#{type}` are disabled\._
+    <i>Messages of type <code>#{type}</code> are disabled.</i>
 
 # no_reply
  - |-
-    _You need to reply to a message to use this command\._
+    <i>You need to reply to a message to use this command.</i>
 
 # not_in_cache
  - |-
-    _That message could not be found in the cache\._
+    <i>That message could not be found in the cache.</i>
 
 # no_tripcode_set
  - |-
-    _You do not have a tripcode set\.
-    Use the /tripcode command to set one\._
+    <i>You do not have a tripcode set.
+    Use the /tripcode command to set one.</i>
 
 # no_user_found
  - |-
-    _There was no user found with that name\._
+    <i>There was no user found with that name.</i>
 
 # no_user_oid_found
  - |-
-    _There was no user found with that OID\._
+    <i>There was no user found with that OID.</i>
 
 # no_rank_found: ranks
  - |-
-    _There was no rank found with that name\. Ranks are: [#{ranks}]_
+    <i>There was no rank found with that name. Ranks are: [#{ranks}]</i>
 
 # promoted: rank
  - |-
-    _You have been promoted to #{rank}\! Type /help to view the commands available to you\._
+    <i>You have been promoted to #{rank}! Type /help to view the commands available to you.</i>
 
 # help_header
  - |-
-    __*General Commands*__
+    <u><b>General Commands</b></u>
 
 # help_rank_commands: rank
  - |-
-    __*Commands available to #{rank}*__
+    <u><b>Commands available to #{rank}</b></u>
 
 # help_reply_commands
  - |-
-    __*Commands that require a reply*__
+    <u><b>Commands that require a reply</b></u>
 
 # toggle_karma: toggle
  - |-
-    *Karma notifications*: #{toggle}
+    <b>Karma notifications</b>: #{toggle}
 
 # toggle_debug: toggle
  - |-
-    *Debug mode*: #{toggle}
+    <b>Debug mode</b>: #{toggle}
 
 # gave_upvote
  - |-
-    _You upvoted this message\!_
+    <i>You upvoted this message!</i>
 
 # got_upvote
  - |-
-    _You've just been upvoted\! \(check /info to see your karma or /toggleKarma to turn these notifications off\)_
+    <i>You've just been upvoted! (check /info to see your karma or /toggleKarma to turn these notifications off)</i>
 
 # upvoted_own_message
  - |-
-    _You can't upvote your own message\!_
+    <i>You can't upvote your own message!</i>
 
 # already_voted
  - |-
-    _You have already upvoted or downvoted this message\._
+    <i>You have already upvoted or downvoted this message.</i>
 
 # gave_downvote
  - |-
-    _You downvoted this message\!_
+    <i>You downvoted this message!</i>
 
 # got_downvote
  - |-
-    _You've just been downvoted\! \(check /info to see your karma or /toggleKarma to turn these notifications off\)_
+    <i>You've just been downvoted! (check /info to see your karma or /toggleKarma to turn these notifications off)</i>
 
 # downvoted_own_message
  - |-
-    _You can't downvote your own message\!_
+    <i>You can't downvote your own message!</i>
 
 # already_warned
  - |-
-    _This message has already been warned\._
+    <i>This message has already been warned.</i>
 
 # private_sign
  - |-
-    _Your account's forward privacy must be set to "Everybody" to sign with your username\._
+    <i>Your account's forward privacy must be set to "Everybody" to sign with your username.</i>
 
 # spamming
  - |-
-    _Your message has not been sent, avoid sending messages too fast\. Try again later\._
+    <i>Your message has not been sent, avoid sending messages too fast. Try again later.</i>
 
 # sign_spam
  - |-
-    _Your message has not been sent, avoid signing too often\. Try again later\._
+    <i>Your message has not been sent, avoid signing too often. Try again later.</i>
 
 # upvote_spam
  - |-
-    _You can't upvote at this time, avoid upvoting too often\. Try again later\._
+    <i>You can't upvote at this time, avoid upvoting too often. Try again later.</i>
 
 # downvote_spam
  - |-
-    _Your can't downvote at this time, avoid downvoting too often\. Try again later\._
+    <i>Your can't downvote at this time, avoid downvoting too often. Try again later.</i>
 
 # invalid_tripcode_format
  - |-
-    _Invalid tripcode format\. The format is:_
-    `name#pass`
+    <i>Invalid tripcode format. The format is:</i>
+    <code>name#pass</code>
 
 # tripcode_set: name, tripcode
  - |-
-    _Tripcode set\. It will appear as:_
-    *#{name}* `#{tripcode}`:
+    <i>Tripcode set. It will appear as:</i>
+    <b>#{name}</b> <code>#{tripcode}</code>:
 
 # tripcode_info: tripcode
  - |-
-    *Tripcode*: `#{tripcode}`
+    <b>Tripcode</b>: <code>#{tripcode}</code>
 
 # tripcode_unset
  - |-
@@ -183,20 +183,20 @@ replies:
 
 # user_info: oid, username, rank, rank_val, karma, warnings, smiley, warn_expiry, cooldown_until
  - |-
-    *id*: #{oid}, *username*: #{username}, *rank*: #{rank_val} \(#{rank}\)
-    *karma*: #{karma}
-    *warnings*: #{warnings} #{smiley} #{warn_expiry}
-    *cooldown*: #{cooldown_until}
+    <b>id</b>: #{oid}, <b>username</b>: #{username}, <b>rank</b>: #{rank_val} (#{rank})
+    <b>karma</b>: #{karma}
+    <b>warnings</b>: #{warnings} #{smiley} #{warn_expiry}
+    <b>cooldown</b>: #{cooldown_until}
 
 # info_warning: warn_expiry
  - |-
-    \(one warning will expire at #{warn_expiry}\)
+    (one warning will expire at #{warn_expiry})
 
 # ranked_info: oid, karma, cooldown_until
  - |-
-    *id*: #{oid}, *username*: anonymous, *rank*: n/a
-    *karma*: #{karma}
-    *cooldown*: #{cooldown_until}
+    <b>id</b>: #{oid}, <b>username</b>: anonymous, <b>rank</b>: n/a
+    <b>karma</b>: #{karma}
+    <b>cooldown</b>: #{cooldown_until}
 
 # cooldown_true
  - |-
@@ -207,40 +207,40 @@ replies:
 
 # user_count: total
  - |-
-    *#{total}* _users_
+    <b>#{total}</b> <i>users</i>
 
 # user_count_full: joined, left, blacklisted, total
  - |-
-    *#{joined}* _joined,_ *#{left}* _left,_ *#{blacklisted}* _blacklisted users_ \(_total_: *#{total}*\)
+    <b>#{joined}</b> <i>joined,</i> <b>#{left}</b> <i>left,</i> <b>#{blacklisted}</b> <i>blacklisted users</i> (<i>total</i>: <b>#{total}</b>)
 
 # message_deleted: reason, duration
  - |-
-    _This message has been deleted#{reason}\. You have been given a cooldown of #{duration}\._
+    <i>This message has been deleted#{reason}. You have been given a cooldown of #{duration}.</i>
 
 # message_removed: reason
  - |-
-    _This message has been removed#{reason}\. No cooldown has been given, but please refrain from posting the same message again\._
+    <i>This message has been removed#{reason}. No cooldown has been given, but please refrain from posting the same message again.</i>
 
 # reason_prefix
  - |-
-    \ for: 
+     for: 
 
 # cooldown_given: duration, reason
  - |-
-    _You've been given a cooldown of #{duration}#{reason}_
+    <i>You've been given a cooldown of #{duration}#{reason}</i>
 
 # on_cooldown: time
  - |-
-    _You're on cooldown until #{time}_
+    <i>You're on cooldown until #{time}</i>
 
 # media_limit: total
  - |-
-    _You cannot send media or forward messages at this time, try again in #{total} hours\._
+    <i>You cannot send media or forward messages at this time, try again in #{total} hours.</i>
 
 # blacklisted: reason
  - |-
-    _You have been blacklisted#{reason}
-    #{contact}_
+    <i>You have been blacklisted#{reason}
+    #{contact}</i>
 
 # blacklist_contact: contact
  - |-
@@ -248,7 +248,7 @@ replies:
 
 # purge_complete: msgs_deleted
  - |-
-    _#{msgs_deleted} messages were matched and deleted\._
+    <i>#{msgs_deleted} messages were matched and deleted.</i>
 
 # success
  - |-

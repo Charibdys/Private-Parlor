@@ -205,6 +205,17 @@ class Replies
     end
   end
 
+  # Checks the text and entities for a forwarded message to determine if it 
+  # was relayed as a regular message
+  #
+  # Returns true if the forward message was relayed regularly, nil otherwise
+  def is_regular_forward?(text : String?, entities : Array(Tourmaline::MessageEntity)) : Bool?
+    return unless text
+    if ent = entities.first?
+      text.starts_with?("Forwarded from") && ent.type == "bold"
+    end
+  end
+
   # Strips message entities if they're found in `entity_types`
   def remove_entities(entities : Array(Tourmaline::MessageEntity)) : Array(Tourmaline::MessageEntity)
     stripped_entities = [] of Tourmaline::MessageEntity
@@ -218,14 +229,14 @@ class Replies
     entities - stripped_entities
   end
 
-  # Strips MarkdownV2 format from a message and escapes formatting found in `MessageEntities`.
+  # Strips HTML format from a message and escapes formatting found in `MessageEntities`.
   # If the message has `MessageEntities`, replaces any inline links and removes entities found in `entity_types`.
   def strip_format(text : String, entities : Array(Tourmaline::MessageEntity)) : String
     if !entities.empty?
       text = replace_links(text, entities)
       entities = remove_entities(entities)
     end
-    unparse_text(text, entities, Tourmaline::ParseMode::MarkdownV2, escape: true)
+    unparse_text(text, entities, Tourmaline::ParseMode::HTML, escape: true)
   end
 
   # Generate a 8chan or Secretlounge-ng style tripcode from a given string in the format `name#pass`.
@@ -285,28 +296,48 @@ class Replies
     Link.new("~~#{name}", "tg://user?id=#{id}").to_md
   end
 
-  def format_user_forward(name : String, id : Int64) : String
-    Group.new(Bold.new("Forwarded from "), Bold.new(UserMention.new(name, id))).to_md
+  def format_user_forward(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String
+    tokens = Group.new(Bold.new("Forwarded from "), Bold.new(UserMention.new(name, id)))
+    case parsemode
+    when Tourmaline::ParseMode::MarkdownV2 then tokens.to_md
+    when Tourmaline::ParseMode::HTML then tokens.to_html
+    else ""
+    end
   end
 
-  def format_private_user_forward(name : String) : String
-    Group.new(Bold.new("Forwarded from "), Bold.new(Italic.new(name))).to_md
+  def format_private_user_forward(name : String, parsemode : Tourmaline::ParseMode) : String
+    tokens = Group.new(Bold.new("Forwarded from "), Bold.new(Italic.new(name)))
+    case parsemode
+    when Tourmaline::ParseMode::MarkdownV2 then tokens.to_md
+    when Tourmaline::ParseMode::HTML then tokens.to_html
+    else ""
+    end
   end
 
   # For bots or public channels
-  def format_username_forward(name : String, username : String?, msid : Int64? = nil)
-    Group.new(
+  def format_username_forward(name : String, username : String?, parsemode : Tourmaline::ParseMode, msid : Int64? = nil) : String
+    tokens = Group.new(
       Bold.new("Forwarded from "), 
       Bold.new(Link.new(name, "tg://resolve?domain=#{username}#{"&post=#{msid}" if msid}"))
-    ).to_md
+    )
+    case parsemode
+    when Tourmaline::ParseMode::MarkdownV2 then tokens.to_md
+    when Tourmaline::ParseMode::HTML then tokens.to_html
+    else ""
+    end
   end
 
   # Removes the "-100" prefix for private channels
-  def format_private_channel_forward(name : String, id : Int64, msid : Int64?)
-    Group.new(
+  def format_private_channel_forward(name : String, id : Int64, msid : Int64?, parsemode : Tourmaline::ParseMode) : String
+    tokens = Group.new(
       Bold.new("Forwarded from "), 
       Bold.new(Link.new(name, "tg://privatepost?channel=#{id.to_s[4..]}#{"&post=#{msid}" if msid}"))
-    ).to_md
+    )
+    case parsemode
+    when Tourmaline::ParseMode::MarkdownV2 then tokens.to_md
+    when Tourmaline::ParseMode::HTML then tokens.to_html
+    else ""
+    end
   end
 
   # Returns a bolded signature showing which type of user sent this message.
