@@ -340,6 +340,10 @@ command_descriptions:
  - |-
    Delete all messages from all blacklisted users
 
+# spoiler
+ - |-
+   Hides a media message with a spoiler
+
 # blacklist
  - |-
    Ban a user from the chat
@@ -410,6 +414,14 @@ logs:
 # reason_prefix
  - |-
    for: 
+
+# spoiled: id, name, msid
+ - |-
+   User #{id}, aka #{name}, added a spoiler to receiver message [#{msid}]
+
+# unspoiled: id, name, msid
+ - |-
+   User #{id}, aka #{name}, removed a spoiler from receiver message [#{msid}]
 
 # ranked_message: id, name, rank, text
  - |-

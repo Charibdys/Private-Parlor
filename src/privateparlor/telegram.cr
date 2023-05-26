@@ -368,7 +368,7 @@ class PrivateParlor < Tourmaline::Client
   def initialize_handlers(descriptions : Hash(Symbol, String), config : Configuration::Config) : Nil
     {% for command in [
                         "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help",
-                        "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist",
+                        "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "spoiler", "blacklist",
                       ] %}
 
     if config.enable_{{command.id}}[0]
@@ -1244,6 +1244,73 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # STUB!
+  def spoiler_command(ctx : CommandHandler::Context) : Nil
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, :not_in_chat)
+    end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
+    unless authority = @access.authorized?(user.rank, :spoiler, :spoiler_own)
+      return relay_to_one(message.message_id, user.id, :fail)
+    end
+    unless reply = message.reply_message
+      return relay_to_one(message.message_id, user.id, :no_reply)
+    end
+    if reply.forward_from || reply.forward_from_chat
+      return relay_to_one(message.message_id, user.id, :fail)
+    end
+    unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+      return relay_to_one(message.message_id, user.id, :not_in_cache)
+    end
+    if reply_user.id != user.id && authority == :spoiler_own
+      return relay_to_one(message.message_id, user.id, :fail)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    if media = reply.photo.last?
+      input = InputMediaPhoto.new(media.file_id, caption: reply.caption, caption_entities: reply.caption_entities)
+    elsif media = reply.video
+      input = InputMediaVideo.new(media.file_id, caption: reply.caption, caption_entities: reply.caption_entities)
+    elsif media = reply.animation
+      input = InputMediaAnimation.new(media.file_id, caption: reply.caption, caption_entities: reply.caption_entities)
+    else
+      return relay_to_one(message.message_id, user.id, :fail)
+    end
+
+    if reply.has_media_spoiler?
+      return relay_to_one(message.message_id, user.id, :fail) if authority == :spoiler_own
+        
+      spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
+      
+      Log.info { @replies.substitute_log(:unspoiled, {
+        "id"    => user.id.to_s,
+        "name"  => user.get_formatted_name,
+        "msid"  => reply.message_id.to_s,
+      }) }
+    else
+      input.has_spoiler = true
+
+      spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
+      
+      Log.info { @replies.substitute_log(:spoiled, {
+        "id"    => user.id.to_s,
+        "name"  => user.get_formatted_name,
+        "msid"  => reply.message_id.to_s,
+      }) }
+    end
+
+
+
+    relay_to_one(message.message_id, user.id, :success)
+  end
+
   # Replies with the motd/rules associated with this bot.
   #
   # Checks for the following permissions: `motd_set` (only when an argument is given)
@@ -1998,6 +2065,23 @@ class PrivateParlor < Tourmaline::Client
       end
 
       @history.del_message_group(msid)
+    end
+  end
+
+  def spoil_messages(msid : Int64, user_id : Int64, debug_enabled : Bool?, input : InputMedia) : Nil
+    if reply_msids = @history.get_all_msids(msid)
+      if !debug_enabled
+        reply_msids.delete(user_id)
+      end
+
+      reply_msids.each do |receiver_id, receiver_msid|
+        begin
+          edit_message_media(receiver_id, input, receiver_msid)
+        rescue Tourmaline::Error::MessageCantBeEdited
+          # Either message was a forward or
+          # User set debug_mode to true before message was spoiled; simply continue on
+        end
+      end
     end
   end
 

@@ -64,12 +64,12 @@ class Replies
 
     log_keys = %i(
       start joined rejoined left promoted demoted warned message_deleted message_removed removed_cooldown
-      blacklisted reason_prefix ranked_message force_leave
+      blacklisted reason_prefix spoiled unspoiled ranked_message force_leave
     )
 
     command_keys = %i(
       start stop info users version upvote downvote toggle_karma toggle_debug tripcode promote demote
-      sign tsign ranksay warn delete uncooldown remove purge blacklist motd help motd_set ranked_info
+      sign tsign ranksay warn delete uncooldown remove purge spoiler blacklist motd help motd_set ranked_info
     )
 
     @entity_types = entities
