@@ -1817,6 +1817,52 @@ class PrivateParlor < Tourmaline::Client
 
     if message.text
       proc = ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text) }
+    elsif album = message.media_group_id
+      if media = message.photo.last?
+        input = InputMediaPhoto.new(media.file_id, parse_mode: Tourmaline::ParseMode::HTML, has_spoiler: message.has_media_spoiler?)
+      elsif media = message.video
+        input = InputMediaVideo.new(media.file_id, parse_mode: Tourmaline::ParseMode::HTML, has_spoiler: message.has_media_spoiler?)
+      elsif media = message.audio
+        input = InputMediaAudio.new(media.file_id, parse_mode: Tourmaline::ParseMode::HTML)
+      elsif media = message.document
+        input = InputMediaDocument.new(media.file_id, parse_mode: Tourmaline::ParseMode::HTML)
+      else
+        return
+      end
+  
+      if @albums[album]?
+        input.caption = message.caption
+        input.caption_entities = message.caption_entities
+
+        @albums[album].message_ids << message.message_id
+        @albums[album].media_ids << input
+      else
+        input.caption = text
+        media_group = Album.new(message.message_id, input)
+        @albums[album] = media_group
+  
+        # Wait an arbitrary amount of time for Telegram MediaGroup updates to come in before relaying the album.
+        Tasker.at(500.milliseconds.from_now) {
+          unless temp_album = @albums.delete(album)
+            next
+          end
+  
+          cached_msids = Array(Int64).new
+  
+          temp_album.message_ids.each do |msid|
+            cached_msids << @history.new_message(info.id, msid)
+          end
+  
+          relay(
+            message.reply_message,
+            user,
+            cached_msids,
+            ->(receiver : Int64, reply : Int64 | Nil) { send_media_group(receiver, temp_album.media_ids, reply_to_message: reply) }
+          )
+        }
+      end
+
+      return
     elsif file = message.animation
       return unless file && (file_id = file.file_id)
       proc = ->(receiver : Int64, reply : Int64 | Nil) {
@@ -1837,7 +1883,6 @@ class PrivateParlor < Tourmaline::Client
       proc = ->(receiver : Int64, reply : Int64 | Nil) {
         send_photo(receiver, file_id, caption: text, has_spoiler: message.has_media_spoiler?)
       }
-    # TODO: Add condition for albums
     else
       proc = ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
     end
