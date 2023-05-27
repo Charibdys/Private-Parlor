@@ -376,15 +376,13 @@ module Configuration
   # Returns an updated `Config` object
   def check_and_init_ranks(config : Config) : Config
     command_keys = Set{
-      :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote, :sign, :tsign, :spoiler, :spoiler_own,
+      :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote, :sign, :tsign, :spoiler,
       :ranksay, :ranksay_lower, :warn, :delete, :uncooldown, :remove, :purge, :blacklist, :motd_set, :ranked_info
     }
 
     promote_keys = Set{:promote, :promote_lower, :promote_same}
 
     ranksay_keys = Set{:ranksay, :ranksay_lower}
-
-    spoiler_keys = Set{:spoiler, :spoiler_own}
 
     config.intermediary_ranks.each do |ri|
       if (invalid = ri.permissions.to_set - command_keys.map(&.to_s)) && !invalid.empty?
@@ -403,12 +401,6 @@ module Configuration
           "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_ranksay.join(", ")}]" 
         }
         ri.permissions = ri.permissions - ranksay_keys.map(&.to_s)
-      end
-      if (invalid_spoiler = ri.permissions & spoiler_keys.map(&.to_s)) && invalid_spoiler.size > 1
-        Log.notice{
-          "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_spoiler.join(", ")}]" 
-        }
-        ri.permissions = ri.permissions - spoiler_keys.map(&.to_s)
       end
 
       config.ranks[ri.value] = Rank.new(

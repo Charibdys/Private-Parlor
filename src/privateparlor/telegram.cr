@@ -1244,7 +1244,11 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
-  # STUB!
+  # Adds a spoiler overlay to a media message when replied to.
+  #
+  # Checks for the following permissions: `spoiler`
+  #
+  # If `spoiler`, allows the user to add a spoiler to a relayed media message.
   def spoiler_command(ctx : CommandHandler::Context) : Nil
     unless (message = ctx.message) && (info = message.from)
       return
@@ -1255,7 +1259,7 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
-    unless authority = @access.authorized?(user.rank, :spoiler, :spoiler_own)
+    unless @access.authorized?(user.rank, :spoiler)
       return relay_to_one(message.message_id, user.id, :fail)
     end
     unless reply = message.reply_message
@@ -1267,7 +1271,8 @@ class PrivateParlor < Tourmaline::Client
     unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
       return relay_to_one(message.message_id, user.id, :not_in_cache)
     end
-    if reply_user.id != user.id && authority == :spoiler_own
+    if (reply_info = reply.from) && user.id == reply_info.id 
+      # Prevent spoiling messages that were not sent by the bot
       return relay_to_one(message.message_id, user.id, :fail)
     end
 
@@ -1285,28 +1290,28 @@ class PrivateParlor < Tourmaline::Client
     end
 
     if reply.has_media_spoiler?
-      return relay_to_one(message.message_id, user.id, :fail) if authority == :spoiler_own
-        
-      spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
-      
-      Log.info { @replies.substitute_log(:unspoiled, {
-        "id"    => user.id.to_s,
-        "name"  => user.get_formatted_name,
-        "msid"  => reply.message_id.to_s,
-      }) }
+      if spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
+        Log.info { @replies.substitute_log(:unspoiled, {
+          "id"    => user.id.to_s,
+          "name"  => user.get_formatted_name,
+          "msid"  => reply.message_id.to_s,
+        }) }
+      else
+        return relay_to_one(message.message_id, user.id, :fail)
+      end
     else
       input.has_spoiler = true
 
-      spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
-      
-      Log.info { @replies.substitute_log(:spoiled, {
-        "id"    => user.id.to_s,
-        "name"  => user.get_formatted_name,
-        "msid"  => reply.message_id.to_s,
-      }) }
+      if spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
+        Log.info { @replies.substitute_log(:spoiled, {
+          "id"    => user.id.to_s,
+          "name"  => user.get_formatted_name,
+          "msid"  => reply.message_id.to_s,
+        }) }
+      else
+        return relay_to_one(message.message_id, user.id, :fail)
+      end
     end
-
-
 
     relay_to_one(message.message_id, user.id, :success)
   end
@@ -2068,7 +2073,10 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
-  def spoil_messages(msid : Int64, user_id : Int64, debug_enabled : Bool?, input : InputMedia) : Nil
+  # Spoils the given media message for all receivers by editing the media with the given input.
+  #
+  # Returns true on success, false or nil otherwise.
+  def spoil_messages(msid : Int64, user_id : Int64, debug_enabled : Bool?, input : InputMedia) : Bool?
     if reply_msids = @history.get_all_msids(msid)
       if !debug_enabled
         reply_msids.delete(user_id)
@@ -2080,8 +2088,11 @@ class PrivateParlor < Tourmaline::Client
         rescue Tourmaline::Error::MessageCantBeEdited
           # Either message was a forward or
           # User set debug_mode to true before message was spoiled; simply continue on
+        rescue Tourmaline::Error::MessageNotModified
+          return false
         end
       end
+      return true
     end
   end
 

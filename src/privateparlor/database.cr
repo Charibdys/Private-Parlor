@@ -472,10 +472,11 @@ class DatabaseHistory
   # Get sender_id of a specific message group
   def get_sender_id(msid : Int64) : Int64 | Nil
     db.query_one?(
-      "SELECT senderID
+      "SELECT DISTINCT senderID
       FROM message_groups
-      JOIN receivers ON receivers.receiverMSID = ? AND receivers.messageGroupID = message_groups.messageGroupID",
-      msid,
+      JOIN receivers ON receivers.messageGroupID = message_groups.messageGroupID
+      WHERE receivers.receiverMSID = ? OR message_groups.messageGroupID = ?",
+      msid, msid,
       as: Int64
     )
   end
