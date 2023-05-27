@@ -22,6 +22,7 @@ class Replies
   getter smileys : Array(String)
   getter blacklist_contact : String?
   getter tripcode_salt : String
+  getter linked_network : Hash(String, String)
 
   # Creates an instance of `Replies`.
   #
@@ -38,7 +39,7 @@ class Replies
   #
   # `salt`
   # :     a salt used for hashing tripcodes
-  def initialize(entities : Array(String), locale : String, smileys : Array(String), contact : String?, salt : String)
+  def initialize(entities : Array(String), locale : String, smileys : Array(String), contact : String?, salt : String, links : Hash(String, String))
     begin
       yaml = File.open("./locales/#{locale}.yaml") do |file|
         YAML.parse(file)
@@ -76,6 +77,7 @@ class Replies
     @smileys = smileys
     @blacklist_contact = contact
     @tripcode_salt = salt
+    @linked_network = links
     @time_units = yaml["time_units"].as_a.map(&.as_s)
     @time_format = yaml["time_format"].as_s
     @toggle = yaml["toggle"].as_a.map(&.as_s)
@@ -192,6 +194,19 @@ class Replies
     text
   end
 
+  # Embeds any occurence of a >>>/chat/ link with a link to that chat.
+  def replace_network_links(text : String) : String
+    text.gsub(/>>>\/\w+\//) do |match|
+      chat = match.strip(">>>//")
+
+      if linked_network[chat]?
+        "<a href=\"tg://resolve?domain=#{linked_network[chat]}\">#{match}</a>"
+      else
+        match
+      end
+    end
+  end
+
   # Checks the content of the message text and determines if it should be relayed.
   #
   # Returns false if the text has mathematical alphanumeric symbols, as they contain bold and italic characters.
@@ -237,6 +252,7 @@ class Replies
       entities = remove_entities(entities)
     end
     unparse_text(text, entities, Tourmaline::ParseMode::HTML, escape: true)
+    replace_network_links(text)
   end
 
   # Generate a 8chan or Secretlounge-ng style tripcode from a given string in the format `name#pass`.

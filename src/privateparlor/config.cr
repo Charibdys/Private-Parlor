@@ -36,6 +36,12 @@ module Configuration
     @[YAML::Field(key: "inactivity_limit")]
     getter inactivity_limit : Int32 = 0
 
+    @[YAML::Field(key: "linked_network")]
+    getter intermediary_linked_network : Hash(String, String) | String | Nil
+
+    @[YAML::Field(ignore: true)]
+    getter linked_network : Hash(String, String) = {} of String => String
+
     @[YAML::Field(key: "ranks")]
     getter intermediary_ranks : Array(IntermediaryRank)
 
@@ -371,6 +377,7 @@ module Configuration
     end
 
     config = check_and_init_ranks(config)
+    config = check_and_init_linked_network(config)
   end
 
   # Checks every intermediate rank for invalid or otherwise undefined permissions
@@ -410,6 +417,35 @@ module Configuration
         ri.name,
         command_keys.compact_map {|key| key if ri.permissions.includes?(key.to_s)}.to_set
       )
+    end
+
+    config
+  end
+
+  # Checks the config for a hash of linked networks and initializes `linked_network` field.
+  #
+  # If `intermediary_linked_network` is a hash, merge it into `linked_network`
+  #
+  # Otherwise if it is a string, try to open the file from the path and merge 
+  # the YAML dictionary there into  `linked_network`
+  def check_and_init_linked_network(config : Config) : Config
+    if (links = config.intermediary_linked_network) && links.is_a?(String)
+      begin
+        hash = {} of String => String
+        File.open(links) do |file|
+          yaml = YAML.parse(file)
+          yaml["linked_network"].as_h.each do |k, v|
+            hash[k.as_s] = v.as_s
+          end
+          config.linked_network.merge!(hash)
+        end
+      rescue ex : YAML::ParseException
+        Log.error(exception: ex) { "Could not parse the given value at row #{ex.line_number}. Check that \"linked_network\" is a valid dictionary." }
+      rescue ex : File::NotFoundError | File::AccessDeniedError
+        Log.notice(exception: ex) { "Could not open linked network file, \"#{links}\"" }
+      end
+    elsif links.is_a?(Hash(String, String))
+      config.linked_network.merge!(links)
     end
 
     config

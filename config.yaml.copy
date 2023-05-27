@@ -44,6 +44,14 @@ locale: "en-US"
 # Set to 0 to disable; disabled by default
 #inactivity_limit: 30
 
+# Map of chats and links that a user can refer to in their message
+# e.g., >>>/foo/ woulb be turned into an inline link to http://t.me/foochatbot
+#linked_network:
+#  foo: foochatbot
+#  bar: barchatbot
+# Alternatively, the map can be loaded from another YAML file using this syntax:
+#linked_network: "./somewhere/bots.yml"
+
 # A list of ranks recognized by the bot
 # To add a rank, add a new entry and define the name, value, and permissisons
 # 
