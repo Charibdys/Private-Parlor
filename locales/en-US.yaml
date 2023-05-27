@@ -250,6 +250,10 @@ replies:
  - |-
     <i>#{msgs_deleted} messages were matched and deleted.</i>
 
+# inactive
+ - |-
+    <i>You have been kicked due to inactivity. Type /start to receive messages again!</i>
+
 # success
  - |-
    ✅ 

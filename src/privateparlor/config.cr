@@ -33,6 +33,9 @@ module Configuration
     @[YAML::Field(key: "regular_forwards")]
     getter regular_forwards : Bool? = false
 
+    @[YAML::Field(key: "inactivity_limit")]
+    getter inactivity_limit : Int32 = 0
+
     @[YAML::Field(key: "ranks")]
     getter intermediary_ranks : Array(IntermediaryRank)
 

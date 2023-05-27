@@ -19,6 +19,7 @@ class PrivateParlor < Tourmaline::Client
 
   getter allow_media_spoilers : Bool?
   getter regular_forwards : Bool?
+  getter inactivity_limit : Int32
   getter media_limit_period : Int32
   getter registration_open : Bool?
   getter enable_sign : Bool?
@@ -47,6 +48,7 @@ class PrivateParlor < Tourmaline::Client
 
     @allow_media_spoilers = config.allow_media_spoilers
     @regular_forwards = config.regular_forwards
+    @inactivity_limit = config.inactivity_limit
     @media_limit_period = config.media_limit_period
     @registration_open = config.registration_open
     @enable_sign = config.enable_sign[0]
@@ -461,12 +463,15 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Starts various background tasks and stores them in a hash.
-  def register_tasks(spam_interval_seconds : Int32) : Hash
+  def register_tasks(spam_interval_seconds : Int32) : Hash(Symbol, Tasker::Task)
     tasks = {} of Symbol => Tasker::Task
     tasks[:cache] = Tasker.every(@history.lifespan * (1/4)) { @history.expire }
     tasks[:warnings] = Tasker.every(15.minutes) { @database.expire_warnings(warn_expire_hours) }
     if spam = @spam_handler
       tasks[:spam] = Tasker.every(spam_interval_seconds.seconds) { spam.expire }
+    end
+    if @inactivity_limit > 0
+      tasks[:inactivity] = Tasker.every(6.hours) { kick_inactive_users }
     end
     tasks
   end
@@ -2053,6 +2058,19 @@ class PrivateParlor < Tourmaline::Client
       relay_to_one(nil, user.id, :media_limit, {"total" => (@media_limit_period.hours - (Time.utc - user.joined)).hours})
     else
       relay_to_one(nil, user.id, :not_in_chat)
+    end
+  end
+
+  # Kicks any users that have been inactive for a duration of time.
+  def kick_inactive_users() : Nil
+    @database.get_inactive_users(@inactivity_limit).each do |user|
+      user.set_left
+      @database.modify_user(user)
+      @queue_mutex.synchronize do
+        @queue.reject! do |msg|
+          msg.receiver == user.id
+        end
+      end
     end
   end
 

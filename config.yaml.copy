@@ -39,6 +39,11 @@ locale: "en-US"
 # Must have "relay_forwarded_message" enabled for this to work
 #regular_forwards: true
 
+# Limit (in days) for which a user can be inactive and still receive messages
+# If user is inactive, they will be kicked with an option to rejoin
+# Set to 0 to disable; disabled by default
+#inactivity_limit: 30
+
 # A list of ranks recognized by the bot
 # To add a rank, add a new entry and define the name, value, and permissisons
 # 

@@ -263,6 +263,10 @@ class Database
     db.query_all("SELECT * FROM users WHERE rank NOT IN (#{values.join(", ") {"?"}})", args: values, as: User)
   end
 
+  def get_inactive_users(limit : Int32) Array(User) | Nil
+    db.query_all("SELECT * FROM users WHERE left is NULL AND lastActive < ?", (Time.utc - limit.days), as: User)
+  end
+
   # Queries the database for a user with a given *username*.
   #
   # Returns a `User` object or Nil if no user was found.

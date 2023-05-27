@@ -249,6 +249,10 @@ replies:
 # purge_complete: msgs_deleted
  - |-
     _#{msgs_deleted} messages were matched and deleted\._
+ 
+# inactive
+ - |-
+    _You have been kicked due to inactivity\. Type /start to receive messages again\!_
 
 # success
  - |-
