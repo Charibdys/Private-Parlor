@@ -135,7 +135,7 @@ class Replies
         end
 
         if replace
-          replace = replace.to_md
+          replace = replace.to_html
         end
         replace
       end
@@ -293,7 +293,7 @@ class Replies
 
   # Returns a link to the given user's account.
   def format_user_sign(id : Int64, name : String) : String
-    Link.new("~~#{name}", "tg://user?id=#{id}").to_md
+    Link.new("~~#{name}", "tg://user?id=#{id}").to_html
   end
 
   def format_user_forward(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String
@@ -342,12 +342,12 @@ class Replies
 
   # Returns a bolded signature showing which type of user sent this message.
   def format_user_say(signature : String) : String
-    Bold.new("~~#{signature}").to_md
+    Bold.new("~~#{signature}").to_html
   end
 
   # Returns a tripcode (Name!Tripcode) segment.
   def format_tripcode_sign(name : String, tripcode : String) : String
-    Group.new(Bold.new(name), Code.new(tripcode)).to_md
+    Group.new(Bold.new(name), Code.new(tripcode)).to_html
   end
 
   # Formats a timespan, so the duration is marked by its largest unit ("20m", "3h", "5d", etc)
@@ -390,12 +390,12 @@ class Replies
   #
   # Feel free to edit this if you fork the code.
   def version : String
-    Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://github.com/Charibdys/Private-Parlor")).to_md
+    Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://github.com/Charibdys/Private-Parlor")).to_html
   end
 
   # Returns a custom text from a given string.
   def custom(text : String) : String
-    Section.new(text).to_md
+    Section.new(text).to_html
   end
 
   # Returns a message containing the commands the user can use.
@@ -406,22 +406,22 @@ class Replies
     )
 
     reply_required_keys = %i(
-      upvote downvote warn delete 
+      upvote downvote warn delete spoiler
       remove blacklist ranked_info
     )
 
     help_text = String.build do |str|
       str << substitute_reply(:help_header)
-      str << "\n/start - #{@command_descriptions[:start]?}".to_md
-      str << "\n/stop - #{@command_descriptions[:stop]?}".to_md
-      str << "\n/info - #{@command_descriptions[:info]?}".to_md
-      str << "\n/users - #{@command_descriptions[:users]?}".to_md
-      str << "\n/version - #{@command_descriptions[:version]?}".to_md
-      str << "\n/toggle_karma - #{@command_descriptions[:toggle_karma]?}".to_md
-      str << "\n/toggle_debug - #{@command_descriptions[:toggle_debug]?}".to_md
-      str << "\n/tripcode - #{@command_descriptions[:tripcode]?}".to_md
-      str << "\n/motd - #{@command_descriptions[:motd]?}".to_md
-      str << "\n/help - #{@command_descriptions[:help]?}".to_md
+      str << "\n/start - #{@command_descriptions[:start]?}".to_html
+      str << "\n/stop - #{@command_descriptions[:stop]?}".to_html
+      str << "\n/info - #{@command_descriptions[:info]?}".to_html
+      str << "\n/users - #{@command_descriptions[:users]?}".to_html
+      str << "\n/version - #{@command_descriptions[:version]?}".to_html
+      str << "\n/toggle_karma - #{@command_descriptions[:toggle_karma]?}".to_html
+      str << "\n/toggle_debug - #{@command_descriptions[:toggle_debug]?}".to_html
+      str << "\n/tripcode - #{@command_descriptions[:tripcode]?}".to_html
+      str << "\n/motd - #{@command_descriptions[:motd]?}".to_html
+      str << "\n/help - #{@command_descriptions[:help]?}".to_html
 
       if rank = ranks[user.rank]?
         rank_commands = [] of String
@@ -466,12 +466,12 @@ class Replies
         if !rank_commands.empty?
           str << "\n\n"
           str << substitute_reply(:help_rank_commands, {"rank" => rank.name})
-          rank_commands.each {|line| str << "\n#{line}".to_md}
+          rank_commands.each {|line| str << "\n#{line}".to_html}
         end
         if !reply_commands.empty?
           str << "\n\n"
           str << substitute_reply(:help_reply_commands)
-          reply_commands.each {|line| str << "\n#{line}".to_md}
+          reply_commands.each {|line| str << "\n#{line}".to_html}
         end
       end
     end
