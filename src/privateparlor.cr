@@ -4,7 +4,7 @@ require "tasker"
 require "sqlite3"
 require "./privateparlor/*"
 
-VERSION = "0.7"
+VERSION = "0.8"
 
 bot = PrivateParlor.new(Configuration.parse_config)
 

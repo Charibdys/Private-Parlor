@@ -89,7 +89,7 @@ The following features are planned and being worked on:
 	- [X] Configurable cache contents/data
 	- [x] Configurable cache life
 	- [x] Configurable time and content limits for spam filter
-- [ ] Inactivity timeout
+- [x] Inactivity timeout
 - [ ] CLI tools and utility scripts
 
 ## Contributing
