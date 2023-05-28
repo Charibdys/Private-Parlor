@@ -1270,7 +1270,7 @@ class PrivateParlor < Tourmaline::Client
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, :no_reply)
     end
-    if reply.forward_from || reply.forward_from_chat
+    if reply.forward_date
       return relay_to_one(message.message_id, user.id, :fail)
     end
     unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
@@ -1523,7 +1523,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless user = database.get_user(info.id)
@@ -1561,7 +1561,7 @@ class PrivateParlor < Tourmaline::Client
           return
         end
     {% end %}
-    if (message.forward_from || message.forward_from_chat)
+    if message.forward_date
       return
     end
     if message.media_group_id
@@ -1620,7 +1620,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless album = message.media_group_id
@@ -1692,7 +1692,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless poll = message.poll
@@ -1900,7 +1900,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless sticker = message.sticker
@@ -1933,7 +1933,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if (message.forward_from || message.forward_from_chat)
+    if message.forward_date
       return
     end
     unless user = database.get_user(info.id)
@@ -1963,7 +1963,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless venue = message.venue
@@ -2006,7 +2006,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless location = message.location
@@ -2043,7 +2043,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless contact = message.contact
