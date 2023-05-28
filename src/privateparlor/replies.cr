@@ -22,6 +22,7 @@ class Replies
   getter smileys : Array(String)
   getter blacklist_contact : String?
   getter tripcode_salt : String
+  getter linked_network : Hash(String, String)
 
   # Creates an instance of `Replies`.
   #
@@ -38,7 +39,7 @@ class Replies
   #
   # `salt`
   # :     a salt used for hashing tripcodes
-  def initialize(entities : Array(String), locale : String, smileys : Array(String), contact : String?, salt : String)
+  def initialize(entities : Array(String), locale : String, smileys : Array(String), contact : String?, salt : String, links : Hash(String, String))
     begin
       yaml = File.open("./locales/#{locale}.yaml") do |file|
         YAML.parse(file)
@@ -59,23 +60,24 @@ class Replies
       upvote_spam downvote_spam invalid_tripcode_format tripcode_set tripcode_info tripcode_unset 
       user_info info_warning ranked_info cooldown_true cooldown_false user_count user_count_full
       message_deleted message_removed reason_prefix cooldown_given on_cooldown media_limit blacklisted 
-      blacklist_contact purge_complete success fail
+      blacklist_contact purge_complete inactive success fail
     )
 
     log_keys = %i(
       start joined rejoined left promoted demoted warned message_deleted message_removed removed_cooldown
-      blacklisted reason_prefix ranked_message force_leave
+      blacklisted reason_prefix spoiled unspoiled ranked_message force_leave
     )
 
     command_keys = %i(
       start stop info users version upvote downvote toggle_karma toggle_debug tripcode promote demote
-      sign tsign ranksay warn delete uncooldown remove purge blacklist motd help motd_set ranked_info
+      sign tsign ranksay warn delete uncooldown remove purge spoiler blacklist motd help motd_set ranked_info
     )
 
     @entity_types = entities
     @smileys = smileys
     @blacklist_contact = contact
     @tripcode_salt = salt
+    @linked_network = links
     @time_units = yaml["time_units"].as_a.map(&.as_s)
     @time_format = yaml["time_format"].as_s
     @toggle = yaml["toggle"].as_a.map(&.as_s)
@@ -135,7 +137,7 @@ class Replies
         end
 
         if replace
-          replace = replace.to_md
+          replace = replace.to_html
         end
         replace
       end
@@ -192,6 +194,19 @@ class Replies
     text
   end
 
+  # Embeds any occurence of a >>>/chat/ link with a link to that chat.
+  def replace_network_links(text : String) : String
+    text.gsub(/>>>\/\w+\//) do |match|
+      chat = match.strip(">>>//")
+
+      if linked_network[chat]?
+        "<a href=\"tg://resolve?domain=#{linked_network[chat]}\">#{match}</a>"
+      else
+        match
+      end
+    end
+  end
+
   # Checks the content of the message text and determines if it should be relayed.
   #
   # Returns false if the text has mathematical alphanumeric symbols, as they contain bold and italic characters.
@@ -202,6 +217,17 @@ class Replies
       false
     else
       true
+    end
+  end
+
+  # Checks the text and entities for a forwarded message to determine if it 
+  # was relayed as a regular message
+  #
+  # Returns true if the forward message was relayed regularly, nil otherwise
+  def is_regular_forward?(text : String?, entities : Array(Tourmaline::MessageEntity)) : Bool?
+    return unless text
+    if ent = entities.first?
+      text.starts_with?("Forwarded from") && ent.type == "bold"
     end
   end
 
@@ -218,14 +244,15 @@ class Replies
     entities - stripped_entities
   end
 
-  # Strips MarkdownV2 format from a message and escapes formatting found in `MessageEntities`.
+  # Strips HTML format from a message and escapes formatting found in `MessageEntities`.
   # If the message has `MessageEntities`, replaces any inline links and removes entities found in `entity_types`.
   def strip_format(text : String, entities : Array(Tourmaline::MessageEntity)) : String
     if !entities.empty?
       text = replace_links(text, entities)
       entities = remove_entities(entities)
     end
-    unparse_text(text, entities, Tourmaline::ParseMode::MarkdownV2, escape: true)
+    unparse_text(text, entities, Tourmaline::ParseMode::HTML, escape: true)
+    replace_network_links(text)
   end
 
   # Generate a 8chan or Secretlounge-ng style tripcode from a given string in the format `name#pass`.
@@ -282,17 +309,61 @@ class Replies
 
   # Returns a link to the given user's account.
   def format_user_sign(id : Int64, name : String) : String
-    Link.new("~~#{name}", "tg://user?id=#{id}").to_md
+    Link.new("~~#{name}", "tg://user?id=#{id}").to_html
+  end
+
+  def format_user_forward(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String
+    tokens = Group.new(Bold.new("Forwarded from "), Bold.new(UserMention.new(name, id)))
+    case parsemode
+    when Tourmaline::ParseMode::MarkdownV2 then tokens.to_md
+    when Tourmaline::ParseMode::HTML then tokens.to_html
+    else ""
+    end
+  end
+
+  def format_private_user_forward(name : String, parsemode : Tourmaline::ParseMode) : String
+    tokens = Group.new(Bold.new("Forwarded from "), Bold.new(Italic.new(name)))
+    case parsemode
+    when Tourmaline::ParseMode::MarkdownV2 then tokens.to_md
+    when Tourmaline::ParseMode::HTML then tokens.to_html
+    else ""
+    end
+  end
+
+  # For bots or public channels
+  def format_username_forward(name : String, username : String?, parsemode : Tourmaline::ParseMode, msid : Int64? = nil) : String
+    tokens = Group.new(
+      Bold.new("Forwarded from "), 
+      Bold.new(Link.new(name, "tg://resolve?domain=#{username}#{"&post=#{msid}" if msid}"))
+    )
+    case parsemode
+    when Tourmaline::ParseMode::MarkdownV2 then tokens.to_md
+    when Tourmaline::ParseMode::HTML then tokens.to_html
+    else ""
+    end
+  end
+
+  # Removes the "-100" prefix for private channels
+  def format_private_channel_forward(name : String, id : Int64, msid : Int64?, parsemode : Tourmaline::ParseMode) : String
+    tokens = Group.new(
+      Bold.new("Forwarded from "), 
+      Bold.new(Link.new(name, "tg://privatepost?channel=#{id.to_s[4..]}#{"&post=#{msid}" if msid}"))
+    )
+    case parsemode
+    when Tourmaline::ParseMode::MarkdownV2 then tokens.to_md
+    when Tourmaline::ParseMode::HTML then tokens.to_html
+    else ""
+    end
   end
 
   # Returns a bolded signature showing which type of user sent this message.
   def format_user_say(signature : String) : String
-    Bold.new("~~#{signature}").to_md
+    Bold.new("~~#{signature}").to_html
   end
 
   # Returns a tripcode (Name!Tripcode) segment.
   def format_tripcode_sign(name : String, tripcode : String) : String
-    Group.new(Bold.new(name), Code.new(tripcode)).to_md
+    Group.new(Bold.new(name), Code.new(tripcode)).to_html
   end
 
   # Formats a timespan, so the duration is marked by its largest unit ("20m", "3h", "5d", etc)
@@ -335,12 +406,12 @@ class Replies
   #
   # Feel free to edit this if you fork the code.
   def version : String
-    Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://github.com/Charibdys/Private-Parlor")).to_md
+    Group.new("Private Parlor v#{VERSION} ~ ", Link.new("[Source]", "https://github.com/Charibdys/Private-Parlor")).to_html
   end
 
   # Returns a custom text from a given string.
   def custom(text : String) : String
-    Section.new(text).to_md
+    Section.new(text).to_html
   end
 
   # Returns a message containing the commands the user can use.
@@ -351,22 +422,22 @@ class Replies
     )
 
     reply_required_keys = %i(
-      upvote downvote warn delete 
+      upvote downvote warn delete spoiler
       remove blacklist ranked_info
     )
 
     help_text = String.build do |str|
       str << substitute_reply(:help_header)
-      str << "\n/start - #{@command_descriptions[:start]?}".to_md
-      str << "\n/stop - #{@command_descriptions[:stop]?}".to_md
-      str << "\n/info - #{@command_descriptions[:info]?}".to_md
-      str << "\n/users - #{@command_descriptions[:users]?}".to_md
-      str << "\n/version - #{@command_descriptions[:version]?}".to_md
-      str << "\n/toggle_karma - #{@command_descriptions[:toggle_karma]?}".to_md
-      str << "\n/toggle_debug - #{@command_descriptions[:toggle_debug]?}".to_md
-      str << "\n/tripcode - #{@command_descriptions[:tripcode]?}".to_md
-      str << "\n/motd - #{@command_descriptions[:motd]?}".to_md
-      str << "\n/help - #{@command_descriptions[:help]?}".to_md
+      str << "\n/start - #{@command_descriptions[:start]?}".to_html
+      str << "\n/stop - #{@command_descriptions[:stop]?}".to_html
+      str << "\n/info - #{@command_descriptions[:info]?}".to_html
+      str << "\n/users - #{@command_descriptions[:users]?}".to_html
+      str << "\n/version - #{@command_descriptions[:version]?}".to_html
+      str << "\n/toggle_karma - #{@command_descriptions[:toggle_karma]?}".to_html
+      str << "\n/toggle_debug - #{@command_descriptions[:toggle_debug]?}".to_html
+      str << "\n/tripcode - #{@command_descriptions[:tripcode]?}".to_html
+      str << "\n/motd - #{@command_descriptions[:motd]?}".to_html
+      str << "\n/help - #{@command_descriptions[:help]?}".to_html
 
       if rank = ranks[user.rank]?
         rank_commands = [] of String
@@ -411,12 +482,12 @@ class Replies
         if !rank_commands.empty?
           str << "\n\n"
           str << substitute_reply(:help_rank_commands, {"rank" => rank.name})
-          rank_commands.each {|line| str << "\n#{line}".to_md}
+          rank_commands.each {|line| str << "\n#{line}".to_html}
         end
         if !reply_commands.empty?
           str << "\n\n"
           str << substitute_reply(:help_reply_commands)
-          reply_commands.each {|line| str << "\n#{line}".to_md}
+          reply_commands.each {|line| str << "\n#{line}".to_html}
         end
       end
     end

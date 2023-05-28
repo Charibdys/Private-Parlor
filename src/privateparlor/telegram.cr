@@ -5,6 +5,7 @@ class PrivateParlor < Tourmaline::Client
   getter history : History | DatabaseHistory
   getter access : AuthorizedRanks
   getter queue : Deque(QueuedMessage)
+  getter queue_mutex : Mutex
   getter replies : Replies
   getter tasks : Hash(Symbol, Tasker::Task)
   getter albums : Hash(String, Album)
@@ -17,6 +18,8 @@ class PrivateParlor < Tourmaline::Client
   getter karma_warn_penalty : Int32
 
   getter allow_media_spoilers : Bool?
+  getter regular_forwards : Bool?
+  getter inactivity_limit : Int32
   getter media_limit_period : Int32
   getter registration_open : Bool?
   getter enable_sign : Bool?
@@ -34,7 +37,7 @@ class PrivateParlor < Tourmaline::Client
   # :     a `Configuration::Config` from parsing the `config.yaml` file
   def initialize(config : Configuration::Config)
     super(bot_token: config.token, set_commands: true)
-    Client.default_parse_mode = (Tourmaline::ParseMode::MarkdownV2)
+    Client.default_parse_mode = (Tourmaline::ParseMode::HTML)
 
     # Init warn/karma variables
     @cooldown_time_begin = config.cooldown_time_begin
@@ -44,6 +47,8 @@ class PrivateParlor < Tourmaline::Client
     @karma_warn_penalty = config.karma_warn_penalty
 
     @allow_media_spoilers = config.allow_media_spoilers
+    @regular_forwards = config.regular_forwards
+    @inactivity_limit = config.inactivity_limit
     @media_limit_period = config.media_limit_period
     @registration_open = config.registration_open
     @enable_sign = config.enable_sign[0]
@@ -58,7 +63,8 @@ class PrivateParlor < Tourmaline::Client
     @access = AuthorizedRanks.new(config.ranks)
     @history = get_history_type(db, config)
     @queue = Deque(QueuedMessage).new
-    @replies = Replies.new(config.entities, config.locale, config.smileys, config.blacklist_contact, config.salt)
+    @queue_mutex = Mutex.new
+    @replies = Replies.new(config.entities, config.locale, config.smileys, config.blacklist_contact, config.salt, config.linked_network)
     @spam_handler = SpamScoreHandler.new(config) if config.spam_interval_seconds != 0
     @tasks = register_tasks(config.spam_interval_seconds)
     @albums = {} of String => Album
@@ -364,7 +370,7 @@ class PrivateParlor < Tourmaline::Client
   def initialize_handlers(descriptions : Hash(Symbol, String), config : Configuration::Config) : Nil
     {% for command in [
                         "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help",
-                        "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "blacklist",
+                        "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "spoiler", "blacklist",
                       ] %}
 
     if config.enable_{{command.id}}[0]
@@ -457,12 +463,15 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Starts various background tasks and stores them in a hash.
-  def register_tasks(spam_interval_seconds : Int32) : Hash
+  def register_tasks(spam_interval_seconds : Int32) : Hash(Symbol, Tasker::Task)
     tasks = {} of Symbol => Tasker::Task
     tasks[:cache] = Tasker.every(@history.lifespan * (1/4)) { @history.expire }
     tasks[:warnings] = Tasker.every(15.minutes) { @database.expire_warnings(warn_expire_hours) }
     if spam = @spam_handler
       tasks[:spam] = Tasker.every(spam_interval_seconds.seconds) { spam.expire }
+    end
+    if @inactivity_limit > 0
+      tasks[:inactivity] = Tasker.every(6.hours) { kick_inactive_users }
     end
     tasks
   end
@@ -551,7 +560,7 @@ class PrivateParlor < Tourmaline::Client
         return relay_to_one(message.message_id, user.id, :fail)
       end
       unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
-        return
+        return relay_to_one(message.message_id, user.id, :not_in_cache)
       end
 
       user.set_active(info.username, info.full_name)
@@ -660,7 +669,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, :no_reply)
     end
     unless reply_user = database.get_user(history_with_karma.get_sender_id(reply.message_id))
-      return
+      return relay_to_one(message.message_id, user.id, :not_in_cache)
     end
 
     user.set_active(info.username, info.full_name)
@@ -709,7 +718,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, :no_reply)
     end
     unless reply_user = database.get_user(history_with_karma.get_sender_id(reply.message_id))
-      return
+      return relay_to_one(message.message_id, user.id, :not_in_cache)
     end
 
     user.set_active(info.username, info.full_name)
@@ -1221,9 +1230,11 @@ class PrivateParlor < Tourmaline::Client
       reply_user.blacklist(reason)
       @database.modify_user(reply_user)
 
-      # Remove queued messages sent by and directed to blacklisted user.
-      @queue.reject! do |msg|
-        msg.receiver == user.id || msg.sender == user.id
+      # Remove queued messages sent by and directed to the blacklisted user.
+      @queue_mutex.synchronize do 
+        @queue.reject! do |msg|
+          msg.receiver == reply_user.id || msg.sender == reply_user.id
+        end
       end
       cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
@@ -1236,6 +1247,78 @@ class PrivateParlor < Tourmaline::Client
       }) }
       relay_to_one(message.message_id, user.id, :success)
     end
+  end
+
+  # Adds a spoiler overlay to a media message when replied to.
+  #
+  # Checks for the following permissions: `spoiler`
+  #
+  # If `spoiler`, allows the user to add a spoiler to a relayed media message.
+  def spoiler_command(ctx : CommandHandler::Context) : Nil
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, :not_in_chat)
+    end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :spoiler)
+      return relay_to_one(message.message_id, user.id, :fail)
+    end
+    unless reply = message.reply_message
+      return relay_to_one(message.message_id, user.id, :no_reply)
+    end
+    if reply.forward_date
+      return relay_to_one(message.message_id, user.id, :fail)
+    end
+    unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+      return relay_to_one(message.message_id, user.id, :not_in_cache)
+    end
+    if (reply_info = reply.from) && user.id == reply_info.id 
+      # Prevent spoiling messages that were not sent by the bot
+      return relay_to_one(message.message_id, user.id, :fail)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    if media = reply.photo.last?
+      input = InputMediaPhoto.new(media.file_id, caption: reply.caption, caption_entities: reply.caption_entities)
+    elsif media = reply.video
+      input = InputMediaVideo.new(media.file_id, caption: reply.caption, caption_entities: reply.caption_entities)
+    elsif media = reply.animation
+      input = InputMediaAnimation.new(media.file_id, caption: reply.caption, caption_entities: reply.caption_entities)
+    else
+      return relay_to_one(message.message_id, user.id, :fail)
+    end
+
+    if reply.has_media_spoiler?
+      if spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
+        Log.info { @replies.substitute_log(:unspoiled, {
+          "id"    => user.id.to_s,
+          "name"  => user.get_formatted_name,
+          "msid"  => reply.message_id.to_s,
+        }) }
+      else
+        return relay_to_one(message.message_id, user.id, :fail)
+      end
+    else
+      input.has_spoiler = true
+
+      if spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
+        Log.info { @replies.substitute_log(:spoiled, {
+          "id"    => user.id.to_s,
+          "name"  => user.get_formatted_name,
+          "msid"  => reply.message_id.to_s,
+        }) }
+      else
+        return relay_to_one(message.message_id, user.id, :fail)
+      end
+    end
+
+    relay_to_one(message.message_id, user.id, :success)
   end
 
   # Replies with the motd/rules associated with this bot.
@@ -1440,7 +1523,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless user = database.get_user(info.id)
@@ -1478,7 +1561,7 @@ class PrivateParlor < Tourmaline::Client
           return
         end
     {% end %}
-    if (message.forward_from || message.forward_from_chat)
+    if message.forward_date
       return
     end
     if message.media_group_id
@@ -1506,7 +1589,7 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     if raw_caption = message.caption
-      caption = check_text(@replies.strip_format(raw_caption, message.entities), user, message.message_id)
+      caption = check_text(@replies.strip_format(raw_caption, message.caption_entities), user, message.message_id)
       if caption.nil? # Caption contained a special font or used a disabled command
         return
       end
@@ -1537,7 +1620,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless album = message.media_group_id
@@ -1609,7 +1692,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless poll = message.poll
@@ -1677,11 +1760,138 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    relay(
+    unless @regular_forwards
+      return relay(
+        message.reply_message,
+        user,
+        @history.new_message(user.id, message.message_id),
+        ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+      )
+    end
+
+    if @replies.is_regular_forward?(message.text || message.caption, message.text_entities.keys)
+      return relay(
+        message.reply_message,
+        user,
+        @history.new_message(user.id, message.message_id),
+        ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+      )
+    end
+
+    if from = message.forward_from
+      if from.bot?
+        header = @replies.format_username_forward(from.full_name, from.username, Client.default_parse_mode)
+      elsif from.id
+        header = @replies.format_user_forward(from.full_name, from.id, Client.default_parse_mode)
+      end
+    elsif (from = message.forward_from_chat) && message.forward_from_message_id
+      if from.username
+        header = @replies.format_username_forward(from.name, from.username, Client.default_parse_mode, message.forward_from_message_id)
+      else
+        header = @replies.format_private_channel_forward(from.name, from.id, message.forward_from_message_id, Client.default_parse_mode)
+      end
+    elsif from = message.forward_sender_name
+      header = @replies.format_private_user_forward(from, Client.default_parse_mode,)
+    end
+
+    unless header
+      return relay(
+        message.reply_message,
+        user,
+        @history.new_message(user.id, message.message_id),
+        ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+      )
+    end
+    
+    if text = message.text
+      text = @replies.unparse_text(text, message.entities, Client.default_parse_mode, escape: true)
+    elsif text = message.caption
+      text = @replies.unparse_text(text, message.caption_entities, Client.default_parse_mode, escape: true)
+    end
+
+    text = String.build do |str|
+      str << header
+      str << "\n\n"
+      str << text
+    end
+
+    if message.text
+      proc = ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text) }
+    elsif album = message.media_group_id
+      if media = message.photo.last?
+        input = InputMediaPhoto.new(media.file_id, parse_mode: Tourmaline::ParseMode::HTML, has_spoiler: message.has_media_spoiler?)
+      elsif media = message.video
+        input = InputMediaVideo.new(media.file_id, parse_mode: Tourmaline::ParseMode::HTML, has_spoiler: message.has_media_spoiler?)
+      elsif media = message.audio
+        input = InputMediaAudio.new(media.file_id, parse_mode: Tourmaline::ParseMode::HTML)
+      elsif media = message.document
+        input = InputMediaDocument.new(media.file_id, parse_mode: Tourmaline::ParseMode::HTML)
+      else
+        return
+      end
+  
+      if @albums[album]?
+        input.caption = message.caption
+        input.caption_entities = message.caption_entities
+
+        @albums[album].message_ids << message.message_id
+        @albums[album].media_ids << input
+      else
+        input.caption = text
+        media_group = Album.new(message.message_id, input)
+        @albums[album] = media_group
+  
+        # Wait an arbitrary amount of time for Telegram MediaGroup updates to come in before relaying the album.
+        Tasker.at(500.milliseconds.from_now) {
+          unless temp_album = @albums.delete(album)
+            next
+          end
+  
+          cached_msids = Array(Int64).new
+  
+          temp_album.message_ids.each do |msid|
+            cached_msids << @history.new_message(info.id, msid)
+          end
+  
+          relay(
+            message.reply_message,
+            user,
+            cached_msids,
+            ->(receiver : Int64, reply : Int64 | Nil) { send_media_group(receiver, temp_album.media_ids, reply_to_message: reply) }
+          )
+        }
+      end
+
+      return
+    elsif file = message.animation
+      return unless file && (file_id = file.file_id)
+      proc = ->(receiver : Int64, reply : Int64 | Nil) {
+        send_animation(receiver, file_id, caption: text, has_spoiler: message.has_media_spoiler?)
+      }
+    elsif file = message.document
+      return unless file && (file_id = file.file_id)
+      proc = ->(receiver : Int64, reply : Int64 | Nil) {
+        send_document(receiver, file_id, caption: text)
+      }
+    elsif file = message.video
+      return unless file && (file_id = file.file_id)
+      proc = ->(receiver : Int64, reply : Int64 | Nil) {
+        send_video(receiver, file_id, caption: text, has_spoiler: message.has_media_spoiler?)
+      }
+    elsif file = message.photo
+      return unless file.last? && (file_id = file.last.file_id)
+      proc = ->(receiver : Int64, reply : Int64 | Nil) {
+        send_photo(receiver, file_id, caption: text, has_spoiler: message.has_media_spoiler?)
+      }
+    else
+      proc = ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+    end
+
+    return relay(
       message.reply_message,
       user,
       @history.new_message(user.id, message.message_id),
-      ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+      proc
     )
   end
 
@@ -1690,7 +1900,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless sticker = message.sticker
@@ -1723,7 +1933,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if (message.forward_from || message.forward_from_chat)
+    if message.forward_date
       return
     end
     unless user = database.get_user(info.id)
@@ -1753,7 +1963,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless venue = message.venue
@@ -1796,7 +2006,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless location = message.location
@@ -1833,7 +2043,7 @@ class PrivateParlor < Tourmaline::Client
     unless (message = update.message) && (info = message.from)
       return
     end
-    if message.forward_from || message.forward_from_chat
+    if message.forward_date
       return
     end
     unless contact = message.contact
@@ -1896,6 +2106,19 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Kicks any users that have been inactive for a duration of time.
+  def kick_inactive_users() : Nil
+    @database.get_inactive_users(@inactivity_limit).each do |user|
+      user.set_left
+      @database.modify_user(user)
+      @queue_mutex.synchronize do
+        @queue.reject! do |msg|
+          msg.receiver == user.id
+        end
+      end
+    end
+  end
+
   # Deletes the given message for all receivers and removes it from the message history.
   #
   # Returns the sender's (user_id) original message id upon success.
@@ -1913,96 +2136,142 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  # Spoils the given media message for all receivers by editing the media with the given input.
+  #
+  # Returns true on success, false or nil otherwise.
+  def spoil_messages(msid : Int64, user_id : Int64, debug_enabled : Bool?, input : InputMedia) : Bool?
+    if reply_msids = @history.get_all_msids(msid)
+      if !debug_enabled
+        reply_msids.delete(user_id)
+      end
+
+      reply_msids.each do |receiver_id, receiver_msid|
+        begin
+          edit_message_media(receiver_id, input, receiver_msid)
+        rescue Tourmaline::Error::MessageCantBeEdited
+          # Either message was a forward or
+          # User set debug_mode to true before message was spoiled; simply continue on
+        rescue Tourmaline::Error::MessageNotModified
+          return false
+        end
+      end
+      return true
+    end
+  end
+
   # Caches a message and sends it to the queue for relaying.
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64 | Array(Int64), proc : MessageProc) : Nil
     if reply_message
-      if (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
-        @database.get_prioritized_users.each do |receiver_id|
-          if (receiver_id != user.id) || user.debug_enabled
-            add_to_queue(cached_msid, user.id, receiver_id, reply_msids[receiver_id], proc)
-          end
-        end
-      else # Reply does not exist in cache; remove this message from cache
+      unless (reply_msids = @history.get_all_msids(reply_message.message_id)) && (!reply_msids.empty?)
         relay_to_one(cached_msid.is_a?(Int64) ? cached_msid : cached_msid[0], user.id, :not_in_cache)
         if cached_msid.is_a?(Int64)
           @history.del_message_group(cached_msid)
         else
           cached_msid.each { |msid| @history.del_message_group(msid) }
         end
-      end
-    else
-      @database.get_prioritized_users.each do |receiver_id|
-        if (receiver_id != user.id) || user.debug_enabled
-          add_to_queue(cached_msid, user.id, receiver_id, nil, proc)
-        end
+
+        return
       end
     end
+
+    add_to_queue(
+      cached_msid,
+      user.id,
+      @database.get_prioritized_users(user),
+      reply_msids,
+      proc
+    )
   end
 
   # Relay a message to a single user. Used for system messages.
   def relay_to_one(reply_message : Int64?, user : Int64, text : String)
     proc = ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, link_preview: true, reply_to_message: reply) }
-    if reply_message
-      add_to_queue_priority(user, reply_message, proc)
-    else
-      add_to_queue_priority(user, nil, proc)
-    end
+    add_to_queue_priority(user, reply_message, proc)
   end
 
   # :ditto:
   def relay_to_one(reply_message : Int64?, user : Int64, key : Symbol, params : LocaleParameters = {"" => ""}) : Nil
     proc = ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, @replies.substitute_reply(key, params), link_preview: true, reply_to_message: reply) }
-    if reply_message
-      add_to_queue_priority(user, reply_message, proc)
-    else
-      add_to_queue_priority(user, nil, proc)
-    end
+    add_to_queue_priority(user, reply_message, proc)
   end
 
   ###################
   # Queue functions #
   ###################
 
+  # Creates a new `QueuedMessage` with a reply and pushes it to the back of the queue.
+  def add_to_queue(cached_msid : Int64 | Array(Int64), sender_id : Int64 | Nil, receiver_ids : Array(Int64), reply_msids : Hash(Int64, Int64), func : MessageProc) : Nil
+    @queue_mutex.synchronize do 
+      receiver_ids.each do |receiver_id|
+        @queue.push(QueuedMessage.new(cached_msid, sender_id, receiver_id, reply_msids[receiver_id], func))
+      end
+    end
+  end
+
   # Creates a new `QueuedMessage` and pushes it to the back of the queue.
-  def add_to_queue(cached_msid : Int64 | Array(Int64), sender_id : Int64 | Nil, receiver_id : Int64, reply_msid : Int64 | Nil, func : MessageProc) : Nil
-    @queue.push(QueuedMessage.new(cached_msid, sender_id, receiver_id, reply_msid, func))
+  def add_to_queue(cached_msid : Int64 | Array(Int64), sender_id : Int64 | Nil, receiver_ids : Array(Int64), reply_msid : Nil, func : MessageProc) : Nil
+    @queue_mutex.synchronize do 
+      receiver_ids.each do |receiver_id|
+        @queue.push(QueuedMessage.new(cached_msid, sender_id, receiver_id, nil, func))
+      end
+    end
   end
 
   # Creates a new `QueuedMessage` and pushes it to the front of the queue.
   def add_to_queue_priority(receiver_id : Int64, reply_msid : Int64 | Nil, func : MessageProc) : Nil
-    @queue.unshift(QueuedMessage.new(nil, nil, receiver_id, reply_msid, func))
+    @queue_mutex.synchronize do 
+      @queue.unshift(QueuedMessage.new(nil, nil, receiver_id, reply_msid, func))
+    end
   end
 
   # Receives a `Message` from the `queue`, calls its proc, and adds the returned message id to the History
   #
   # This function should be invoked in a Fiber.
-  def send_messages(msg : QueuedMessage) : Nil
-    success = msg.function.call(msg.receiver, msg.reply_to)
-    if msg.origin_msid != nil
-      if !success.is_a?(Array(Tourmaline::Message))
-        @history.add_to_cache(msg.origin_msid.as(Int64), success.message_id, msg.receiver)
-      else
-        sent_msids = success.map(&.message_id)
+  def send_messages() : Bool?
+    @queue_mutex.lock
+    msg = @queue.shift?
 
-        sent_msids.zip(msg.origin_msid.as(Array(Int64))) do |msid, origin_msid|
-          @history.add_to_cache(origin_msid, msid, msg.receiver)
-        end
+    if msg.nil?
+      @queue_mutex.unlock
+      return true
+    end
+
+    begin
+      success = msg.function.call(msg.receiver, msg.reply_to)
+    rescue Tourmaline::Error::BotBlocked | Tourmaline::Error::UserDeactivated
+      return force_leave(msg.receiver)
+    rescue ex
+      return Log.error(exception: ex) { "Error occured when relaying message." }
+    ensure
+      @queue_mutex.unlock
+    end
+
+    unless msg.origin_msid
+      return
+    end
+
+    case success
+    when Tourmaline::Message
+      @history.add_to_cache(msg.origin_msid.as(Int64), success.message_id, msg.receiver)
+    when Array(Tourmaline::Message)
+      sent_msids = success.map(&.message_id)
+
+      sent_msids.zip(msg.origin_msid.as(Array(Int64))) do |msid, origin_msid|
+        @history.add_to_cache(origin_msid, msid, msg.receiver)
       end
     end
-  rescue Tourmaline::Error::BotBlocked | Tourmaline::Error::UserDeactivated
-    force_leave(msg.receiver)
-  rescue ex
-    Log.error(exception: ex) { "Error occured when relaying message." }
   end
 
   # Set blocked user to left in the database and delete all incoming messages from the queue.
+  #
+  # Should only be invoked in `send_messages`, as this does not check the `queue_mutex`
   def force_leave(user_id : Int64) : Nil
     if user = database.get_user(user_id)
       user.set_left
       @database.modify_user(user)
       Log.info { @replies.substitute_log(:force_leave, {"id" => user_id.to_s}) }
     end
-    queue.reject! do |msg|
+    @queue.reject! do |msg|
       msg.receiver == user_id
     end
   end

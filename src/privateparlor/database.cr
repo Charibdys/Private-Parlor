@@ -263,6 +263,10 @@ class Database
     db.query_all("SELECT * FROM users WHERE rank NOT IN (#{values.join(", ") {"?"}})", args: values, as: User)
   end
 
+  def get_inactive_users(limit : Int32) Array(User) | Nil
+    db.query_all("SELECT * FROM users WHERE left is NULL AND lastActive < ?", (Time.utc - limit.days), as: User)
+  end
+
   # Queries the database for a user with a given *username*.
   #
   # Returns a `User` object or Nil if no user was found.
@@ -292,8 +296,18 @@ class Database
   end
 
   # Queries the database for all user ids, ordered by highest ranking users first then most active users.
-  def get_prioritized_users : Array(Int64)
-    db.query_all("SELECT id FROM users WHERE left IS NULL ORDER BY rank DESC, lastActive DESC", &.read(Int64))
+  def get_prioritized_users(user : User) : Array(Int64)
+    if user.debug_enabled
+      db.query_all("SELECT id FROM users WHERE left IS NULL ORDER BY rank DESC, lastActive DESC", &.read(Int64))
+    else
+      db.query_all("SELECT id 
+        FROM users 
+        WHERE left IS NULL AND id IS NOT ? 
+        ORDER BY rank DESC, lastActive DESC", 
+        args: [user.id]
+        &.read(Int64)
+      )
+    end
   end
 
   # Inserts a user with the given *id*, *username*, and *realname* into the database.
@@ -462,10 +476,11 @@ class DatabaseHistory
   # Get sender_id of a specific message group
   def get_sender_id(msid : Int64) : Int64 | Nil
     db.query_one?(
-      "SELECT senderID
+      "SELECT DISTINCT senderID
       FROM message_groups
-      JOIN receivers ON receivers.receiverMSID = ? AND receivers.messageGroupID = message_groups.messageGroupID",
-      msid,
+      JOIN receivers ON receivers.messageGroupID = message_groups.messageGroupID
+      WHERE receivers.receiverMSID = ? OR message_groups.messageGroupID = ?",
+      msid, msid,
       as: Int64
     )
   end

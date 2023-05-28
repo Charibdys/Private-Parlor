@@ -30,6 +30,18 @@ module Configuration
     @[YAML::Field(key: "allow_media_spoilers")]
     getter allow_media_spoilers : Bool? = false
 
+    @[YAML::Field(key: "regular_forwards")]
+    getter regular_forwards : Bool? = false
+
+    @[YAML::Field(key: "inactivity_limit")]
+    getter inactivity_limit : Int32 = 0
+
+    @[YAML::Field(key: "linked_network")]
+    getter intermediary_linked_network : Hash(String, String) | String | Nil
+
+    @[YAML::Field(ignore: true)]
+    getter linked_network : Hash(String, String) = {} of String => String
+
     @[YAML::Field(key: "ranks")]
     getter intermediary_ranks : Array(IntermediaryRank)
 
@@ -109,6 +121,9 @@ module Configuration
 
     @[YAML::Field(key: "enable_blacklist")]
     getter enable_blacklist : Array(Bool) = [true, false]
+
+    @[YAML::Field(key: "enable_spoiler")]
+    getter enable_spoiler : Array(Bool) = [false, false]
 
     # Relay Toggles
 
@@ -362,6 +377,7 @@ module Configuration
     end
 
     config = check_and_init_ranks(config)
+    config = check_and_init_linked_network(config)
   end
 
   # Checks every intermediate rank for invalid or otherwise undefined permissions
@@ -370,14 +386,13 @@ module Configuration
   # Returns an updated `Config` object
   def check_and_init_ranks(config : Config) : Config
     command_keys = Set{
-      :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote, :sign, :tsign, :ranksay,
-      :ranksay_lower, :warn, :delete, :uncooldown, :remove, :purge, :blacklist, :motd_set, :ranked_info
+      :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote, :sign, :tsign, :spoiler,
+      :ranksay, :ranksay_lower, :warn, :delete, :uncooldown, :remove, :purge, :blacklist, :motd_set, :ranked_info
     }
 
     promote_keys = Set{:promote, :promote_lower, :promote_same}
 
     ranksay_keys = Set{:ranksay, :ranksay_lower}
-
 
     config.intermediary_ranks.each do |ri|
       if (invalid = ri.permissions.to_set - command_keys.map(&.to_s)) && !invalid.empty?
@@ -402,6 +417,35 @@ module Configuration
         ri.name,
         command_keys.compact_map {|key| key if ri.permissions.includes?(key.to_s)}.to_set
       )
+    end
+
+    config
+  end
+
+  # Checks the config for a hash of linked networks and initializes `linked_network` field.
+  #
+  # If `intermediary_linked_network` is a hash, merge it into `linked_network`
+  #
+  # Otherwise if it is a string, try to open the file from the path and merge 
+  # the YAML dictionary there into  `linked_network`
+  def check_and_init_linked_network(config : Config) : Config
+    if (links = config.intermediary_linked_network) && links.is_a?(String)
+      begin
+        hash = {} of String => String
+        File.open(links) do |file|
+          yaml = YAML.parse(file)
+          yaml["linked_network"].as_h.each do |k, v|
+            hash[k.as_s] = v.as_s
+          end
+          config.linked_network.merge!(hash)
+        end
+      rescue ex : YAML::ParseException
+        Log.error(exception: ex) { "Could not parse the given value at row #{ex.line_number}. Check that \"linked_network\" is a valid dictionary." }
+      rescue ex : File::NotFoundError | File::AccessDeniedError
+        Log.notice(exception: ex) { "Could not open linked network file, \"#{links}\"" }
+      end
+    elsif links.is_a?(Hash(String, String))
+      config.linked_network.merge!(links)
     end
 
     config
