@@ -65,7 +65,7 @@ module Format
   # Globally substitutes placeholders in log message with the given variables
   def substitute_log(log : String, locale : Locale, variables : LocaleParameters = {"" => ""}) : String
     if log.scan(/{\w*}/).size != 0
-      log.gsub(/\{\w*}/) do |match|
+      log.gsub(/{\w*}/) do |match|
         placeholder = match.strip("{}")
         case placeholder
         when "rank"
