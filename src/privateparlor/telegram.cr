@@ -1,4 +1,8 @@
 require "./queue/*"
+require "./history/*"
+require "./locale/*"
+require "./rank/*"
+require "./config/*"
 
 alias MessageProc = Proc(Int64, Int64 | Nil, Tourmaline::Message) | Proc(Int64, Int64 | Nil, Array(Tourmaline::Message))
 
@@ -42,8 +46,8 @@ class PrivateParlor < Tourmaline::Client
   # ## Arguments:
   #
   # `config`
-  # :     a `Configuration::Config` from parsing the `config.yaml` file
-  def initialize(config : Configuration::Config)
+  # :     a `Config` from parsing the `config.yaml` file
+  def initialize(config : Config)
     super(bot_token: config.token, set_commands: true)
     Client.default_parse_mode = (Tourmaline::ParseMode::HTML)
 
@@ -77,7 +81,7 @@ class PrivateParlor < Tourmaline::Client
     @history = get_history_type(db, config)
     @queue = MessageQueue.new
     @locale = Localization.parse_locale(config.locale)
-    @spam_handler = SpamScoreHandler.new(config) if config.spam_interval_seconds != 0
+    @spam_handler = config.spam_score_handler if config.spam_interval_seconds != 0
     @tasks = register_tasks(config.spam_interval_seconds)
     @albums = {} of String => Album
 
@@ -85,243 +89,12 @@ class PrivateParlor < Tourmaline::Client
     initialize_handlers(@locale.command_descriptions, config)
   end
 
-  class Album
-    property message_ids : Array(Int64)
-    property media_ids : Array(InputMediaPhoto | InputMediaVideo | InputMediaAudio | InputMediaDocument)
-
-    # Creates and instance of `Album`, representing a prepared media group to queue and relay
-    #
-    # ## Arguments:
-    #
-    # `msid`
-    # :     the message ID of the first media file in the album
-    #
-    # `media`
-    # :     the media type corresponding with the given MSID
-    def initialize(msid : Int64, media : InputMediaPhoto | InputMediaVideo | InputMediaAudio | InputMediaDocument)
-      @message_ids = [msid]
-      @media_ids = [media]
-    end
-  end
-
-  class SpamScoreHandler
-    getter scores : Hash(Int64, Float32)
-    getter sign_last_used : Hash(Int64, Time)
-    getter upvote_last_used : Hash(Int64, Time)
-    getter downvote_last_used : Hash(Int64, Time)
-
-    getter spam_limit : Float32
-    getter spam_limit_hit : Float32
-
-    getter score_base_message : Float32
-    getter score_text_character : Float32
-    getter score_text_linebreak : Float32
-    getter score_animation : Float32
-    getter score_audio : Float32
-    getter score_document : Float32
-    getter score_video : Float32
-    getter score_video_note : Float32
-    getter score_voice : Float32
-    getter score_photo : Float32
-    getter score_media_group : Float32
-    getter score_poll : Float32
-    getter score_forwarded_message : Float32
-    getter score_sticker : Float32
-    getter score_dice : Float32
-    getter score_dart : Float32
-    getter score_basketball : Float32
-    getter score_soccerball : Float32
-    getter score_slot_machine : Float32
-    getter score_bowling : Float32
-    getter score_venue : Float32
-    getter score_location : Float32
-    getter score_contact : Float32
-
-    # Creates a new instance of a `SpamScoreHandler`.
-    #
-    # ## Arguments:
-    #
-    # `config`
-    # :     a `Configuration::Config` passed from initializing a `PrivateParlor`
-    def initialize(config : Configuration::Config)
-      @scores = {} of Int64 => Float32
-      @sign_last_used = {} of Int64 => Time
-      @upvote_last_used = {} of Int64 => Time
-      @downvote_last_used = {} of Int64 => Time
-
-      # Init spam score constants
-      @spam_limit = config.spam_limit
-      @spam_limit_hit = config.spam_limit_hit
-
-      @score_base_message = config.score_base_message
-      @score_text_character = config.score_text_character
-      @score_text_linebreak = config.score_text_linebreak
-      @score_animation = config.score_animation
-      @score_audio = config.score_audio
-      @score_document = config.score_document
-      @score_video = config.score_video
-      @score_video_note = config.score_video_note
-      @score_voice = config.score_voice
-      @score_photo = config.score_photo
-      @score_media_group = config.score_media_group
-      @score_poll = config.score_poll
-      @score_forwarded_message = config.score_forwarded_message
-      @score_sticker = config.score_sticker
-      @score_dice = config.score_dice
-      @score_dart = config.score_dart
-      @score_basketball = config.score_basketball
-      @score_soccerball = config.score_soccerball
-      @score_slot_machine = config.score_slot_machine
-      @score_bowling = config.score_bowling
-      @score_venue = config.score_venue
-      @score_location = config.score_location
-      @score_contact = config.score_contact
-    end
-
-    # Check if user's spam score triggers the spam filter
-    #
-    # Returns true if score is greater than spam limit, false otherwise.
-    def spammy?(user : Int64, increment : Float32) : Bool
-      score = 0 unless score = @scores[user]?
-
-      if score > spam_limit
-        return true
-      elsif score + increment > spam_limit
-        @scores[user] = spam_limit_hit
-        return score + increment >= spam_limit_hit
-      end
-
-      @scores[user] = score + increment
-
-      false
-    end
-
-    # Check if user has signed within an interval of time
-    #
-    # Returns true if so (user is sign spamming), false otherwise.
-    def spammy_sign?(user : Int64, interval : Int32) : Bool
-      unless interval == 0
-        if last_used = @sign_last_used[user]?
-          if (Time.utc - last_used) < interval.seconds
-            return true
-          else
-            @sign_last_used[user] = Time.utc
-          end
-        else
-          @sign_last_used[user] = Time.utc
-        end
-      end
-
-      false
-    end
-
-    # Check if user has upvoted within an interval of time
-    #
-    # Returns true if so (user is upvoting too often), false otherwise.
-    def spammy_upvote?(user : Int64, interval : Int32) : Bool
-      unless interval == 0
-        if last_used = @upvote_last_used[user]?
-          if (Time.utc - last_used) < interval.seconds
-            return true
-          else
-            @upvote_last_used[user] = Time.utc
-          end
-        else
-          @upvote_last_used[user] = Time.utc
-        end
-      end
-
-      false
-    end
-
-    # Check if user has downvoted within an interval of time
-    #
-    # Returns true if so (user is downvoting too often), false otherwise.
-    def spammy_downvote?(user : Int64, interval : Int32) : Bool
-      unless interval == 0
-        if last_used = @downvote_last_used[user]?
-          if (Time.utc - last_used) < interval.seconds
-            return true
-          else
-            @downvote_last_used[user] = Time.utc
-          end
-        else
-          @downvote_last_used[user] = Time.utc
-        end
-      end
-
-      false
-    end
-
-    # Returns the associated spam score contant from a given type
-    def calculate_spam_score(type : Symbol) : Float32
-      case type
-      when :animation
-        score_animation
-      when :audio
-        score_audio
-      when :document
-        score_document
-      when :video
-        score_video
-      when :video_note
-        score_video_note
-      when :voice
-        score_voice
-      when :photo
-        score_photo
-      when :album
-        score_media_group
-      when :poll
-        score_poll
-      when :forward
-        score_forwarded_message
-      when :sticker
-        score_sticker
-      when :dice
-        score_dice
-      when :dart
-        score_dart
-      when :basketball
-        score_basketball
-      when :soccerball
-        score_soccerball
-      when :slot_machine
-        score_slot_machine
-      when :bowling
-        score_bowling
-      when :venue
-        score_venue
-      when :location
-        score_location
-      when :contact
-        score_contact
-      else
-        score_base_message
-      end
-    end
-
-    def calculate_spam_score_text(text : String) : Float32
-      score_base_message + (text.size * score_text_character) + (text.count('\n') * score_text_linebreak)
-    end
-
-    def expire
-      @scores.each do |user, score|
-        if (score - 1) <= 0
-          @scores.delete(user)
-        else
-          @scores[user] = score - 1
-        end
-      end
-    end
-  end
-
   # Determine appropriate `History` type based on given config variables
-  def get_history_type(db : DB::Database, config : Configuration::Config) : History | DatabaseHistory
+  def get_history_type(db : DB::Database, config : Config) : History | DatabaseHistory
     if config.database_history
       DatabaseHistory.new(db, config.lifetime.hours)
     elsif (config.enable_downvote || config.enable_upvote) && config.enable_warn
-      HistoryRatingsAndWarnings.new(config.lifetime.hours)
+      HistoryFull.new(config.lifetime.hours)
     elsif config.enable_downvote || config.enable_upvote
       HistoryRatings.new(config.lifetime.hours)
     elsif config.enable_warn
@@ -344,7 +117,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Initializes CommandHandlers and UpdateHandlers
   # Also checks whether or not a command or media type is enabled via the config, and registers commands with BotFather
-  def initialize_handlers(descriptions : CommandDescriptions, config : Configuration::Config) : Nil
+  def initialize_handlers(descriptions : CommandDescriptions, config : Config) : Nil
     {% for command in [
                         "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help",
                         "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "spoiler", "blacklist",
@@ -624,7 +397,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `upvote`, allows the user to upvote a message
   def upvote_command(ctx : CommandHandler::Context) : Nil
-    unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryRatingsAndWarnings | HistoryRatings | DatabaseHistory)
+    unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryFull | HistoryRatings | DatabaseHistory)
       return
     end
     unless (message = ctx.message) && (info = message.from)
@@ -673,7 +446,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `downvote`, allows the user to downvote a message
   def downvote_command(ctx : CommandHandler::Context) : Nil
-    unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryRatingsAndWarnings | HistoryRatings | DatabaseHistory)
+    unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryFull | HistoryRatings | DatabaseHistory)
       return
     end
     unless (message = ctx.message) && (info = message.from)
@@ -948,7 +721,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `warn`, allows the user to warn a message
   def warn_command(ctx : CommandHandler::Context) : Nil
-    unless (history_with_warnings = @history) && history_with_warnings.is_a?(HistoryRatingsAndWarnings | HistoryWarnings | DatabaseHistory)
+    unless (history_with_warnings = @history) && history_with_warnings.is_a?(HistoryFull| HistoryWarnings | DatabaseHistory)
       return
     end
     unless (message = ctx.message) && (info = message.from)

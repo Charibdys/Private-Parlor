@@ -91,15 +91,4 @@ class AuthorizedRanks
       v.name if k < limit
     end
   end
-
-end
-
-class Rank
-  include YAML::Serializable
-
-  getter name : String
-  getter permissions : Set(Symbol)
-
-  def initialize(@name, @permissions)
-  end
 end
