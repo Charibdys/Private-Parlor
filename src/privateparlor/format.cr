@@ -18,32 +18,32 @@ module Format
         placeholder = match.strip("{}")
         case placeholder
         when "toggle"
-          replace = variables[placeholder] ? locale.toggle[1] : locale.toggle[0]
+          replace = variables[placeholder]? ? locale.toggle[1] : locale.toggle[0]
         when "rank"
           replace = variables[placeholder]?.to_s
         when "cooldown_until"
-          if variables[placeholder]
+          if variables[placeholder]?
             replace = "#{locale.replies.cooldown_true} #{variables[placeholder]}"
           else
             replace = locale.replies.cooldown_false
           end
         when "warn_expiry"
-          if variables[placeholder]
+          if variables[placeholder]?
             # Skip replace.to_md to prevent escaping Markdown twice
             next replace = locale.replies.info_warning.gsub("{warn_expiry}") { "#{escape_html(variables[placeholder])}" }
           end
         when "reason"
-          if variables[placeholder]
+          if variables[placeholder]?
             replace = "#{locale.replies.reason_prefix}#{variables[placeholder]}"
           end
         when "tripcode"
-          if variables[placeholder]
+          if variables[placeholder]?
             replace = variables[placeholder].to_s
           else
             replace = locale.replies.tripcode_unset
           end
         when "contact"
-          if variables[placeholder]
+          if variables[placeholder]?
             replace = locale.replies.blacklist_contact.gsub("{contact}") { "#{escape_html(variables[placeholder])}" }
           else
             replace = ""
