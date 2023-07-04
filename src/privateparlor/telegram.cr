@@ -1169,7 +1169,7 @@ class PrivateParlor < Tourmaline::Client
       return handle_sign(text, user, msid)
     when text.starts_with?("/t "), text.starts_with?("/tsign ")
       return handle_tripcode(text, user, msid)
-    when match = /^\/(\w*)say/.match(text).try &.[1]
+    when match = /^\/(\w*)say\s/.match(text).try &.[1]
       return handle_ranksay(match, text, user, msid)
     end
   end
@@ -1215,11 +1215,11 @@ class PrivateParlor < Tourmaline::Client
     unless @access.authorized?(user.rank, :tsign)
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
-    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
-      return relay_to_one(msid, user.id, @locale.replies.sign_spam)
-    end
     unless tripkey = user.tripcode
       return relay_to_one(msid, user.id, @locale.replies.no_tripcode_set)
+    end
+    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
+      return relay_to_one(msid, user.id, @locale.replies.sign_spam)
     end
 
     if (args = Format.get_arg(text)) && args.size > 0

@@ -219,7 +219,7 @@ module Format
 
   # Returns a link to the given user's account.
   def format_user_sign_html(id : Int64, name : String) : String
-    "<a href=\"tg://user?id=#{id}\">~~#{escape_html(name)}</a>"
+    "<a href=\"tg://user?id=#{id}\"> ~~#{escape_html(name)}</a>"
   end
 
   # def format_user_forward(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String
@@ -286,7 +286,7 @@ module Format
 
   # Returns a bolded signature showing which type of user sent this message.
   def format_user_say_html(signature : String) : String
-    "<b>~~#{escape_html(signature)}</b>"
+    "<b> ~~#{escape_html(signature)}</b>"
   end
 
   def format_tripcode_sign_html(name : String, tripcode : String) : String
