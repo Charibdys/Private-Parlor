@@ -263,7 +263,7 @@ class PrivateParlor < Tourmaline::Client
       end
 
       if motd = @database.get_motd
-        relay_to_one(nil, user.id, Format.custom(motd))
+        relay_to_one(nil, user.id, motd)
       end
 
       relay_to_one(message.message_id, user.id, @locale.replies.joined)
@@ -1087,11 +1087,21 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_use_command?
       return deny_user(user)
     end
+    unless text = message.text
+      return
+    end
 
-    if arg = Format.get_arg(ctx.message.text)
+    if text.split(2)[1]?
       unless @access.authorized?(user.rank, :motd_set)
         return relay_to_one(message.message_id, user.id, @locale.replies.fail)
       end
+
+      arg = Format.format_motd(text, message.entities, @linked_network)
+
+      if arg.empty?
+        return relay_to_one(message.message_id, user.id, @locale.replies.fail)
+      end
+
       user.set_active(info.username, info.full_name)
       @database.modify_user(user)
 
@@ -1104,7 +1114,7 @@ class PrivateParlor < Tourmaline::Client
       user.set_active(info.username, info.full_name)
       @database.modify_user(user)
 
-      relay_to_one(message.message_id, user.id, Format.custom(motd))
+      relay_to_one(message.message_id, user.id, motd)
     end
   end
 

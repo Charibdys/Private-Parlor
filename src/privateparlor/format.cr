@@ -329,16 +329,36 @@ module Format
     end
   end
 
+  # Parses new MOTD for HTML formatting and returns the MOTD in 
+  # HTML without the command and whitespace that follows it
+  #
+  # Returns an empty string if no whitespace or command argument could be found.
+  def format_motd(text : String, entities : Array(Tourmaline::MessageEntity), linked_network : Hash(String, String)) : String
+    parser = Tourmaline::HTMLParser.new
+
+    text, parsed_ents = parser.parse(text)
+    entities = entities | parsed_ents
+
+    whitespace_start = text.index(/\s+/)
+    whitespace_end = text.index(/\s\w/)
+
+    text = Format.get_arg(text)
+
+    unless whitespace_start && whitespace_end && text
+      return ""
+    end
+
+    offset = 1 + entities[0].length + whitespace_end - whitespace_start
+
+    text = parser.unparse(text, entities, offset)
+    replace_network_links(text, linked_network)
+  end
+
   # Returns a message containing the program version and a link to its Git repo.
   #
   # Feel free to edit this if you fork the code.
   def version_html : String
     "Private Parlor v#{VERSION} ~ <a href=\"https://github.com/Charibdys/Private-Parlor\">[Source]</a>"
-  end
-
-  # Returns a custom text from a given string.
-  def custom(text : String) : String
-    escape_html(text)
   end
 
   # Returns a message containing the commands the user can use.
