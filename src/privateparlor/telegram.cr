@@ -11,7 +11,6 @@ class PrivateParlor < Tourmaline::Client
   getter history : History | DatabaseHistory
   getter access : AuthorizedRanks
   getter queue : MessageQueue
-
   getter locale : Locale
 
   getter tasks : Hash(Symbol, Tasker::Task)

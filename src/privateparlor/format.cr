@@ -154,11 +154,15 @@ module Format
   # Strips HTML format from a message and escapes formatting found in `MessageEntities`.
   # If the message has `MessageEntities`, replaces any inline links and removes entities found in `entity_types`.
   def strip_format(text : String, entities : Array(Tourmaline::MessageEntity), entity_types : Array(String), linked_network : Hash(String, String)) : String
-    if !entities.empty?
-      text = replace_links(text, entities)
-      entities = remove_entities(entities, entity_types)
-    end
-    unparse_text(text, entities, Tourmaline::ParseMode::HTML, escape: true)
+    parser = Tourmaline::HTMLParser.new
+
+    text, parsed_ents = parser.parse(text)
+    entities = entities | parsed_ents
+
+    text = replace_links(text, entities)
+    entities = remove_entities(entities, entity_types)
+
+    text = parser.unparse(text, entities)
     replace_network_links(text, linked_network)
   end
 

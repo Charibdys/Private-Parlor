@@ -136,7 +136,7 @@ replies:
    # Available placeholders: joined, left, blacklisted, total
    user_count_full: "<b>{joined}</b> <i>joined,</i> <b>{left}</b> <i>left,</i> <b>{blacklisted}</b> <i>blacklisted users</i> (<i>total</i>: <b>{total}</b>)"
 
-   # Available placeholders: eason, duration
+   # Available placeholders: reason, duration
    message_deleted: "<i>This message has been deleted{reason}. You have been given a cooldown of {duration}.</i>"
 
    # Available placeholders: reason
