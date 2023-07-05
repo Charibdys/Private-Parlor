@@ -316,10 +316,10 @@ class PrivateParlor < Tourmaline::Client
       @database.modify_user(user)
 
       relay_to_one(message.message_id, user.id, @locale.replies.ranked_info, {
-          "oid"            => reply_user.get_obfuscated_id,
-          "karma"          => reply_user.get_obfuscated_karma,
-          "cooldown_until" => reply_user.remove_cooldown ? nil : Format.format_time(reply_user.cooldown_until, @locale.time_format),
-        })
+        "oid"            => reply_user.get_obfuscated_id,
+        "karma"          => reply_user.get_obfuscated_karma,
+        "cooldown_until" => reply_user.remove_cooldown ? nil : Format.format_time(reply_user.cooldown_until, @locale.time_format),
+      })
     else
       user.set_active(info.username, info.full_name)
       @database.modify_user(user)
@@ -587,7 +587,7 @@ class PrivateParlor < Tourmaline::Client
 
     if reply = message.reply_message
       arg = Format.get_arg(ctx.message.text)
-      
+
       if arg.nil? && authority.in?(:promote, :promote_same)
         tuple = {user.rank, @access.ranks[user.rank]}
       elsif arg
@@ -599,7 +599,7 @@ class PrivateParlor < Tourmaline::Client
       unless tuple
         return relay_to_one(message.message_id, user.id, @locale.replies.no_rank_found, {"ranks" => @access.rank_names(limit: user.rank)})
       end
-      
+
       unless (promoted_user = database.get_user(@history.get_sender_id(reply.message_id))) && !promoted_user.left?
         return relay_to_one(message.message_id, user.id, @locale.replies.no_user_found)
       end
@@ -607,7 +607,7 @@ class PrivateParlor < Tourmaline::Client
       unless args = Format.get_args(message.text, count: 2)
         return relay_to_one(message.message_id, user.id, @locale.replies.missing_args)
       end
-      
+
       if args.size == 1 && authority.in?(:promote, :promote_same)
         tuple = {user.rank, @access.ranks[user.rank]}
       elsif args.size == 2
@@ -647,7 +647,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Demotes a user to a given rank.
-  # 
+  #
   # Checks for the following permissions: `demote`
   #
   # If used with a reply, the reply user is demoted to either the user rank or a given rank.
@@ -720,7 +720,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `warn`, allows the user to warn a message
   def warn_command(ctx : CommandHandler::Context) : Nil
-    unless (history_with_warnings = @history) && history_with_warnings.is_a?(HistoryFull| HistoryWarnings | DatabaseHistory)
+    unless (history_with_warnings = @history) && history_with_warnings.is_a?(HistoryFull | HistoryWarnings | DatabaseHistory)
       return
     end
     unless (message = ctx.message) && (info = message.from)
@@ -750,8 +750,13 @@ class PrivateParlor < Tourmaline::Client
 
     reason = Format.get_arg(ctx.message.text)
 
-    duration = Format.format_timespan(reply_user.cooldown_and_warn(
-      cooldown_time_begin, cooldown_time_linear_m, cooldown_time_linear_b, warn_expire_hours, karma_warn_penalty,
+    duration = Format.format_timespan(
+      reply_user.cooldown_and_warn(
+        cooldown_time_begin,
+        cooldown_time_linear_m,
+        cooldown_time_linear_b,
+        warn_expire_hours,
+        karma_warn_penalty,
       ),
       @locale.time_units
     )
@@ -803,8 +808,13 @@ class PrivateParlor < Tourmaline::Client
     reason = Format.get_arg(message.text)
     cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
-    duration = Format.format_timespan(reply_user.cooldown_and_warn(
-      cooldown_time_begin, cooldown_time_linear_m, cooldown_time_linear_b, warn_expire_hours, karma_warn_penalty
+    duration = Format.format_timespan(
+      reply_user.cooldown_and_warn(
+        cooldown_time_begin,
+        cooldown_time_linear_m,
+        cooldown_time_linear_b,
+        warn_expire_hours,
+        karma_warn_penalty
       ),
       @locale.time_units
     )
@@ -1027,7 +1037,7 @@ class PrivateParlor < Tourmaline::Client
     unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
     end
-    if (reply_info = reply.from) && user.id == reply_info.id 
+    if (reply_info = reply.from) && user.id == reply_info.id
       # Prevent spoiling messages that were not sent by the bot
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
@@ -1048,9 +1058,9 @@ class PrivateParlor < Tourmaline::Client
     if reply.has_media_spoiler?
       if spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
         Log.info { Format.substitute_log(@locale.logs.unspoiled, @locale, {
-          "id"    => user.id.to_s,
-          "name"  => user.get_formatted_name,
-          "msid"  => reply.message_id.to_s,
+          "id"   => user.id.to_s,
+          "name" => user.get_formatted_name,
+          "msid" => reply.message_id.to_s,
         }) }
       else
         return relay_to_one(message.message_id, user.id, @locale.replies.fail)
@@ -1060,9 +1070,9 @@ class PrivateParlor < Tourmaline::Client
 
       if spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
         Log.info { Format.substitute_log(@locale.logs.spoiled, @locale, {
-          "id"    => user.id.to_s,
-          "name"  => user.get_formatted_name,
-          "msid"  => reply.message_id.to_s,
+          "id"   => user.id.to_s,
+          "name" => user.get_formatted_name,
+          "msid" => reply.message_id.to_s,
         }) }
       else
         return relay_to_one(message.message_id, user.id, @locale.replies.fail)
@@ -1265,14 +1275,13 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-
     Log.info { Format.substitute_log(@locale.logs.ranked_message, @locale, {
       "id"   => user.id.to_s,
       "name" => user.get_formatted_name,
       "rank" => parsed_rank[1].name,
       "text" => args,
     }) }
-    
+
     String.build do |str|
       str << args
       str << Format.format_user_say(parsed_rank[1].name)
@@ -1552,7 +1561,7 @@ class PrivateParlor < Tourmaline::Client
         header = Format.format_private_channel_forward(from.name, from.id, message.forward_from_message_id, Client.default_parse_mode)
       end
     elsif from = message.forward_sender_name
-      header = Format.format_private_user_forward(from, Client.default_parse_mode,)
+      header = Format.format_private_user_forward(from, Client.default_parse_mode)
     end
 
     unless header
@@ -1563,7 +1572,7 @@ class PrivateParlor < Tourmaline::Client
         ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
       )
     end
-    
+
     if text = message.text
       text = Format.unparse_text(text, message.entities, Client.default_parse_mode, escape: true)
     elsif text = message.caption
@@ -1590,7 +1599,7 @@ class PrivateParlor < Tourmaline::Client
       else
         return
       end
-  
+
       if @albums[album]?
         input.caption = message.caption
         input.caption_entities = message.caption_entities
@@ -1601,19 +1610,19 @@ class PrivateParlor < Tourmaline::Client
         input.caption = text
         media_group = Album.new(message.message_id, input)
         @albums[album] = media_group
-  
+
         # Wait an arbitrary amount of time for Telegram MediaGroup updates to come in before relaying the album.
         Tasker.at(500.milliseconds.from_now) {
           unless temp_album = @albums.delete(album)
             next
           end
-  
+
           cached_msids = Array(Int64).new
-  
+
           temp_album.message_ids.each do |msid|
             cached_msids << @history.new_message(info.id, msid)
           end
-  
+
           relay(
             message.reply_message,
             user,
@@ -1868,14 +1877,13 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Kicks any users that have been inactive for a duration of time.
-  def kick_inactive_users() : Nil
+  def kick_inactive_users : Nil
     @database.get_inactive_users(@inactivity_limit).each do |user|
       user.set_left
       @database.modify_user(user)
       @queue.reject_messsages do |msg|
         msg.receiver == user.id
       end
-
     end
   end
 
@@ -1958,8 +1966,8 @@ class PrivateParlor < Tourmaline::Client
   # Receives a `Message` from the `queue`, calls its proc, and adds the returned message id to the History
   #
   # This function should be invoked in a Fiber.
-  def send_messages() : Bool?
-    msg = @queue.get_message()
+  def send_messages : Bool?
+    msg = @queue.get_message
 
     if msg.nil?
       return true

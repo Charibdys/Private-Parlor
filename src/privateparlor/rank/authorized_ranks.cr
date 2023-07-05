@@ -45,7 +45,7 @@ class AuthorizedRanks
     if value && @ranks[value]
       {value, @ranks[value]}
     else
-      @ranks.find do |k, v| 
+      @ranks.find do |k, v|
         v.name.downcase == name || k == value
       end
     end
@@ -56,14 +56,14 @@ class AuthorizedRanks
     if rank <= receiver || rank > invoker || rank == -10 || rank < 0
       return false
     end
-    
+
     if rank <= invoker && permission == :promote
       true
     elsif rank < invoker && permission == :promote_lower
       true
     elsif rank == invoker && permission == :promote_same
       true
-    else 
+    else
       false
     end
   end
@@ -74,20 +74,20 @@ class AuthorizedRanks
   end
 
   # Returns `true` if the user can sign a message with the given rank.
-  def can_ranksay?(rank : Int32, invoker : Int32, permission : Symbol) Bool
+  def can_ranksay?(rank : Int32, invoker : Int32, permission : Symbol) : Bool
     rank != -10 && (rank < invoker && permission == :ranksay_lower) || rank == invoker
   end
 
   # Returns an array of all the rank names in the ranks hash.
   def rank_names : Array(String)
-    @ranks.compact_map do |k, v| 
+    @ranks.compact_map do |k, v|
       v.name
     end
   end
 
   # Returns an array of all the rank names in the ranks hash, up to a rank value limit.
   def rank_names(limit : Int32) : Array(String)
-    @ranks.compact_map do |k, v| 
+    @ranks.compact_map do |k, v|
       v.name if k < limit
     end
   end

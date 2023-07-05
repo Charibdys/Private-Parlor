@@ -43,7 +43,7 @@ class Config
   @[YAML::Field(ignore: true)]
   getter ranks : Hash(Int32, Rank) = {
     -10 => Rank.new("Banned", Set.new([] of Symbol)),
-    0 => Rank.new("User", Set.new([:upvote, :downvote, :sign, :tsign]))
+      0 => Rank.new("User", Set.new([:upvote, :downvote, :sign, :tsign])),
   }
 
   # Command Toggles
@@ -204,7 +204,7 @@ class Config
 
   @[YAML::Field(key: "spam_interval_seconds")]
   getter spam_interval_seconds : Int32 = 10
-  
+
   @[YAML::Field(key: "spam_score_handler")]
   getter spam_score_handler : SpamScoreHandler
 

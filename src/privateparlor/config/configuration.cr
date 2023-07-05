@@ -53,7 +53,7 @@ module Configuration
   def check_and_init_ranks(config : Config) : Config
     command_keys = Set{
       :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote, :sign, :tsign, :spoiler,
-      :ranksay, :ranksay_lower, :warn, :delete, :uncooldown, :remove, :purge, :blacklist, :motd_set, :ranked_info
+      :ranksay, :ranksay_lower, :warn, :delete, :uncooldown, :remove, :purge, :blacklist, :motd_set, :ranked_info,
     }
 
     promote_keys = Set{:promote, :promote_lower, :promote_same}
@@ -62,26 +62,26 @@ module Configuration
 
     config.intermediary_ranks.each do |ri|
       if (invalid = ri.permissions.to_set - command_keys.map(&.to_s)) && !invalid.empty?
-        Log.notice { 
-          "Rank #{ri.name} (#{ri.value}) has the following invalid permissions: [#{invalid.join(", ")}]" 
+        Log.notice {
+          "Rank #{ri.name} (#{ri.value}) has the following invalid permissions: [#{invalid.join(", ")}]"
         }
       end
       if (invalid_promote = ri.permissions & promote_keys.map(&.to_s)) && invalid_promote.size > 1
-        Log.notice{
-          "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_promote.join(", ")}]" 
+        Log.notice {
+          "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_promote.join(", ")}]"
         }
         ri.permissions = ri.permissions - promote_keys.map(&.to_s)
       end
       if (invalid_ranksay = ri.permissions & ranksay_keys.map(&.to_s)) && invalid_ranksay.size > 1
-        Log.notice{
-          "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_ranksay.join(", ")}]" 
+        Log.notice {
+          "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_ranksay.join(", ")}]"
         }
         ri.permissions = ri.permissions - ranksay_keys.map(&.to_s)
       end
 
       config.ranks[ri.value] = Rank.new(
         ri.name,
-        command_keys.compact_map {|key| key if ri.permissions.includes?(key.to_s)}.to_set
+        command_keys.compact_map { |key| key if ri.permissions.includes?(key.to_s) }.to_set
       )
     end
 
@@ -92,7 +92,7 @@ module Configuration
   #
   # If `intermediary_linked_network` is a hash, merge it into `linked_network`
   #
-  # Otherwise if it is a string, try to open the file from the path and merge 
+  # Otherwise if it is a string, try to open the file from the path and merge
   # the YAML dictionary there into  `linked_network`
   def check_and_init_linked_network(config : Config) : Config
     if (links = config.intermediary_linked_network) && links.is_a?(String)

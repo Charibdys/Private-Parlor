@@ -260,10 +260,10 @@ class Database
   end
 
   def get_invalid_rank_users(values : Array(Int32)) : Array(User) | Nil
-    db.query_all("SELECT * FROM users WHERE rank NOT IN (#{values.join(", ") {"?"}})", args: values, as: User)
+    db.query_all("SELECT * FROM users WHERE rank NOT IN (#{values.join(", ") { "?" }})", args: values, as: User)
   end
 
-  def get_inactive_users(limit : Int32) Array(User) | Nil
+  def get_inactive_users(limit : Int32) : Array(User) | Nil
     db.query_all("SELECT * FROM users WHERE left is NULL AND lastActive < ?", (Time.utc - limit.days), as: User)
   end
 
@@ -300,11 +300,11 @@ class Database
     if user.debug_enabled
       db.query_all("SELECT id FROM users WHERE left IS NULL ORDER BY rank DESC, lastActive DESC", &.read(Int64))
     else
-      db.query_all("SELECT id 
-        FROM users 
-        WHERE left IS NULL AND id IS NOT ? 
-        ORDER BY rank DESC, lastActive DESC", 
-        args: [user.id]
+      db.query_all("SELECT id
+        FROM users
+        WHERE left IS NULL AND id IS NOT ?
+        ORDER BY rank DESC, lastActive DESC",
+        args: [user.id],
         &.read(Int64)
       )
     end

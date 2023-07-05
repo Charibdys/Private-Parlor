@@ -285,7 +285,7 @@ module Format
     end
   end
 
-  # Parses new MOTD for HTML formatting and returns the MOTD in 
+  # Parses new MOTD for HTML formatting and returns the MOTD in
   # HTML without the command and whitespace that follows it
   #
   # Returns an empty string if no whitespace or command argument could be found.

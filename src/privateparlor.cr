@@ -22,13 +22,13 @@ spawn(name: "private_parlor_loop") do
   loop do
     break unless bot.polling
 
-    bot.send_messages()
+    bot.send_messages
     sleep(0.5)
   end
 
   # Send last messages in queue
-  loop do 
-    break if bot.send_messages() == true
+  loop do
+    break if bot.send_messages == true
   end
 
   # Bot stopped polling from SIGINT/SIGTERM, shut down
