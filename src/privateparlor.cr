@@ -1,5 +1,4 @@
 require "tourmaline"
-require "tourmaline/src/tourmaline/extra/format.cr"
 require "tasker"
 require "sqlite3"
 require "./privateparlor/*"
@@ -8,7 +7,7 @@ VERSION = "0.8"
 
 bot = PrivateParlor.new(Configuration.parse_config)
 
-Log.info { bot.replies.substitute_log(:start, {"version" => VERSION}) }
+Log.info { Format.substitute_log(bot.locale.logs.start, bot.locale, {"version" => VERSION}) }
 
 Signal::INT.trap do
   bot.stop_polling
