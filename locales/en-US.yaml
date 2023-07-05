@@ -164,7 +164,10 @@ replies:
    # Available placeholders: msgs_deleted
    purge_complete: "<i>{msgs_deleted} messages were matched and deleted.</i>"
 
-   inactive: "<i>You have been kicked due to inactivity. Type /start to receive messages again!</i>"
+   # Available placeholders: time
+   inactive: |- 
+      <i>You have been kicked due to inactivity (AFK for {time} days).
+      Type /start to receive messages again!</i>"
 
    success: "✅" 
 
@@ -237,7 +240,7 @@ logs:
    rejoined: "User {id}, aka {name}, rejoined the chat."
 
    # Available placeholders: id, name
-   left: "User {id}, aka {name}, joined the chat."
+   left: "User {id}, aka {name}, left the chat."
 
    # Available placeholders: id, name, rank, invoker
    promoted: "User {id}, aka {name}, has been promoted to {rank} by {invoker}."

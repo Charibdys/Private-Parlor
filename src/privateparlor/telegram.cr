@@ -13,8 +13,8 @@ class PrivateParlor < Tourmaline::Client
   getter queue : MessageQueue
   getter locale : Locale
 
-  getter tasks : Hash(Symbol, Tasker::Task)
-  getter albums : Hash(String, Album)
+  getter tasks : Hash(Symbol, Tasker::Task) = {} of Symbol => Tasker::Task
+  getter albums : Hash(String, Album) = {} of String => Album
   getter spam_handler : SpamScoreHandler | Nil
 
   getter cooldown_time_begin : Array(Int32)
@@ -82,7 +82,6 @@ class PrivateParlor < Tourmaline::Client
     @locale = Localization.parse_locale(config.locale)
     @spam_handler = config.spam_score_handler if config.spam_interval_seconds != 0
     @tasks = register_tasks(config.spam_interval_seconds)
-    @albums = {} of String => Album
 
     revert_ranked_users()
     initialize_handlers(@locale.command_descriptions, config)
@@ -1884,6 +1883,8 @@ class PrivateParlor < Tourmaline::Client
       @queue.reject_messsages do |msg|
         msg.receiver == user.id
       end
+      Log.info { Format.substitute_log(@locale.logs.left, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}) }
+      relay_to_one(nil, user.id, @locale.replies.inactive, {"time" => @inactivity_limit})
     end
   end
 
