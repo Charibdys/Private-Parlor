@@ -16,6 +16,9 @@ class Config
   @[YAML::Field(key: "log_file")]
   getter log_file : String? = nil
 
+  @[YAML::Field(key: "log_channel")]
+  getter log_channel : String? = nil
+
   @[YAML::Field(key: "lifetime")]
   property lifetime : Int32 = 24
 

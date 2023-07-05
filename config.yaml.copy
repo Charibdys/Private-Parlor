@@ -10,6 +10,12 @@ locale: "en-US"
 #log_level: "info"
 #log_file: "./log.txt"
 
+# ID of a channel to output bot logs to 
+# Setting a value here will not prevent the program's logs from being written to STDOUT or a file
+# ID should be a negative 13 digit value
+# Bot must be an admin of the channel with the permission to post messages for this to work
+#log_channel: -100XXXXXXXXXX
+
 # Modify lifetime of a message, in hours (24 hours is the default)
 # Can be set greater than or equal to 1
 # NOTE: Increasing this value will increase RAM usage if database history is not enabled

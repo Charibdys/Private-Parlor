@@ -23,6 +23,7 @@ class PrivateParlor < Tourmaline::Client
   getter warn_expire_hours : Int32
   getter karma_warn_penalty : Int32
 
+  getter log_channel : String?
   getter allow_media_spoilers : Bool?
   getter regular_forwards : Bool?
   getter inactivity_limit : Int32
@@ -57,6 +58,7 @@ class PrivateParlor < Tourmaline::Client
     @warn_expire_hours = config.warn_expire_hours
     @karma_warn_penalty = config.karma_warn_penalty
 
+    @log_channel = config.log_channel
     @allow_media_spoilers = config.allow_media_spoilers
     @regular_forwards = config.regular_forwards
     @inactivity_limit = config.inactivity_limit
@@ -107,9 +109,9 @@ class PrivateParlor < Tourmaline::Client
   # If the rank is not valid, the user is reverted to the default user rank.
   def revert_ranked_users : Nil
     @database.get_invalid_rank_users(@access.ranks.keys).each do |user|
-      Log.notice { "User #{user.id}, aka #{user.get_formatted_name}, had an invalid rank (was #{user.rank}) and was reverted to user rank (0) " }
       user.set_rank(0)
       @database.modify_user(user)
+      log_output(@log_channel, "User #{user.id}, aka #{user.get_formatted_name}, had an invalid rank (was #{user.rank}) and was reverted to user rank (0)" )
     end
   end
 
@@ -244,7 +246,7 @@ class PrivateParlor < Tourmaline::Client
         user.set_active(info.username, info.full_name)
         @database.modify_user(user)
         relay_to_one(message.message_id, user.id, @locale.replies.rejoined)
-        Log.info { Format.substitute_log(@locale.logs.rejoined, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}) }
+        log_output(@log_channel, Format.substitute_log(@locale.logs.rejoined, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}))
       else
         user.set_active(info.username, info.full_name)
         @database.modify_user(user)
@@ -266,7 +268,7 @@ class PrivateParlor < Tourmaline::Client
       end
 
       relay_to_one(message.message_id, user.id, @locale.replies.joined)
-      Log.info { Format.substitute_log(@locale.logs.joined, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}) }
+      log_output(@log_channel, Format.substitute_log(@locale.logs.joined, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}))
     end
   end
 
@@ -283,7 +285,7 @@ class PrivateParlor < Tourmaline::Client
       user.set_left
       @database.modify_user(user)
       relay_to_one(message.message_id, user.id, @locale.replies.left)
-      Log.info { Format.substitute_log(@locale.logs.left, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}) }
+      log_output(@log_channel, Format.substitute_log(@locale.logs.left, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}))
     end
   end
 
@@ -636,12 +638,12 @@ class PrivateParlor < Tourmaline::Client
 
     relay_to_one(nil, promoted_user.id, @locale.replies.promoted, {"rank" => tuple[1].name})
 
-    Log.info { Format.substitute_log(@locale.logs.promoted, locale, {
+    log_output(@log_channel, Format.substitute_log(@locale.logs.promoted, locale, {
       "id"      => promoted_user.id.to_s,
       "name"    => promoted_user.get_formatted_name,
       "rank"    => tuple[1].name,
       "invoker" => user.get_formatted_name,
-    }) }
+    }))
     relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
@@ -704,12 +706,12 @@ class PrivateParlor < Tourmaline::Client
     demoted_user.set_rank(tuple[0])
     @database.modify_user(demoted_user)
 
-    Log.info { Format.substitute_log(@locale.logs.demoted, locale, {
+    log_output(@log_channel, Format.substitute_log(@locale.logs.demoted, locale, {
       "id"      => demoted_user.id.to_s,
       "name"    => demoted_user.get_formatted_name,
       "rank"    => tuple[1].name,
       "invoker" => user.get_formatted_name,
-    }) }
+    }))
     relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
@@ -766,13 +768,13 @@ class PrivateParlor < Tourmaline::Client
 
     relay_to_one(cached_msid, reply_user.id, @locale.replies.cooldown_given, {"reason" => reason, "duration" => duration})
 
-    Log.info { Format.substitute_log(@locale.logs.warned, locale, {
+    log_output(@log_channel, Format.substitute_log(@locale.logs.warned, locale, {
       "id"       => user.id.to_s,
       "name"     => user.get_formatted_name,
       "oid"      => reply_user.get_obfuscated_id,
       "duration" => duration,
       "reason"   => reason,
-    }) }
+    }))
     relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
@@ -820,14 +822,14 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(reply_user)
 
     relay_to_one(cached_msid, reply_user.id, @locale.replies.message_deleted, {"reason" => reason, "duration" => duration})
-    Log.info { Format.substitute_log(@locale.logs.message_deleted, @locale, {
+    log_output(@log_channel, Format.substitute_log(@locale.logs.message_deleted, @locale, {
       "id"       => user.id.to_s,
       "name"     => user.get_formatted_name,
       "msid"     => cached_msid.to_s,
       "oid"      => reply_user.get_obfuscated_id,
       "duration" => duration,
       "reason"   => reason,
-    }) }
+    }))
     relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
@@ -874,12 +876,12 @@ class PrivateParlor < Tourmaline::Client
     uncooldown_user.remove_warning(1, warn_expire_hours)
     @database.modify_user(uncooldown_user)
 
-    Log.info { Format.substitute_log(@locale.logs.removed_cooldown, @locale, {
+    log_output(@log_channel, Format.substitute_log(@locale.logs.removed_cooldown, @locale, {
       "id"             => user.id.to_s,
       "name"           => user.get_formatted_name,
       "oid"            => uncooldown_user.get_obfuscated_id,
       "cooldown_until" => cooldown_until,
-    }) }
+    }))
     relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
@@ -914,13 +916,13 @@ class PrivateParlor < Tourmaline::Client
     cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
     relay_to_one(cached_msid, reply_user.id, @locale.replies.message_removed, {"reason" => Format.get_arg(message.text)})
-    Log.info { Format.substitute_log(@locale.logs.message_removed, @locale, {
+    log_output(@log_channel, Format.substitute_log(@locale.logs.message_removed, @locale, {
       "id"     => user.id.to_s,
       "name"   => user.get_formatted_name,
       "msid"   => cached_msid.to_s,
       "oid"    => reply_user.get_obfuscated_id,
       "reason" => Format.get_arg(message.text),
-    }) }
+    }))
     relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
@@ -999,12 +1001,12 @@ class PrivateParlor < Tourmaline::Client
       cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
 
       relay_to_one(cached_msid, reply_user.id, @locale.replies.blacklisted, {"contact" => @blacklist_contact, "reason" => reason})
-      Log.info { Format.substitute_log(@locale.logs.blacklisted, @locale, {
+      log_output(@log_channel, Format.substitute_log(@locale.logs.blacklisted, @locale, {
         "id"      => reply_user.id.to_s,
         "name"    => reply_user.get_formatted_name,
         "invoker" => user.get_formatted_name,
         "reason"  => reason,
-      }) }
+      }))
       relay_to_one(message.message_id, user.id, @locale.replies.success)
     end
   end
@@ -1056,11 +1058,11 @@ class PrivateParlor < Tourmaline::Client
 
     if reply.has_media_spoiler?
       if spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
-        Log.info { Format.substitute_log(@locale.logs.unspoiled, @locale, {
+        log_output(@log_channel, Format.substitute_log(@locale.logs.unspoiled, @locale, {
           "id"   => user.id.to_s,
           "name" => user.get_formatted_name,
           "msid" => reply.message_id.to_s,
-        }) }
+        }))
       else
         return relay_to_one(message.message_id, user.id, @locale.replies.fail)
       end
@@ -1068,11 +1070,11 @@ class PrivateParlor < Tourmaline::Client
       input.has_spoiler = true
 
       if spoil_messages(reply.message_id, reply_user.id, reply_user.debug_enabled, input)
-        Log.info { Format.substitute_log(@locale.logs.spoiled, @locale, {
+        log_output(@log_channel, Format.substitute_log(@locale.logs.spoiled, @locale, {
           "id"   => user.id.to_s,
           "name" => user.get_formatted_name,
           "msid" => reply.message_id.to_s,
-        }) }
+        }))
       else
         return relay_to_one(message.message_id, user.id, @locale.replies.fail)
       end
@@ -1274,12 +1276,12 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-    Log.info { Format.substitute_log(@locale.logs.ranked_message, @locale, {
+    log_output(@log_channel, Format.substitute_log(@locale.logs.ranked_message, @locale, {
       "id"   => user.id.to_s,
       "name" => user.get_formatted_name,
       "rank" => parsed_rank[1].name,
       "text" => args,
-    }) }
+    }))
 
     String.build do |str|
       str << args
@@ -1883,7 +1885,7 @@ class PrivateParlor < Tourmaline::Client
       @queue.reject_messsages do |msg|
         msg.receiver == user.id
       end
-      Log.info { Format.substitute_log(@locale.logs.left, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}) }
+      log_output(@log_channel, Format.substitute_log(@locale.logs.left, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}))
       relay_to_one(nil, user.id, @locale.replies.inactive, {"time" => @inactivity_limit})
     end
   end
@@ -1964,6 +1966,16 @@ class PrivateParlor < Tourmaline::Client
     @queue.add_to_queue_priority(user, reply_message, proc)
   end
 
+  # Outputs given text to the log (either STDOUT or a file, defined in config) with INFO severity.
+  #
+  # Also outputs text to a given log channel, if available
+  def log_output(channel : String?, text : String) : Nil
+    Log.info { text }
+    if channel
+      send_message(channel, text)
+    end
+  end
+
   # Receives a `Message` from the `queue`, calls its proc, and adds the returned message id to the History
   #
   # This function should be invoked in a Fiber.
@@ -2005,7 +2017,7 @@ class PrivateParlor < Tourmaline::Client
     if user = database.get_user(user_id)
       user.set_left
       @database.modify_user(user)
-      Log.info { Format.substitute_log(@locale.logs.force_leave, @locale, {"id" => user_id.to_s}) }
+      log_output(@log_channel, Format.substitute_log(@locale.logs.force_leave, @locale, {"id" => user_id.to_s}))
     end
     @queue.reject_messsages do |msg|
       msg.receiver == user_id
