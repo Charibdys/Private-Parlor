@@ -218,78 +218,34 @@ module Format
   end
 
   # Returns a link to the given user's account.
-  def format_user_sign_html(id : Int64, name : String) : String
+  def format_user_sign(id : Int64, name : String) : String
     "<a href=\"tg://user?id=#{id}\"> ~~#{escape_html(name)}</a>"
   end
 
-  # def format_user_forward(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String
-  #   tokens = Group.new(Bold.new("Forwarded from "), Bold.new(UserMention.new(name, id)))
-  #   case parsemode
-  #   when Tourmaline::ParseMode::MarkdownV2 then tokens.escape_md(self, 2)
-  #   when Tourmaline::ParseMode::HTML then tokens.escape_html(self)
-  #   else ""
-  #   end
-  # end
-
-  # def format_private_user_forward(name : String, parsemode : Tourmaline::ParseMode) : String
-  #   tokens = Group.new(Bold.new("Forwarded from "), Bold.new(Italic.new(name)))
-  #   case parsemode
-  #   when Tourmaline::ParseMode::MarkdownV2 then tokens.escape_md(self, 2)
-  #   when Tourmaline::ParseMode::HTML then tokens.escape_html(self)
-  #   else ""
-  #   end
-  # end
-
-  # # For bots or public channels
-  # def format_username_forward(name : String, username : String?, parsemode : Tourmaline::ParseMode, msid : Int64? = nil) : String
-  #   tokens = Group.new(
-  #     Bold.new("Forwarded from "),
-  #     Bold.new(Link.new(name, "tg://resolve?domain=#{username}#{"&post=#{msid}" if msid}"))
-  #   )
-  #   case parsemode
-  #   when Tourmaline::ParseMode::MarkdownV2 then tokens.escape_md(self, 2)
-  #   when Tourmaline::ParseMode::HTML then tokens.escape_html(self)
-  #   else ""
-  #   end
-  # end
-
-  # # Removes the "-100" prefix for private channels
-  # def format_private_channel_forward(name : String, id : Int64, msid : Int64?, parsemode : Tourmaline::ParseMode) : String
-  #   tokens = Group.new(
-  #     Bold.new("Forwarded from "),
-  #     Bold.new(Link.new(name, "tg://privatepost?channel=#{id.to_s[4..]}#{"&post=#{msid}" if msid}"))
-  #   )
-  #   case parsemode
-  #   when Tourmaline::ParseMode::MarkdownV2 then tokens.escape_md(self, 2)
-  #   when Tourmaline::ParseMode::HTML then tokens.escape_html(self)
-  #   else ""
-  #   end
-  # end
-
-  def format_user_forward_html(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String
+  def format_user_forward(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String
     "<b>Forwarded from <a href=\"tg://user?id=#{id}\">#{escape_html(name)}</a></b>"
   end
 
-  def format_private_user_forward_html(name : String, parsemode : Tourmaline::ParseMode) : String
+  def format_private_user_forward(name : String, parsemode : Tourmaline::ParseMode) : String
     "<b>Forwarded from <i>#{escape_html(name)}</i></b>"
   end
 
   # For bots or public channels
-  def format_username_forward_html(name : String, username : String?, parsemode : Tourmaline::ParseMode, msid : Int64? = nil) : String
+  def format_username_forward(name : String, username : String?, parsemode : Tourmaline::ParseMode, msid : Int64? = nil) : String
     "<b>Forwarded from <a href=\"tg://resolve?domain=#{escape_html(username)}#{"&post=#{msid}" if msid}\">#{escape_html(name)}</a></b>"
   end
 
   # Removes the "-100" prefix for private channels
-  def format_private_channel_forward_html(name : String, id : Int64, msid : Int64?, parsemode : Tourmaline::ParseMode) : String
+  def format_private_channel_forward(name : String, id : Int64, msid : Int64?, parsemode : Tourmaline::ParseMode) : String
     "<b>Forwarded from <a href=\"tg://privatepost?channel=#{id.to_s[4..]}#{"&post=#{msid}" if msid}\">#{escape_html(name)}</a></b>"
   end
 
   # Returns a bolded signature showing which type of user sent this message.
-  def format_user_say_html(signature : String) : String
+  def format_user_say(signature : String) : String
     "<b> ~~#{escape_html(signature)}</b>"
   end
 
-  def format_tripcode_sign_html(name : String, tripcode : String) : String
+  def format_tripcode_sign(name : String, tripcode : String) : String
     "<b>#{escape_html(name)}</b><code>#{escape_html(tripcode)}</code>"
   end
 
@@ -357,7 +313,7 @@ module Format
   # Returns a message containing the program version and a link to its Git repo.
   #
   # Feel free to edit this if you fork the code.
-  def version_html : String
+  def format_version : String
     "Private Parlor v#{VERSION} ~ <a href=\"https://github.com/Charibdys/Private-Parlor\">[Source]</a>"
   end
 

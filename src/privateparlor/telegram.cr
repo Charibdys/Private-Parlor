@@ -387,7 +387,7 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    relay_to_one(message.message_id, user.id, Format.version_html)
+    relay_to_one(message.message_id, user.id, Format.format_version)
   end
 
   # Upvotes a message.
@@ -1197,7 +1197,7 @@ class PrivateParlor < Tourmaline::Client
     if (args = Format.get_arg(text)) && args.size > 0
       String.build do |str|
         str << args
-        str << Format.format_user_sign_html(user.id, user.get_formatted_name)
+        str << Format.format_user_sign(user.id, user.get_formatted_name)
       end
     end
   end
@@ -1225,7 +1225,7 @@ class PrivateParlor < Tourmaline::Client
     if (args = Format.get_arg(text)) && args.size > 0
       pair = Format.generate_tripcode(tripkey, @tripcode_salt)
       String.build do |str|
-        str << Format.format_tripcode_sign_html(pair[:name], pair[:tripcode]) << ":"
+        str << Format.format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
         str << "\n"
         str << args
       end
@@ -1275,7 +1275,7 @@ class PrivateParlor < Tourmaline::Client
     
     String.build do |str|
       str << args
-      str << Format.format_user_say_html(parsed_rank[1].name)
+      str << Format.format_user_say(parsed_rank[1].name)
     end
   end
 
@@ -1541,18 +1541,18 @@ class PrivateParlor < Tourmaline::Client
 
     if from = message.forward_from
       if from.bot?
-        header = Format.format_username_forward_html(from.full_name, from.username, Client.default_parse_mode)
+        header = Format.format_username_forward(from.full_name, from.username, Client.default_parse_mode)
       elsif from.id
-        header = Format.format_user_forward_html(from.full_name, from.id, Client.default_parse_mode)
+        header = Format.format_user_forward(from.full_name, from.id, Client.default_parse_mode)
       end
     elsif (from = message.forward_from_chat) && message.forward_from_message_id
       if from.username
-        header = Format.format_username_forward_html(from.name, from.username, Client.default_parse_mode, message.forward_from_message_id)
+        header = Format.format_username_forward(from.name, from.username, Client.default_parse_mode, message.forward_from_message_id)
       else
-        header = Format.format_private_channel_forward_html(from.name, from.id, message.forward_from_message_id, Client.default_parse_mode)
+        header = Format.format_private_channel_forward(from.name, from.id, message.forward_from_message_id, Client.default_parse_mode)
       end
     elsif from = message.forward_sender_name
-      header = Format.format_private_user_forward_html(from, Client.default_parse_mode,)
+      header = Format.format_private_user_forward(from, Client.default_parse_mode,)
     end
 
     unless header
