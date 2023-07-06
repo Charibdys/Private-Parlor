@@ -43,6 +43,12 @@ class Logs
   @[YAML::Field(key: "unspoiled")]
   getter unspoiled : String
 
+  @[YAML::Field(key: "pinned")]
+  getter pinned : String
+
+  @[YAML::Field(key: "unpinned")]
+  getter unpinned : String
+
   @[YAML::Field(key: "ranked_message")]
   getter ranked_message : String
 

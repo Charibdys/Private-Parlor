@@ -123,6 +123,12 @@ class Config
   @[YAML::Field(key: "enable_spoiler")]
   getter enable_spoiler : Array(Bool) = [false, false]
 
+  @[YAML::Field(key: "enable_pin")]
+  getter enable_pin : Array(Bool) = [false, false]
+
+  @[YAML::Field(key: "enable_unpin")]
+  getter enable_unpin : Array(Bool) = [false, false]
+
   # Relay Toggles
 
   @[YAML::Field(key: "relay_text")]

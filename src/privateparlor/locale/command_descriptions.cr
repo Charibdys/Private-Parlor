@@ -66,6 +66,12 @@ class CommandDescriptions
   @[YAML::Field(key: "spoiler")]
   getter spoiler : String
 
+  @[YAML::Field(key: "pin")]
+  getter pin : String
+
+  @[YAML::Field(key: "unpin")]
+  getter unpin : String
+
   @[YAML::Field(key: "blacklist")]
   getter blacklist : String
 

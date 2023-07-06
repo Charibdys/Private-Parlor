@@ -120,7 +120,8 @@ class PrivateParlor < Tourmaline::Client
   def initialize_handlers(descriptions : CommandDescriptions, config : Config) : Nil
     {% for command in [
                         "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help",
-                        "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "spoiler", "blacklist",
+                        "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "spoiler", 
+                        "pin", "unpin", "blacklist",
                       ] %}
 
     if config.enable_{{command.id}}[0]
@@ -1079,6 +1080,72 @@ class PrivateParlor < Tourmaline::Client
         return relay_to_one(message.message_id, user.id, @locale.replies.fail)
       end
     end
+
+    relay_to_one(message.message_id, user.id, @locale.replies.success)
+  end
+
+  def pin_command(ctx : CommandHandler::Context) : Nil
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
+    end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :pin)
+      return relay_to_one(message.message_id, user.id, @locale.replies.fail)
+    end
+    unless reply = message.reply_message
+      return relay_to_one(message.message_id, user.id, @locale.replies.no_reply)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    @history.get_all_msids(reply.message_id).each do |receiver_id, receiver_msid|
+      active_users = @database.get_prioritized_users
+      if receiver_id.in?(active_users)
+        pin_chat_message(receiver_id, receiver_msid)
+      end
+    end
+
+    log_output(@log_channel, Format.substitute_log(@locale.logs.pinned, @locale, {
+      "id"   => user.id.to_s,
+      "name" => user.get_formatted_name,
+      "msid" => reply.message_id.to_s,
+    }))
+
+    # On success, a Telegram system message 
+    # will be displayed saying that the bot has pinned the message
+  end
+
+  def unpin_command(ctx : CommandHandler::Context) : Nil
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
+    end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :unpin)
+      return relay_to_one(message.message_id, user.id, @locale.replies.fail)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    @database.get_prioritized_users.each do |user_id|
+      unpin_chat_message(user_id)
+    end
+
+    log_output(@log_channel, Format.substitute_log(@locale.logs.unpinned, @locale, {
+      "id"   => user.id.to_s,
+      "name" => user.get_formatted_name,
+    }))
 
     relay_to_one(message.message_id, user.id, @locale.replies.success)
   end

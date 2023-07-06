@@ -217,6 +217,10 @@ command_descriptions:
 
    spoiler: Hides a media message with a spoiler
 
+   pin: Pin a message to the chat
+
+   unpin: Unpin the most recent pinned message
+
    blacklist: Ban a user from the chat
 
    motd: Show the rules of this chat
@@ -270,6 +274,12 @@ logs:
 
    # Available placeholders: id, name, msid
    unspoiled: "User {id}, aka {name}, removed a spoiler from receiver message [{msid}]"
+
+   # Available placeholders: id, name, msid
+   pin: "User {id}, aka {name}, pinned receiver message [{msid}]"
+
+   # Available placeholders: id, name
+   unpin: "User {id}, aka {name}, unpinned most recently pinned message"
 
    # Available placeholders: id, name, rank, text
    ranked_message: "User {id}, aka {name}, sent {rank} message: {text}"
