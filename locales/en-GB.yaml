@@ -120,10 +120,10 @@ replies:
 
    tripcode_unset: "unset"
 
-   # Available placeholders: oid, username, rank, rank_val, karma, warnings, smiley, warn_expiry, cooldown_until
+   # Available placeholders: oid, username, rank, rank_val, karma, karma_level warnings, smiley, warn_expiry, cooldown_until
    user_info: |-
       <b>id</b>: {oid}, <b>username</b>: {username}, <b>rank</b>: {rank_val} ({rank})
-      <b>karma</b>: {karma}
+      <b>karma</b>: {karma} {karma_level}
       <b>warnings</b>: {warnings} {smiley} {warn_expiry}
       <b>cooldown</b>: {cooldown_until}
 

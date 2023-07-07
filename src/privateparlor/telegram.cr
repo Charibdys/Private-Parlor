@@ -338,12 +338,32 @@ class PrivateParlor < Tourmaline::Client
       user.set_active(info.username, info.full_name)
       @database.modify_user(user)
 
+      unless @karma_levels.empty?
+        current_level = ""
+
+        @karma_levels.each_cons_pair do |lower, higher|
+          if lower[0] <= user.karma && user.karma < higher[0]
+            current_level = lower[1]
+            break
+          end
+        end
+    
+        if current_level == "" && user.karma >= @karma_levels.last_key
+          current_level = @karma_levels[@karma_levels.last_key]
+        elsif user.karma < @karma_levels.first_key
+          current_level = "???"
+        end
+      else
+        current_level = ""
+      end
+
       relay_to_one(message.message_id, user.id, @locale.replies.user_info, {
         "oid"            => user.get_obfuscated_id,
         "username"       => user.get_formatted_name,
         "rank_val"       => user.rank,
         "rank"           => @access.rank_name(user.rank),
         "karma"          => user.karma,
+        "karma_level"    => "(#{current_level})",
         "warnings"       => user.warnings,
         "warn_expiry"    => Format.format_time(user.warn_expiry, @locale.time_format),
         "smiley"         => Format.format_smiley(user.warnings, @smileys),
