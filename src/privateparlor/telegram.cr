@@ -31,6 +31,7 @@ class PrivateParlor < Tourmaline::Client
   getter registration_open : Bool?
   getter enable_sign : Bool?
   getter enable_tripsign : Bool?
+  getter enable_karma_sign : Bool?
   getter enable_ranksay : Bool?
   getter sign_limit_interval : Int32
   getter upvote_limit_interval : Int32
@@ -67,6 +68,7 @@ class PrivateParlor < Tourmaline::Client
     @registration_open = config.registration_open
     @enable_sign = config.enable_sign[0]
     @enable_tripsign = config.enable_tripsign[0]
+    @enable_karma_sign = config.enable_karma_sign[0]
     @enable_ranksay = config.enable_ranksay[0]
     @sign_limit_interval = config.sign_limit_interval
     @upvote_limit_interval = config.upvote_limit_interval
@@ -192,6 +194,12 @@ class PrivateParlor < Tourmaline::Client
       add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions.tsign) { |ctx| command_disabled(ctx) })
     else
       add_event_handler(CommandHandler.new("/tsign", register: config.enable_tripsign[1], description: descriptions.tsign) { |ctx| command_disabled(ctx) })
+    end
+
+    if config.enable_karma_sign[0]
+      add_event_handler(CommandHandler.new("/ksign", register: config.enable_karma_sign[1], description: descriptions.ksign) { |ctx| command_disabled(ctx) })
+    else
+      add_event_handler(CommandHandler.new("/ksign", register: config.enable_karma_sign[1], description: descriptions.ksign) { |ctx| command_disabled(ctx) })
     end
 
     if config.enable_ranksay[0]
@@ -1303,6 +1311,8 @@ class PrivateParlor < Tourmaline::Client
       return handle_sign(text, user, msid)
     when text.starts_with?("/t "), text.starts_with?("/tsign ")
       return handle_tripcode(text, user, msid)
+    when text.starts_with?("/ks "), text.starts_with?("/ksign ")
+      return handle_karma_sign(text, user, msid)
     when match = /^\/(\w*)say\s/.match(text).try &.[1]
       return handle_ranksay(match, text, user, msid)
     end
@@ -1363,6 +1373,45 @@ class PrivateParlor < Tourmaline::Client
         str << "\n"
         str << args
       end
+    end
+  end
+
+  # Given a command text, checks if karma signs are enabled and if the karma sign
+  # would be spammy, then returns the argument with a karma level signature
+  def handle_karma_sign(text : String, user : Database::User, msid : Int64) : String?
+    unless @enable_karma_sign
+      return relay_to_one(msid, user.id, @locale.replies.command_disabled)
+    end
+    unless (args = Format.get_arg(text)) && args.size > 0
+      return relay_to_one(msid, user.id, @locale.replies.missing_args)
+    end
+    if @karma_levels.empty?
+      return
+    end
+    if user.karma < @karma_levels.first_key
+      # Can't sign if one doesn't have a karma rank
+      return relay_to_one(msid, user.id, @locale.replies.fail)
+    end
+    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
+      return relay_to_one(msid, user.id, @locale.replies.sign_spam)
+    end
+    
+    current_level = ""
+
+    @karma_levels.each_cons_pair do |lower, higher|
+      if lower[0] <= user.karma && user.karma < higher[0]
+        current_level = lower[1]
+        break
+      end
+    end
+
+    if current_level == "" && user.karma >= @karma_levels.last_key
+      current_level = @karma_levels[@karma_levels.last_key]
+    end
+
+    String.build do |str|
+      str << args
+      str << Format.format_karma_say(current_level)
     end
   end
 

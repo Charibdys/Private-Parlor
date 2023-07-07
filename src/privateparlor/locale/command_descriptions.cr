@@ -45,6 +45,9 @@ class CommandDescriptions
   @[YAML::Field(key: "tsign")]
   getter tsign : String
 
+  @[YAML::Field(key: "ksign")]
+  getter ksign : String
+
   @[YAML::Field(key: "ranksay")]
   getter ranksay : String
 

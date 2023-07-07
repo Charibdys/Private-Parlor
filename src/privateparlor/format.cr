@@ -245,6 +245,11 @@ module Format
     "<b> ~~#{escape_html(signature)}</b>"
   end
 
+  # Returns a bolded signature (as terveisin) showing the karma level of the user that sent this message.
+  def format_karma_say(signature : String) : String
+    "<b><i> t. #{escape_html(signature)}</i></b>"
+  end
+
   def format_tripcode_sign(name : String, tripcode : String) : String
     "<b>#{escape_html(name)}</b><code>#{escape_html(tripcode)}</code>"
   end

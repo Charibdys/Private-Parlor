@@ -213,6 +213,8 @@ command_descriptions:
 
    tsign: Sign a message with your tripcode
 
+   ksign: Sign a message with your karma level
+
    ranksay: Sign a message with your current rank
 
    warn: Warns a message without deleting it

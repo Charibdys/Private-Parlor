@@ -84,6 +84,9 @@ class Config
   @[YAML::Field(key: "enable_tripsign")]
   getter enable_tripsign : Array(Bool) = [true, true]
 
+  @[YAML::Field(key: "enable_karma_sign")]
+  getter enable_karma_sign : Array(Bool) = [false, false]
+
   @[YAML::Field(key: "enable_ranksay")]
   getter enable_ranksay : Array(Bool) = [true, true]
 
