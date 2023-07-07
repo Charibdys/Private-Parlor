@@ -94,6 +94,9 @@ class Replies
   @[YAML::Field(key: "downvoted_own_message")]
   getter downvoted_own_message : String
 
+  @[YAML::Field(key: "karma_info")]
+  getter karma_info : String
+
   @[YAML::Field(key: "already_warned")]
   getter already_warned : String
 

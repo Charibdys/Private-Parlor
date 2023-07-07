@@ -42,6 +42,11 @@ module Configuration
       config.entities = ["bold", "italic", "text_link"]
     end
 
+    unless config.karma_levels.empty? || (config.karma_levels.keys.sort == config.karma_levels.keys)
+      Log.notice { "Karma level keys were not in ascending order; defaulting to no karma levels." }
+      config.karma_levels = {} of Int32 => String
+    end
+
     config = check_and_init_ranks(config)
     config = check_and_init_linked_network(config)
   end

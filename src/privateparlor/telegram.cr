@@ -40,6 +40,7 @@ class PrivateParlor < Tourmaline::Client
   getter tripcode_salt : String
   getter linked_network : Hash(String, String)
   getter entity_types : Array(String)
+  getter karma_levels : Hash(Int32, String)
 
   # Creates a new instance of `PrivateParlor`.
   #
@@ -75,6 +76,7 @@ class PrivateParlor < Tourmaline::Client
     @tripcode_salt = config.salt
     @linked_network = config.linked_network
     @entity_types = config.entities
+    @karma_levels = config.karma_levels
 
     db = DB.open("sqlite3://#{Path.new(config.database)}") # TODO: We'll want check if this works on Windows later
     @database = Database.new(db)
@@ -121,7 +123,7 @@ class PrivateParlor < Tourmaline::Client
     {% for command in [
                         "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help",
                         "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "spoiler", 
-                        "pin", "unpin", "blacklist",
+                        "karma_info", "pin", "unpin", "blacklist",
                       ] %}
 
     if config.enable_{{command.id}}[0]
@@ -133,6 +135,8 @@ class PrivateParlor < Tourmaline::Client
           ["togglekarma", "toggle_karma"],
           {% elsif command == "toggle_debug" %}
           ["toggledebug", "toggle_debug"],
+          {% elsif command == "karma_info" %}
+          ["karmainfo", "karma_info"],
           {% elsif command == "motd" %}
           ["rules", "motd"],
           {% elsif command == "upvote" %}
@@ -1082,6 +1086,58 @@ class PrivateParlor < Tourmaline::Client
     end
 
     relay_to_one(message.message_id, user.id, @locale.replies.success)
+  end
+
+  def karma_info_command(ctx : CommandHandler::Context) : Nil
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    if @karma_levels.empty?
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
+    end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    current_level = next_level = {0, ""}
+    percentage = 0.0_f32
+
+    @karma_levels.each_cons_pair do |lower, higher|
+      if lower[0] <= user.karma && user.karma < higher[0]
+        current_level = lower
+        next_level = higher
+
+        percentage = ((user.karma - lower[0]) * 100) / (higher[0] - lower[0]).to_f32
+        break
+      end
+    end
+
+    # Karma lies outside of bounds
+    if current_level == next_level
+      if (lowest = @karma_levels.first?) && user.karma < lowest[0]
+        current_level = {user.karma, "???"}
+        next_level = lowest
+      elsif (highest = {@karma_levels.last_key, @karma_levels.last_value}) && user.karma >= highest[0]
+        current_level = {user.karma, highest[1]}
+        next_level = {highest[0], "???"}
+        percentage = 100.0_f32
+      end
+    end
+
+    relay_to_one(message.message_id, user.id, @locale.replies.karma_info, {
+      "current_level" => current_level[1],
+      "next_level" => next_level[1],
+      "karma" => user.karma,
+      "limit" => next_level[0],
+      "loading_bar" => Format.format_karma_loading_bar(percentage, @locale),
+      "percentage" => "#{percentage.format(decimal_places: 1, only_significant: true)}",
+    })
   end
 
   def pin_command(ctx : CommandHandler::Context) : Nil

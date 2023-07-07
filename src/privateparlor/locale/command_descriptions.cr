@@ -66,6 +66,9 @@ class CommandDescriptions
   @[YAML::Field(key: "spoiler")]
   getter spoiler : String
 
+  @[YAML::Field(key: "karma_info")]
+  getter karma_info : String
+
   @[YAML::Field(key: "pin")]
   getter pin : String
 

@@ -88,6 +88,19 @@ ranks:
       "warn", "delete", "uncooldown", "remove", "purge", 
       "blacklist", "motd_set", "ranksay_lower"]
 
+
+# Levels for karma score
+# Users can view their karma level and sign as their karma level if enabled
+# Levels can be renamed, removed, or added; values must be in ascending order
+#karma_levels:
+#  -10: "Junk"
+#  0: "Normal"
+#  10: "Common"
+#  20: "Uncommon"
+#  30: "Rare"
+#  40: "Legendary"
+#  50: "Unique"
+
 # Command toggles
 # First value toggles the command (true to enable, false to disable)
 # Second value, if true, will register the command with BotFather
@@ -115,6 +128,7 @@ enable_remove: [true, false]
 enable_purge: [true, false]
 enable_blacklist: [true, false]
 enable_spoiler: [false, false]
+enable_karma_info: [false, false]
 enable_pin: [false, false]
 enable_unpin: [false, false]
 

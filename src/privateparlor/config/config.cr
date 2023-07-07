@@ -49,6 +49,9 @@ class Config
       0 => Rank.new("User", Set.new([:upvote, :downvote, :sign, :tsign])),
   }
 
+  @[YAML::Field(key: "karma_levels")]
+  property karma_levels : Hash(Int32, String) = {} of Int32 => String
+
   # Command Toggles
 
   @[YAML::Field(key: "enable_start")]
@@ -122,6 +125,9 @@ class Config
 
   @[YAML::Field(key: "enable_spoiler")]
   getter enable_spoiler : Array(Bool) = [false, false]
+
+  @[YAML::Field(key: "enable_karma_info")]
+  getter enable_karma_info : Array(Bool) = [false, false]
 
   @[YAML::Field(key: "enable_pin")]
   getter enable_pin : Array(Bool) = [false, false]

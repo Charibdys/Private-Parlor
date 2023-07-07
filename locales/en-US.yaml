@@ -9,6 +9,9 @@ time_format: "%m-%d-%y %r %Z"
 # Term for off and on, respectively
 toggle: ["disabled", "enabled"]
 
+# Values for the loading bar, from empty, to partially full, to full
+loading_bar: ["○", "◐", "●"]
+
 # Parameters are enclosed by a placeholder, {text}, where text is any of the parameters next to the comment
 # Placeholders should not be escaped
 # Special characters in HTML must be escaped
@@ -83,6 +86,13 @@ replies:
    got_downvote: "<i>You've just been downvoted! (check /info to see your karma or /toggleKarma to turn these notifications off)</i>"
 
    downvoted_own_message: "<i>You can't downvote your own message!</i>"
+
+   karma_info: |-
+      <b>Your level</b>: <i>{current_level}</i>
+      <b>Next level</b>: <i>{next_level}</i>
+
+      <b>Karma</b>: {karma}/{limit}
+      {loading_bar} ({percentage}%)
 
    already_warned: "<i>This message has already been warned.</i>"
 
@@ -216,6 +226,8 @@ command_descriptions:
    purge: Delete all messages from all blacklisted users
 
    spoiler: Hides a media message with a spoiler
+
+   karma_info: View your current karma and level
 
    pin: Pin a message to the chat
 
