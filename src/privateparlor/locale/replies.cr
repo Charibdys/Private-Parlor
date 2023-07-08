@@ -4,6 +4,9 @@ class Replies
   @[YAML::Field(key: "joined")]
   getter joined : String
 
+  @[YAML::Field(key: "joined_pseudonym")]
+  getter joined_pseudonym : String
+
   @[YAML::Field(key: "rejoined")]
   getter rejoined : String
 

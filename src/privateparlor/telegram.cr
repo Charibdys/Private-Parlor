@@ -29,6 +29,7 @@ class PrivateParlor < Tourmaline::Client
   getter inactivity_limit : Int32
   getter media_limit_period : Int32
   getter registration_open : Bool?
+  getter pseudonymous : Bool?
   getter enable_sign : Bool?
   getter enable_tripsign : Bool?
   getter enable_karma_sign : Bool?
@@ -66,6 +67,7 @@ class PrivateParlor < Tourmaline::Client
     @inactivity_limit = config.inactivity_limit
     @media_limit_period = config.media_limit_period
     @registration_open = config.registration_open
+    @pseudonymous = config.pseudonymous
     @enable_sign = config.enable_sign[0]
     @enable_tripsign = config.enable_tripsign[0]
     @enable_karma_sign = config.enable_karma_sign[0]
@@ -280,7 +282,11 @@ class PrivateParlor < Tourmaline::Client
         relay_to_one(nil, user.id, motd)
       end
 
-      relay_to_one(message.message_id, user.id, @locale.replies.joined)
+      if @pseudonymous
+        relay_to_one(message.message_id, user.id, @locale.replies.joined_pseudonym)
+      else
+        relay_to_one(message.message_id, user.id, @locale.replies.joined)
+      end
       log_output(@log_channel, Format.substitute_log(@locale.logs.joined, @locale, {"id" => user.id.to_s, "name" => user.get_formatted_name}))
     end
   end
@@ -1469,6 +1475,9 @@ class PrivateParlor < Tourmaline::Client
     unless @enable_tripsign
       return relay_to_one(msid, user.id, @locale.replies.command_disabled)
     end
+    if @pseudonymous
+      return
+    end
     unless @access.authorized?(user.rank, :tsign)
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
@@ -1594,6 +1603,13 @@ class PrivateParlor < Tourmaline::Client
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score_text(text))
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
     end
+    if @pseudonymous
+      unless tripkey = user.tripcode
+        return relay_to_one(message.message_id, user.id, @locale.replies.no_tripcode_set)
+      end
+
+      text = Format.format_pseudonymous_message(text, tripkey, @tripcode_salt)
+    end
 
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
@@ -1651,6 +1667,13 @@ class PrivateParlor < Tourmaline::Client
       end
     end
 
+    if @pseudonymous
+      unless tripkey = user.tripcode
+        return relay_to_one(message.message_id, user.id, @locale.replies.no_tripcode_set)
+      end
+
+      caption = Format.format_pseudonymous_message(caption, tripkey, @tripcode_salt)
+    end
 
     relay(
       message.reply_message,
@@ -1692,21 +1715,30 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    if caption = message.caption
-      caption = Format.replace_links(caption, message.caption_entities)
+    if raw_caption = message.caption
+      caption = check_text(Format.strip_format(raw_caption, message.caption_entities, @entity_types, @linked_network), user, message.message_id)
+      if caption.nil? # Caption contained a special font or used a disabled command
+        return
+      end
     end
-    if entities = message.caption_entities
-      entities = Format.remove_entities(entities, @entity_types)
+
+    # If using pseudononymous mode, then only apply tripcode to the the first input file
+    if @pseudonymous && @albums[album]? == nil
+      unless tripkey = user.tripcode
+        return relay_to_one(message.message_id, user.id, @locale.replies.no_tripcode_set)
+      end
+
+      caption = Format.format_pseudonymous_message(caption, tripkey, @tripcode_salt)
     end
 
     if media = message.photo.last?
-      input = InputMediaPhoto.new(media.file_id, caption: caption, caption_entities: entities, has_spoiler: message.has_media_spoiler? && @allow_media_spoilers)
+      input = InputMediaPhoto.new(media.file_id, caption: caption, parse_mode: :HTML, has_spoiler: message.has_media_spoiler? && @allow_media_spoilers)
     elsif media = message.video
-      input = InputMediaVideo.new(media.file_id, caption: caption, caption_entities: entities, has_spoiler: message.has_media_spoiler? && @allow_media_spoilers)
+      input = InputMediaVideo.new(media.file_id, caption: caption, parse_mode: :HTML, has_spoiler: message.has_media_spoiler? && @allow_media_spoilers)
     elsif media = message.audio
-      input = InputMediaAudio.new(media.file_id, caption: caption, caption_entities: entities)
+      input = InputMediaAudio.new(media.file_id, caption: caption, parse_mode: :HTML)
     elsif media = message.document
-      input = InputMediaDocument.new(media.file_id, caption: caption, caption_entities: entities)
+      input = InputMediaDocument.new(media.file_id, caption: caption, parse_mode: :HTML)
     else
       return
     end

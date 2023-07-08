@@ -259,6 +259,15 @@ module Format
     "<b>#{escape_html(name)}</b><code>#{escape_html(tripcode)}</code>"
   end
 
+  def format_pseudonymous_message(text : String?, tripkey : String, salt : String) : String
+    pair = generate_tripcode(tripkey, salt)
+    String.build do |str|
+      str << format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
+      str << "\n"
+      str << text
+    end
+  end
+
   # Formats a timespan, so the duration is marked by its largest unit ("20m", "3h", "5d", etc)
   def format_timespan(cmp : Time::Span, time_units : Array(String)) : String
     case

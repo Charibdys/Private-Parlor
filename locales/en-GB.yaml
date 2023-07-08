@@ -19,6 +19,12 @@ loading_bar: ["○", "◐", "●"]
 replies:
    joined: "<i>Welcome to the chat!</i>"
 
+   joined_pseudonym: |-
+      <i>Welcome to the chat!
+
+      A tripcode is required before you can send a message
+      Use the /tripcode command to set one</i>
+
    rejoined: "<i>You rejoined the chat!</i>"
     
    left: "<i>You left the chat.</i>"
@@ -308,10 +314,10 @@ logs:
    revealed: "User {sender_id}, aka {sender}, revealed username to user {receiver_id}, aka {receiver}, via receiver message [{msid}]"
 
    # Available placeholders: id, name, msid
-   pin: "User {id}, aka {name}, pinned receiver message [{msid}]"
+   pinned: "User {id}, aka {name}, pinned receiver message [{msid}]"
 
    # Available placeholders: id, name
-   unpin: "User {id}, aka {name}, unpinned most recently pinned message"
+   unpinned: "User {id}, aka {name}, unpinned most recently pinned message"
 
    # Available placeholders: id, name, rank, text
    ranked_message: "User {id}, aka {name}, sent {rank} message: {text}"

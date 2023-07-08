@@ -238,6 +238,9 @@ class Config
   @[YAML::Field(key: "registration_open")]
   getter registration_open : Bool? = true
 
+  @[YAML::Field(key: "pseudonymous")]
+  getter pseudonymous : Bool? = false
+
   @[YAML::Field(key: "blacklist_contact")]
   getter blacklist_contact : String? = nil
 

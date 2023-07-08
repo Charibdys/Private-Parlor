@@ -204,6 +204,10 @@ spam_score_handler:
 # Defaults to true; set to false to close registration
 registration_open: true
 
+# Enable pseudonymous mode; forces the use of tripcodes for all messages
+# Users will be required to set up a tripcode prior to chatting
+#pseudonymous: false
+
 # MessageEntity toggles
 # Entity types specified here will be stripped from every user message
 # The defaults remove bold, italics, and inline links; it's recommended to keep these

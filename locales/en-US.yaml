@@ -19,6 +19,12 @@ loading_bar: ["○", "◐", "●"]
 replies:
    joined: "<i>Welcome to the chat!</i>"
 
+   joined_pseudonym: |-
+      <i>Welcome to the chat!
+
+      A tripcode is required before you can send a message
+      Use the /tripcode command to set one</i>
+
    rejoined: "<i>You rejoined the chat!</i>"
     
    left: "<i>You left the chat.</i>"
