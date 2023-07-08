@@ -224,7 +224,7 @@ module Format
 
   # Returns a link to a given user's account, for reveal messages
   def format_user_reveal(id : Int64, name : String, locale : Locale) : String
-    locale.replies.username_reveal.gsub("{username}", "<a href=\"tg://user?id=#{id}\">#{escape_html(name)}</a>") 
+    locale.replies.username_reveal.gsub("{username}", "<a href=\"tg://user?id=#{id}\">#{escape_html(name)}</a>")
   end
 
   def format_user_forward(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String

@@ -117,7 +117,7 @@ class PrivateParlor < Tourmaline::Client
     @database.get_invalid_rank_users(@access.ranks.keys).each do |user|
       user.set_rank(0)
       @database.modify_user(user)
-      log_output(@log_channel, "User #{user.id}, aka #{user.get_formatted_name}, had an invalid rank (was #{user.rank}) and was reverted to user rank (0)" )
+      log_output(@log_channel, "User #{user.id}, aka #{user.get_formatted_name}, had an invalid rank (was #{user.rank}) and was reverted to user rank (0)")
     end
   end
 
@@ -125,9 +125,9 @@ class PrivateParlor < Tourmaline::Client
   # Also checks whether or not a command or media type is enabled via the config, and registers commands with BotFather
   def initialize_handlers(descriptions : CommandDescriptions, config : Config) : Nil
     {% for command in [
-                        "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "reveal", "tripcode", "motd", 
-                        "help", "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", 
-                        "spoiler", "karma_info", "pin", "unpin", "blacklist", "whitelist"
+                        "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "reveal", "tripcode", "motd",
+                        "help", "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge",
+                        "spoiler", "karma_info", "pin", "unpin", "blacklist", "whitelist",
                       ] %}
 
     if config.enable_{{command.id}}[0]
@@ -353,7 +353,7 @@ class PrivateParlor < Tourmaline::Client
             break
           end
         end
-    
+
         if current_level == "" && user.karma >= @karma_levels.last_key
           current_level = @karma_levels[@karma_levels.last_key]
         elsif user.karma < @karma_levels.first_key
@@ -602,13 +602,13 @@ class PrivateParlor < Tourmaline::Client
     relay_to_one(@history.get_msid(reply.message_id, reply_user.id), reply_user.id, Format.format_user_reveal(user.id, user.get_formatted_name, @locale))
 
     log_output(@log_channel, Format.substitute_log(@locale.logs.revealed, @locale, {
-      "sender_id" => user.id.to_s,
-      "sender" => user.get_formatted_name,
+      "sender_id"   => user.id.to_s,
+      "sender"      => user.get_formatted_name,
       "receiver_id" => reply_user.id.to_s,
-      "receiver" => reply_user.get_formatted_name,
-      "msid" => reply.message_id.to_s,
+      "receiver"    => reply_user.get_formatted_name,
+      "msid"        => reply.message_id.to_s,
     }))
-  
+
     relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
@@ -1129,15 +1129,15 @@ class PrivateParlor < Tourmaline::Client
 
     database.add_user(arg, "", "WHITELISTED", 0)
 
-    # Will throw if user has not started a chat with the bot, or throw and 
+    # Will throw if user has not started a chat with the bot, or throw and
     # force leave user if bot is blocked, but user is still whitelisted
     begin
       relay_to_one(nil, arg, @locale.replies.added_to_chat)
     end
 
     log_output(@log_channel, Format.substitute_log(@locale.logs.whitelisted, @locale, {
-        "id"      => arg.to_s,
-        "invoker" => user.get_formatted_name,
+      "id"      => arg.to_s,
+      "invoker" => user.get_formatted_name,
     }))
 
     relay_to_one(message.message_id, user.id, @locale.replies.success)
@@ -1259,11 +1259,11 @@ class PrivateParlor < Tourmaline::Client
 
     relay_to_one(message.message_id, user.id, @locale.replies.karma_info, {
       "current_level" => current_level[1],
-      "next_level" => next_level[1],
-      "karma" => user.karma,
-      "limit" => next_level[0],
-      "loading_bar" => Format.format_karma_loading_bar(percentage, @locale),
-      "percentage" => "#{percentage.format(decimal_places: 1, only_significant: true)}",
+      "next_level"    => next_level[1],
+      "karma"         => user.karma,
+      "limit"         => next_level[0],
+      "loading_bar"   => Format.format_karma_loading_bar(percentage, @locale),
+      "percentage"    => "#{percentage.format(decimal_places: 1, only_significant: true)}",
     })
   end
 
@@ -1300,7 +1300,7 @@ class PrivateParlor < Tourmaline::Client
       "msid" => reply.message_id.to_s,
     }))
 
-    # On success, a Telegram system message 
+    # On success, a Telegram system message
     # will be displayed saying that the bot has pinned the message
   end
 
@@ -1517,7 +1517,7 @@ class PrivateParlor < Tourmaline::Client
     if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
       return relay_to_one(msid, user.id, @locale.replies.sign_spam)
     end
-    
+
     current_level = ""
 
     @karma_levels.each_cons_pair do |lower, higher|
