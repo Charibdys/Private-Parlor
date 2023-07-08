@@ -87,6 +87,7 @@ replies:
 
    downvoted_own_message: "<i>You can't downvote your own message!</i>"
 
+   # Available placeholders: current_level, next_level, karma, limit, loading_bar, percentage
    karma_info: |-
       <b>Your level</b>: <i>{current_level}</i>
       <b>Next level</b>: <i>{next_level}</i>
@@ -107,7 +108,7 @@ replies:
 
    upvote_spam: "<i>You can't upvote at this time, avoid upvoting too often. Try again later.</i>"
 
-   downvote_spam: "<i>Your can't downvote at this time, avoid downvoting too often. Try again later.</i>"
+   downvote_spam: "<i>You can't downvote at this time, avoid downvoting too often. Try again later.</i>"
 
    invalid_tripcode_format: |-
       <i>Invalid tripcode format. The format is:</i>
