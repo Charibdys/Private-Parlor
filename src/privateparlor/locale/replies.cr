@@ -16,6 +16,12 @@ class Replies
   @[YAML::Field(key: "registration_closed")]
   getter registration_closed : String
 
+  @[YAML::Field(key: "added_to_chat")]
+  getter added_to_chat : String
+
+  @[YAML::Field(key: "already_whitelisted")]
+  getter already_whitelisted : String
+
   @[YAML::Field(key: "not_in_chat")]
   getter not_in_chat : String
 

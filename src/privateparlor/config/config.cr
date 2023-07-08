@@ -129,6 +129,9 @@ class Config
   @[YAML::Field(key: "enable_blacklist")]
   getter enable_blacklist : Array(Bool) = [true, false]
 
+  @[YAML::Field(key: "enable_whitelist")]
+  getter enable_whitelist : Array(Bool) = [false, false]
+
   @[YAML::Field(key: "enable_spoiler")]
   getter enable_spoiler : Array(Bool) = [false, false]
 

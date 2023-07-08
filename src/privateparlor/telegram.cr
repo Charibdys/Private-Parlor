@@ -125,7 +125,7 @@ class PrivateParlor < Tourmaline::Client
     {% for command in [
                         "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "reveal", "tripcode", "motd", 
                         "help", "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", 
-                        "spoiler", "karma_info", "pin", "unpin", "blacklist",
+                        "spoiler", "karma_info", "pin", "unpin", "blacklist", "whitelist"
                       ] %}
 
     if config.enable_{{command.id}}[0]
@@ -1088,6 +1088,53 @@ class PrivateParlor < Tourmaline::Client
       }))
       relay_to_one(message.message_id, user.id, @locale.replies.success)
     end
+  end
+
+  # Whitelists a user, allowing the user to join the chat. Only applicable if registration is closed
+  #
+  # Checks for the following permissions: `whitelist`
+  #
+  # If `whitelist`, allows the user to whitelist another user by user ID.
+  def whitelist_command(ctx : CommandHandler::Context) : Nil
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
+    end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :whitelist)
+      return relay_to_one(message.message_id, user.id, @locale.replies.fail)
+    end
+    if @registration_open
+      return relay_to_one(message.message_id, user.id, @locale.replies.fail)
+    end
+    unless (arg = Format.get_arg(message.text)) && (arg = arg.to_i64?)
+      return relay_to_one(message.message_id, user.id, @locale.replies.missing_args)
+    end
+    if @database.get_user(arg)
+      return relay_to_one(message.message_id, user.id, @locale.replies.already_whitelisted)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    database.add_user(arg, "", "WHITELISTED", 0)
+
+    # Will throw if user has not started a chat with the bot, or throw and 
+    # force leave user if bot is blocked, but user is still whitelisted
+    begin
+      relay_to_one(nil, arg, @locale.replies.added_to_chat)
+    end
+
+    log_output(@log_channel, Format.substitute_log(@locale.logs.whitelisted, @locale, {
+        "id"      => arg.to_s,
+        "invoker" => user.get_formatted_name,
+    }))
+
+    relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
   # Adds a spoiler overlay to a media message when replied to.

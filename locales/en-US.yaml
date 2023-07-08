@@ -27,6 +27,10 @@ replies:
 
    registration_closed: "<i>Registration is closed. Check back later.</i>"
 
+   added_to_chat: "<i>You have been added to the chat!</i>"
+
+   already_whitelisted: "<i>This user is already in the chat.</i>"
+
    not_in_chat: "<i>You're not in this chat! Type /start to join.</i>"
 
    not_in_cooldown: "<i>User found, but the user was not in cooldown!</i>"
@@ -243,6 +247,8 @@ command_descriptions:
 
    blacklist: Ban a user from the chat
 
+   whitelist: Allow a user to join the chat
+
    motd: Show the rules of this chat
 
    help: Show help text for current rank
@@ -286,6 +292,9 @@ logs:
 
    # Available placeholders: id, name, invoker, reason
    blacklisted: "User {id}, aka {name}, has been blacklisted by {invoker} {reason}"
+
+   # Available placeholders: id, invoker
+   whitelisted: "User {id} has been whitelisted by {invoker}"
 
    reason_prefix: "for: " 
 

@@ -59,7 +59,7 @@ module Configuration
     command_keys = Set{
       :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote, 
       :sign, :tsign, :reveal, :spoiler, :pin, :unpin, :ranksay, :ranksay_lower, :warn, 
-      :delete, :uncooldown, :remove, :purge, :blacklist, :motd_set, :ranked_info,
+      :delete, :uncooldown, :remove, :purge, :blacklist, :whitelist, :motd_set, :ranked_info,
     }
 
     promote_keys = Set{:promote, :promote_lower, :promote_same}

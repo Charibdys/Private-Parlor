@@ -84,6 +84,9 @@ class CommandDescriptions
   @[YAML::Field(key: "blacklist")]
   getter blacklist : String
 
+  @[YAML::Field(key: "whitelist")]
+  getter whitelist : String
+
   @[YAML::Field(key: "motd")]
   getter motd : String
 
