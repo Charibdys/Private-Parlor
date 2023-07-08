@@ -103,6 +103,9 @@ class Replies
   @[YAML::Field(key: "private_sign")]
   getter private_sign : String
 
+  @[YAML::Field(key: "username_reveal")]
+  getter username_reveal : String
+
   @[YAML::Field(key: "spamming")]
   getter spamming : String
 

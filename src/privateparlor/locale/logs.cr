@@ -43,6 +43,9 @@ class Logs
   @[YAML::Field(key: "unspoiled")]
   getter unspoiled : String
 
+  @[YAML::Field(key: "revealed")]
+  getter revealed : String
+
   @[YAML::Field(key: "pinned")]
   getter pinned : String
 

@@ -75,6 +75,9 @@ class Config
   @[YAML::Field(key: "enable_toggle_debug")]
   getter enable_toggle_debug : Array(Bool) = [true, true]
 
+  @[YAML::Field(key: "enable_reveal")]
+  getter enable_reveal : Array(Bool) = [false, false]
+
   @[YAML::Field(key: "enable_tripcode")]
   getter enable_tripcode : Array(Bool) = [true, true]
 

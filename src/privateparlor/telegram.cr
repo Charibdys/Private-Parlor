@@ -123,9 +123,9 @@ class PrivateParlor < Tourmaline::Client
   # Also checks whether or not a command or media type is enabled via the config, and registers commands with BotFather
   def initialize_handlers(descriptions : CommandDescriptions, config : Config) : Nil
     {% for command in [
-                        "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "tripcode", "motd", "help",
-                        "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", "spoiler", 
-                        "karma_info", "pin", "unpin", "blacklist",
+                        "start", "stop", "info", "users", "version", "toggle_karma", "toggle_debug", "reveal", "tripcode", "motd", 
+                        "help", "upvote", "downvote", "promote", "demote", "warn", "delete", "uncooldown", "remove", "purge", 
+                        "spoiler", "karma_info", "pin", "unpin", "blacklist",
                       ] %}
 
     if config.enable_{{command.id}}[0]
@@ -558,6 +558,52 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     relay_to_one(nil, user.id, @locale.replies.toggle_debug, {"toggle" => user.debug_enabled})
+  end
+
+  # Privately reveal username to another user
+  def reveal_command(ctx : CommandHandler::Context) : Nil
+    unless (message = ctx.message) && (info = message.from)
+      return
+    end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
+    end
+    unless user.can_use_command?
+      return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :reveal)
+      return relay_to_one(message.message_id, user.id, @locale.replies.fail)
+    end
+    if (chat = get_chat(user.id)) && chat.has_private_forwards
+      return relay_to_one(message.message_id, user.id, @locale.replies.private_sign)
+    end
+    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
+      return relay_to_one(message.message_id, user.id, @locale.replies.sign_spam)
+    end
+    unless reply = message.reply_message
+      return relay_to_one(message.message_id, user.id, @locale.replies.no_reply)
+    end
+    unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
+      return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
+    end
+    if reply_user.id == user.id
+      return relay_to_one(message.message_id, user.id, @locale.replies.fail)
+    end
+
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
+    relay_to_one(@history.get_msid(reply.message_id, reply_user.id), reply_user.id, Format.format_user_reveal(user.id, user.get_formatted_name, @locale))
+
+    log_output(@log_channel, Format.substitute_log(@locale.logs.revealed, @locale, {
+      "sender_id" => user.id.to_s,
+      "sender" => user.get_formatted_name,
+      "receiver_id" => reply_user.id.to_s,
+      "receiver" => reply_user.get_formatted_name,
+      "msid" => reply.message_id.to_s,
+    }))
+  
+    relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
   # Set/modify/view the user's tripcode.

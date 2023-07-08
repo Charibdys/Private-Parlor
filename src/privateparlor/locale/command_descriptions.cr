@@ -30,6 +30,9 @@ class CommandDescriptions
   @[YAML::Field(key: "toggle_debug")]
   getter toggle_debug : String
 
+  @[YAML::Field(key: "reveal")]
+  getter reveal : String
+
   @[YAML::Field(key: "tripcode")]
   getter tripcode : String
 

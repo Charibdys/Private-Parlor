@@ -98,6 +98,9 @@ replies:
 
    private_sign: "<i>Your account's forward privacy must be set to \"Everybody\" to sign with your username.</i>"
 
+   # Available placeholders: username
+   username_reveal: "<i>User {username} has requested to contact you in response to this message.</i>"
+
    spamming: "<i>Your message has not been sent, avoid sending messages too fast. Try again later.</i>"
 
    sign_spam: "<i>Your message has not been sent, avoid signing too often. Try again later.</i>"
@@ -203,6 +206,8 @@ command_descriptions:
 
    toggle_debug: Toggle debug mode (sends messages back to you)
 
+   reveal: Privately reveal your username to a user
+
    tripcode: Set or view your tripcode
 
    promote: Promote a user to a given rank
@@ -288,6 +293,9 @@ logs:
 
    # Available placeholders: id, name, msid
    unspoiled: "User {id}, aka {name}, removed a spoiler from receiver message [{msid}]"
+
+   # Available placeholders: sender_id, sender, receiver_id, receiver, msid
+   revealed: "User {sender_id}, aka {sender}, revealed username to user {receiver_id}, aka {receiver}, via receiver message [{msid}]"
 
    # Available placeholders: id, name, msid
    pin: "User {id}, aka {name}, pinned receiver message [{msid}]"

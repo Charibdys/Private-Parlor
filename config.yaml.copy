@@ -63,7 +63,7 @@ locale: "en-US"
 # 
 # The following permissions are available: 
 # users upvote downvote promote promote_lower promote_same demote 
-# sign tsign spoiler pin unpin ranksay ranksay_lower warn 
+# sign tsign reveal spoiler pin unpin ranksay ranksay_lower warn 
 # delete uncooldown remove purge blacklist motd_set ranked_info
 ranks:
   - name: "Banned"
@@ -111,6 +111,7 @@ enable_users: [true, true]
 enable_version: [true, true]
 enable_toggle_karma: [true, true]
 enable_toggle_debug: [true, true]
+enable_reveal: [false, false]
 enable_tripcode: [true, true]
 enable_sign: [true, true]
 enable_tripsign: [true, true]

@@ -58,7 +58,7 @@ module Configuration
   def check_and_init_ranks(config : Config) : Config
     command_keys = Set{
       :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote, 
-      :sign, :tsign, :spoiler, :pin, :unpin, :ranksay, :ranksay_lower, :warn, 
+      :sign, :tsign, :reveal, :spoiler, :pin, :unpin, :ranksay, :ranksay_lower, :warn, 
       :delete, :uncooldown, :remove, :purge, :blacklist, :motd_set, :ranked_info,
     }
 
