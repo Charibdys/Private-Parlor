@@ -296,8 +296,8 @@ class Database
   end
 
   # Queries the database for all user ids, ordered by highest ranking users first then most active users.
-  def get_prioritized_users(user : User) : Array(Int64)
-    if user.debug_enabled
+  def get_prioritized_users(user : User? = nil) : Array(Int64)
+    if user.nil? || user.debug_enabled
       db.query_all("SELECT id FROM users WHERE left IS NULL ORDER BY rank DESC, lastActive DESC", &.read(Int64))
     else
       db.query_all("SELECT id

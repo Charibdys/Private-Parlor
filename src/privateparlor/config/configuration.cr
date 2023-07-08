@@ -42,6 +42,11 @@ module Configuration
       config.entities = ["bold", "italic", "text_link"]
     end
 
+    unless config.karma_levels.empty? || (config.karma_levels.keys.sort == config.karma_levels.keys)
+      Log.notice { "Karma level keys were not in ascending order; defaulting to no karma levels." }
+      config.karma_levels = {} of Int32 => String
+    end
+
     config = check_and_init_ranks(config)
     config = check_and_init_linked_network(config)
   end
@@ -52,8 +57,9 @@ module Configuration
   # Returns an updated `Config` object
   def check_and_init_ranks(config : Config) : Config
     command_keys = Set{
-      :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote, :sign, :tsign, :spoiler,
-      :ranksay, :ranksay_lower, :warn, :delete, :uncooldown, :remove, :purge, :blacklist, :motd_set, :ranked_info,
+      :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote,
+      :sign, :tsign, :reveal, :spoiler, :pin, :unpin, :ranksay, :ranksay_lower, :warn,
+      :delete, :uncooldown, :remove, :purge, :blacklist, :whitelist, :motd_set, :ranked_info,
     }
 
     promote_keys = Set{:promote, :promote_lower, :promote_same}

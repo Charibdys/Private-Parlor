@@ -16,6 +16,9 @@ class Config
   @[YAML::Field(key: "log_file")]
   getter log_file : String? = nil
 
+  @[YAML::Field(key: "log_channel")]
+  getter log_channel : String? = nil
+
   @[YAML::Field(key: "lifetime")]
   property lifetime : Int32 = 24
 
@@ -46,6 +49,9 @@ class Config
       0 => Rank.new("User", Set.new([:upvote, :downvote, :sign, :tsign])),
   }
 
+  @[YAML::Field(key: "karma_levels")]
+  property karma_levels : Hash(Int32, String) = {} of Int32 => String
+
   # Command Toggles
 
   @[YAML::Field(key: "enable_start")]
@@ -69,6 +75,9 @@ class Config
   @[YAML::Field(key: "enable_toggle_debug")]
   getter enable_toggle_debug : Array(Bool) = [true, true]
 
+  @[YAML::Field(key: "enable_reveal")]
+  getter enable_reveal : Array(Bool) = [false, false]
+
   @[YAML::Field(key: "enable_tripcode")]
   getter enable_tripcode : Array(Bool) = [true, true]
 
@@ -77,6 +86,9 @@ class Config
 
   @[YAML::Field(key: "enable_tripsign")]
   getter enable_tripsign : Array(Bool) = [true, true]
+
+  @[YAML::Field(key: "enable_karma_sign")]
+  getter enable_karma_sign : Array(Bool) = [false, false]
 
   @[YAML::Field(key: "enable_ranksay")]
   getter enable_ranksay : Array(Bool) = [true, true]
@@ -117,8 +129,20 @@ class Config
   @[YAML::Field(key: "enable_blacklist")]
   getter enable_blacklist : Array(Bool) = [true, false]
 
+  @[YAML::Field(key: "enable_whitelist")]
+  getter enable_whitelist : Array(Bool) = [false, false]
+
   @[YAML::Field(key: "enable_spoiler")]
   getter enable_spoiler : Array(Bool) = [false, false]
+
+  @[YAML::Field(key: "enable_karma_info")]
+  getter enable_karma_info : Array(Bool) = [false, false]
+
+  @[YAML::Field(key: "enable_pin")]
+  getter enable_pin : Array(Bool) = [false, false]
+
+  @[YAML::Field(key: "enable_unpin")]
+  getter enable_unpin : Array(Bool) = [false, false]
 
   # Relay Toggles
 
@@ -213,6 +237,9 @@ class Config
 
   @[YAML::Field(key: "registration_open")]
   getter registration_open : Bool? = true
+
+  @[YAML::Field(key: "pseudonymous")]
+  getter pseudonymous : Bool? = false
 
   @[YAML::Field(key: "blacklist_contact")]
   getter blacklist_contact : String? = nil

@@ -4,6 +4,9 @@ class Replies
   @[YAML::Field(key: "joined")]
   getter joined : String
 
+  @[YAML::Field(key: "joined_pseudonym")]
+  getter joined_pseudonym : String
+
   @[YAML::Field(key: "rejoined")]
   getter rejoined : String
 
@@ -15,6 +18,12 @@ class Replies
 
   @[YAML::Field(key: "registration_closed")]
   getter registration_closed : String
+
+  @[YAML::Field(key: "added_to_chat")]
+  getter added_to_chat : String
+
+  @[YAML::Field(key: "already_whitelisted")]
+  getter already_whitelisted : String
 
   @[YAML::Field(key: "not_in_chat")]
   getter not_in_chat : String
@@ -94,11 +103,17 @@ class Replies
   @[YAML::Field(key: "downvoted_own_message")]
   getter downvoted_own_message : String
 
+  @[YAML::Field(key: "karma_info")]
+  getter karma_info : String
+
   @[YAML::Field(key: "already_warned")]
   getter already_warned : String
 
   @[YAML::Field(key: "private_sign")]
   getter private_sign : String
+
+  @[YAML::Field(key: "username_reveal")]
+  getter username_reveal : String
 
   @[YAML::Field(key: "spamming")]
   getter spamming : String

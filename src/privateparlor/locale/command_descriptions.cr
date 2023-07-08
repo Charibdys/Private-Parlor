@@ -30,6 +30,9 @@ class CommandDescriptions
   @[YAML::Field(key: "toggle_debug")]
   getter toggle_debug : String
 
+  @[YAML::Field(key: "reveal")]
+  getter reveal : String
+
   @[YAML::Field(key: "tripcode")]
   getter tripcode : String
 
@@ -44,6 +47,9 @@ class CommandDescriptions
 
   @[YAML::Field(key: "tsign")]
   getter tsign : String
+
+  @[YAML::Field(key: "ksign")]
+  getter ksign : String
 
   @[YAML::Field(key: "ranksay")]
   getter ranksay : String
@@ -66,8 +72,20 @@ class CommandDescriptions
   @[YAML::Field(key: "spoiler")]
   getter spoiler : String
 
+  @[YAML::Field(key: "karma_info")]
+  getter karma_info : String
+
+  @[YAML::Field(key: "pin")]
+  getter pin : String
+
+  @[YAML::Field(key: "unpin")]
+  getter unpin : String
+
   @[YAML::Field(key: "blacklist")]
   getter blacklist : String
+
+  @[YAML::Field(key: "whitelist")]
+  getter whitelist : String
 
   @[YAML::Field(key: "motd")]
   getter motd : String

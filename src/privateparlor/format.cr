@@ -222,6 +222,11 @@ module Format
     "<a href=\"tg://user?id=#{id}\"> ~~#{escape_html(name)}</a>"
   end
 
+  # Returns a link to a given user's account, for reveal messages
+  def format_user_reveal(id : Int64, name : String, locale : Locale) : String
+    locale.replies.username_reveal.gsub("{username}", "<a href=\"tg://user?id=#{id}\">#{escape_html(name)}</a>")
+  end
+
   def format_user_forward(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String
     "<b>Forwarded from <a href=\"tg://user?id=#{id}\">#{escape_html(name)}</a></b>"
   end
@@ -245,8 +250,22 @@ module Format
     "<b> ~~#{escape_html(signature)}</b>"
   end
 
+  # Returns a bolded signature (as terveisin) showing the karma level of the user that sent this message.
+  def format_karma_say(signature : String) : String
+    "<b><i> t. #{escape_html(signature)}</i></b>"
+  end
+
   def format_tripcode_sign(name : String, tripcode : String) : String
     "<b>#{escape_html(name)}</b><code>#{escape_html(tripcode)}</code>"
+  end
+
+  def format_pseudonymous_message(text : String?, tripkey : String, salt : String) : String
+    pair = generate_tripcode(tripkey, salt)
+    String.build do |str|
+      str << format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
+      str << "\n"
+      str << text
+    end
   end
 
   # Formats a timespan, so the duration is marked by its largest unit ("20m", "3h", "5d", etc)
@@ -282,6 +301,27 @@ module Format
   def format_time(time : Time?, format : String) : String?
     if time
       time.to_s(format)
+    end
+  end
+
+  # Formats a loading bar for the /karmainfo command
+  def format_karma_loading_bar(percentage : Float32, locale : Locale) : String
+    pips = (percentage.floor.to_i).divmod(10)
+
+    unless pips[0] == 10
+      String.build(10) do |str|
+        str << locale.loading_bar[2] * pips[0]
+
+        if pips[1] >= 5
+          str << locale.loading_bar[1]
+        else
+          str << locale.loading_bar[0]
+        end
+
+        str << locale.loading_bar[0] * (10 - (pips[0] + 1))
+      end
+    else
+      locale.loading_bar[2] * 10
     end
   end
 

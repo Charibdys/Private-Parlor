@@ -10,6 +10,9 @@ class Locale
   @[YAML::Field(key: "toggle")]
   getter toggle : Array(String)
 
+  @[YAML::Field(key: "loading_bar")]
+  getter loading_bar : Array(String)
+
   @[YAML::Field(key: "replies")]
   getter replies : Replies
 

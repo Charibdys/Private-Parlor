@@ -34,6 +34,9 @@ class Logs
   @[YAML::Field(key: "blacklisted")]
   getter blacklisted : String
 
+  @[YAML::Field(key: "whitelisted")]
+  getter whitelisted : String
+
   @[YAML::Field(key: "reason_prefix")]
   getter reason_prefix : String
 
@@ -42,6 +45,15 @@ class Logs
 
   @[YAML::Field(key: "unspoiled")]
   getter unspoiled : String
+
+  @[YAML::Field(key: "revealed")]
+  getter revealed : String
+
+  @[YAML::Field(key: "pinned")]
+  getter pinned : String
+
+  @[YAML::Field(key: "unpinned")]
+  getter unpinned : String
 
   @[YAML::Field(key: "ranked_message")]
   getter ranked_message : String

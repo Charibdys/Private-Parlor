@@ -10,6 +10,12 @@ locale: "en-US"
 #log_level: "info"
 #log_file: "./log.txt"
 
+# ID of a channel to output bot logs to 
+# Setting a value here will not prevent the program's logs from being written to STDOUT or a file
+# ID should be a negative 13 digit value
+# Bot must be an admin of the channel with the permission to post messages for this to work
+#log_channel: -100XXXXXXXXXX
+
 # Modify lifetime of a message, in hours (24 hours is the default)
 # Can be set greater than or equal to 1
 # NOTE: Increasing this value will increase RAM usage if database history is not enabled
@@ -56,8 +62,9 @@ locale: "en-US"
 # To add a rank, add a new entry and define the name, value, and permissisons
 # 
 # The following permissions are available: 
-# users upvote downvote promote promote_lower promote_same demote sign tsign spoiler
-# ranksay ranksay_lower warn delete uncooldown remove purge blacklist motd_set ranked_info
+# users upvote downvote promote promote_lower promote_same demote 
+# sign tsign reveal spoiler pin unpin ranksay ranksay_lower warn 
+# delete uncooldown remove purge blacklist motd_set ranked_info
 ranks:
   - name: "Banned"
     value: -10
@@ -81,6 +88,19 @@ ranks:
       "warn", "delete", "uncooldown", "remove", "purge", 
       "blacklist", "motd_set", "ranksay_lower"]
 
+
+# Levels for karma score
+# Users can view their karma level and sign as their karma level if enabled
+# Levels can be renamed, removed, or added; values must be in ascending order
+#karma_levels:
+#  -10: "Junk"
+#  0: "Normal"
+#  10: "Common"
+#  20: "Uncommon"
+#  30: "Rare"
+#  40: "Legendary"
+#  50: "Unique"
+
 # Command toggles
 # First value toggles the command (true to enable, false to disable)
 # Second value, if true, will register the command with BotFather
@@ -91,9 +111,11 @@ enable_users: [true, true]
 enable_version: [true, true]
 enable_toggle_karma: [true, true]
 enable_toggle_debug: [true, true]
+enable_reveal: [false, false]
 enable_tripcode: [true, true]
 enable_sign: [true, true]
 enable_tripsign: [true, true]
+enable_karma_sign: [false, false]
 enable_ranksay: [true, true]
 enable_motd: [true, true]
 enable_help: [true, true]
@@ -107,7 +129,11 @@ enable_uncooldown: [true, false]
 enable_remove: [true, false]
 enable_purge: [true, false]
 enable_blacklist: [true, false]
+enable_whitelist: [false, false]
 enable_spoiler: [false, false]
+enable_karma_info: [false, false]
+enable_pin: [false, false]
+enable_unpin: [false, false]
 
 # Relaying toggles
 # Set any to false to disable relaying messages of that type
@@ -177,6 +203,10 @@ spam_score_handler:
 # Open registration, so that new users can join
 # Defaults to true; set to false to close registration
 registration_open: true
+
+# Enable pseudonymous mode; forces the use of tripcodes for all messages
+# Users will be required to set up a tripcode prior to chatting
+#pseudonymous: false
 
 # MessageEntity toggles
 # Entity types specified here will be stripped from every user message

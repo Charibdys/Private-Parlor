@@ -9,12 +9,21 @@ time_format: "%d/%m/%y %T %Z"
 # Term for off and on, respectively
 toggle: ["disabled", "enabled"]
 
+# Values for the loading bar, from empty, to partially full, to full
+loading_bar: ["○", "◐", "●"]
+
 # Parameters are enclosed by a placeholder, {text}, where text is any of the parameters next to the comment
 # Placeholders should not be escaped
 # Special characters in HTML must be escaped
 
 replies:
    joined: "<i>Welcome to the chat!</i>"
+
+   joined_pseudonym: |-
+      <i>Welcome to the chat!
+
+      A tripcode is required before you can send a message
+      Use the /tripcode command to set one</i>
 
    rejoined: "<i>You rejoined the chat!</i>"
     
@@ -23,6 +32,10 @@ replies:
    already_in_chat: "<i>You're already in the chat.</i>"
 
    registration_closed: "<i>Registration is closed. Check back later.</i>"
+
+   added_to_chat: "<i>You have been added to the chat!</i>"
+
+   already_whitelisted: "<i>This user is already in the chat.</i>"
 
    not_in_chat: "<i>You're not in this chat! Type /start to join.</i>"
 
@@ -84,9 +97,20 @@ replies:
 
    downvoted_own_message: "<i>You can't downvote your own message!</i>"
 
+   # Available placeholders: current_level, next_level, karma, limit, loading_bar, percentage
+   karma_info: |-
+      <b>Your level</b>: <i>{current_level}</i>
+      <b>Next level</b>: <i>{next_level}</i>
+
+      <b>Karma</b>: {karma}/{limit}
+      {loading_bar} ({percentage})
+
    already_warned: "<i>This message has already been warned.</i>"
 
    private_sign: "<i>Your account's forward privacy must be set to \"Everybody\" to sign with your username.</i>"
+
+   # Available placeholders: username
+   username_reveal: "<i>User {username} has requested to contact you in response to this message.</i>"
 
    spamming: "<i>Your message has not been sent, avoid sending messages too fast. Try again later.</i>"
 
@@ -94,7 +118,7 @@ replies:
 
    upvote_spam: "<i>You can't upvote at this time, avoid upvoting too often. Try again later.</i>"
 
-   downvote_spam: "<i>Your can't downvote at this time, avoid downvoting too often. Try again later.</i>"
+   downvote_spam: "<i>You can't downvote at this time, avoid downvoting too often. Try again later.</i>"
 
    invalid_tripcode_format: |-
       <i>Invalid tripcode format. The format is:</i>
@@ -110,10 +134,10 @@ replies:
 
    tripcode_unset: "unset"
 
-   # Available placeholders: oid, username, rank, rank_val, karma, warnings, smiley, warn_expiry, cooldown_until
+   # Available placeholders: oid, username, rank, rank_val, karma, karma_level warnings, smiley, warn_expiry, cooldown_until
    user_info: |-
       <b>id</b>: {oid}, <b>username</b>: {username}, <b>rank</b>: {rank_val} ({rank})
-      <b>karma</b>: {karma}
+      <b>karma</b>: {karma} {karma_level}
       <b>warnings</b>: {warnings} {smiley} {warn_expiry}
       <b>cooldown</b>: {cooldown_until}
 
@@ -164,7 +188,10 @@ replies:
    # Available placeholders: msgs_deleted
    purge_complete: "<i>{msgs_deleted} messages were matched and deleted.</i>"
 
-   inactive: "<i>You have been kicked due to inactivity. Type /start to receive messages again!</i>"
+   # Available placeholders: time
+   inactive: |- 
+      <i>You have been kicked due to inactivity (AFK for {time} days).
+      Type /start to receive messages again!</i>"
 
    success: "✅" 
 
@@ -190,6 +217,8 @@ command_descriptions:
 
    toggle_debug: Toggle debug mode (sends messages back to you)
 
+   reveal: Privately reveal your username to a user
+
    tripcode: Set or view your tripcode
 
    promote: Promote a user to a given rank
@@ -199,6 +228,8 @@ command_descriptions:
    sign: Sign a message with your username
 
    tsign: Sign a message with your tripcode
+
+   ksign: Sign a message with your karma level
 
    ranksay: Sign a message with your current rank
 
@@ -214,7 +245,15 @@ command_descriptions:
 
    spoiler: Hides a media message with a spoiler
 
+   karma_info: View your current karma and level
+
+   pin: Pin a message to the chat
+
+   unpin: Unpin the most recent pinned message
+
    blacklist: Ban a user from the chat
+
+   whitelist: Allow a user to join the chat
 
    motd: Show the rules of this chat
 
@@ -237,7 +276,7 @@ logs:
    rejoined: "User {id}, aka {name}, rejoined the chat."
 
    # Available placeholders: id, name
-   left: "User {id}, aka {name}, joined the chat."
+   left: "User {id}, aka {name}, left the chat."
 
    # Available placeholders: id, name, rank, invoker
    promoted: "User {id}, aka {name}, has been promoted to {rank} by {invoker}."
@@ -260,6 +299,9 @@ logs:
    # Available placeholders: id, name, invoker, reason
    blacklisted: "User {id}, aka {name}, has been blacklisted by {invoker} {reason}"
 
+   # Available placeholders: id, invoker
+   whitelisted: "User {id} has been whitelisted by {invoker}"
+
    reason_prefix: "for: " 
 
    # Available placeholders: id, name, msid
@@ -267,6 +309,15 @@ logs:
 
    # Available placeholders: id, name, msid
    unspoiled: "User {id}, aka {name}, removed a spoiler from receiver message [{msid}]"
+
+   # Available placeholders: sender_id, sender, receiver_id, receiver, msid
+   revealed: "User {sender_id}, aka {sender}, revealed username to user {receiver_id}, aka {receiver}, via receiver message [{msid}]"
+
+   # Available placeholders: id, name, msid
+   pinned: "User {id}, aka {name}, pinned receiver message [{msid}]"
+
+   # Available placeholders: id, name
+   unpinned: "User {id}, aka {name}, unpinned most recently pinned message"
 
    # Available placeholders: id, name, rank, text
    ranked_message: "User {id}, aka {name}, sent {rank} message: {text}"
