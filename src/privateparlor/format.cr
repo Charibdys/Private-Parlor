@@ -369,7 +369,7 @@ module Format
       remove blacklist ranked_info
     )
 
-    help_text = String.build do |str|
+    String.build do |str|
       str << substitute_reply(locale.replies.help_header, locale)
       str << escape_html("\n/start - #{locale.command_descriptions.start}")
       str << escape_html("\n/stop - #{locale.command_descriptions.stop}")
@@ -390,13 +390,13 @@ module Format
           if ranked_keys.includes?(permission)
             case permission
             when :promote
-              rank_commands << "/#{permission.to_s} [name/OID/ID] [rank] - #{locale.command_descriptions.promote}"
+              rank_commands << "/#{permission} [name/OID/ID] [rank] - #{locale.command_descriptions.promote}"
             when :demote
-              rank_commands << "/#{permission.to_s} [name/OID/ID] [rank] - #{locale.command_descriptions.demote}"
+              rank_commands << "/#{permission} [name/OID/ID] [rank] - #{locale.command_descriptions.demote}"
             when :sign
-              rank_commands << "/#{permission.to_s} [text] - #{locale.command_descriptions.sign}"
+              rank_commands << "/#{permission} [text] - #{locale.command_descriptions.sign}"
             when :tsign
-              rank_commands << "/#{permission.to_s} [text] - #{locale.command_descriptions.tsign}"
+              rank_commands << "/#{permission} [text] - #{locale.command_descriptions.tsign}"
             when :ranksay
               ranks.each do |k, v|
                 if k <= user.rank && k != -10 && v.permissions.includes?(:ranksay)
@@ -404,20 +404,20 @@ module Format
                 end
               end
             when :uncooldown
-              rank_commands << "/#{permission.to_s} [name/OID] - #{locale.command_descriptions.uncooldown}"
+              rank_commands << "/#{permission} [name/OID] - #{locale.command_descriptions.uncooldown}"
             when :motd_set
               rank_commands << "/motd [text] - #{locale.command_descriptions.motd_set}"
             end
           elsif reply_required_keys.includes?(permission)
             case permission
             when :warn
-              reply_commands << "/#{permission.to_s} [reason] - #{locale.command_descriptions.warn}"
+              reply_commands << "/#{permission} [reason] - #{locale.command_descriptions.warn}"
             when :delete
-              reply_commands << "/#{permission.to_s} [reason] - #{locale.command_descriptions.delete}"
+              reply_commands << "/#{permission} [reason] - #{locale.command_descriptions.delete}"
             when :remove
-              reply_commands << "/#{permission.to_s} [reason] - #{locale.command_descriptions.remove}"
+              reply_commands << "/#{permission} [reason] - #{locale.command_descriptions.remove}"
             when :blacklist
-              reply_commands << "/#{permission.to_s} [reason] - #{locale.command_descriptions.blacklist}"
+              reply_commands << "/#{permission} [reason] - #{locale.command_descriptions.blacklist}"
             when :ranked_info
               reply_commands << "/info - #{locale.command_descriptions.ranked_info}"
             when :upvote

@@ -7,7 +7,7 @@ module Configuration
   #
   # Values that aren't specified in the config file will be set to a default value.
   def parse_config : Config
-    config = check_config(Config.from_yaml(File.open("config.yaml")))
+    check_config(Config.from_yaml(File.open("config.yaml")))
   rescue ex : YAML::ParseException
     Log.error(exception: ex) { "Could not parse the given value at row #{ex.line_number}. This could be because a required value was not set or the wrong type was given." }
     exit
@@ -42,7 +42,7 @@ module Configuration
       config.entities = ["bold", "italic", "text_link"]
     end
 
-    unless config.karma_levels.empty? || (config.karma_levels.keys.sort == config.karma_levels.keys)
+    unless config.karma_levels.empty? || (config.karma_levels.keys.sort! == config.karma_levels.keys)
       Log.notice { "Karma level keys were not in ascending order; defaulting to no karma levels." }
       config.karma_levels = {} of Int32 => String
     end

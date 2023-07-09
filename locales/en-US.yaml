@@ -197,7 +197,7 @@ replies:
 
    fail: "❌"
 
-# Special characters in MarkdownV2 must be escaped
+# Special characters in HTML must be escaped
 command_descriptions:
    start: Join the chat (start receiving messages)
 
@@ -264,7 +264,6 @@ command_descriptions:
    ranked_info: Get the user info from this message
 
 # Parameters are enclosed by a placeholder, {text}, where text is any of the parameters next to the comment
-
 logs:
    # Available placeholders: version
    start: Starting Private Parlor v{version}...
