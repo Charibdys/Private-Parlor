@@ -103,7 +103,7 @@ replies:
       <b>Next level</b>: <i>{next_level}</i>
 
       <b>Karma</b>: {karma}/{limit}
-      {loading_bar} ({percentage})
+      {loading_bar} ({percentage}%)
 
    already_warned: "<i>This message has already been warned.</i>"
 

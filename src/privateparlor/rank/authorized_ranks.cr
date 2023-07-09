@@ -53,7 +53,7 @@ class AuthorizedRanks
 
   # Returns true if the user to be promoted (receiver) can be promoted with the given rank.
   def can_promote?(rank : Int32, invoker : Int32, receiver : Int32, permission : Symbol) : Bool
-    if rank <= receiver || rank > invoker || rank == -10 || rank < 0
+    if rank <= receiver || rank > invoker || rank == -10
       return false
     end
 
@@ -80,7 +80,7 @@ class AuthorizedRanks
 
   # Returns an array of all the rank names in the ranks hash.
   def rank_names : Array(String)
-    @ranks.compact_map do |k, v|
+    @ranks.compact_map do |_, v|
       v.name
     end
   end

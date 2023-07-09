@@ -7,7 +7,7 @@ class MessageQueue
     @queue_mutex = Mutex.new
   end
 
-  def reject_messsages(&block) : Nil
+  def reject_messsages(&) : Nil
     @queue_mutex.synchronize do
       @queue.reject! do |msg|
         yield msg
@@ -46,6 +46,6 @@ class MessageQueue
       msg = @queue.shift?
     end
 
-    return msg
+    msg
   end
 end

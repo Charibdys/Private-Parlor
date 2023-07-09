@@ -7,7 +7,7 @@ VERSION = "0.9"
 
 bot = PrivateParlor.new(Configuration.parse_config)
 
-bot.log_output(bot.log_channel, Format.substitute_log(bot.locale.logs.start, bot.locale, {"version" => VERSION}))
+bot.log_output(bot.locale.logs.start, {"version" => VERSION})
 
 Signal::INT.trap do
   bot.stop_polling
