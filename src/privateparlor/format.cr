@@ -351,25 +351,31 @@ module Format
   # Returns a message containing the commands the user can use.
   def format_help(user : Database::User, ranks : Hash(Int32, Rank), locale : Locale) : String
     ranked = {
-      :promote    => "/promote [name/OID/ID] [rank] - #{locale.command_descriptions.promote}",
-      :demote     => "/demote [name/OID/ID] [rank] - #{locale.command_descriptions.demote}",
-      :ranksay    => "/#{ranks[user.rank].name.downcase}say [text] - #{locale.command_descriptions.ranksay}",
-      :sign       => "/sign [text] - #{locale.command_descriptions.sign}",
-      :tsign      => "/tsign [text] - #{locale.command_descriptions.tsign}",
-      :uncooldown => "/uncooldown [name/OID] - #{locale.command_descriptions.uncooldown}",
-      :purge      => "/purge - #{locale.command_descriptions.purge}",
-      :motd_set   => "/motd - #{locale.command_descriptions.motd_set}",
+      CommandPermissions::Promote      => "/promote [name/OID/ID] [rank] - #{locale.command_descriptions.promote}",
+      CommandPermissions::PromoteSame  => "/promote [name/OID/ID] [rank] - #{locale.command_descriptions.promote}",
+      CommandPermissions::PromoteLower => "/promote [name/OID/ID] [rank] - #{locale.command_descriptions.promote}",
+      CommandPermissions::Demote       => "/demote [name/OID/ID] [rank] - #{locale.command_descriptions.demote}",
+      CommandPermissions::Ranksay      => "/#{ranks[user.rank].name.downcase}say [text] - #{locale.command_descriptions.ranksay}",
+      CommandPermissions::Sign         => "/sign [text] - #{locale.command_descriptions.sign}",
+      CommandPermissions::TSign        => "/tsign [text] - #{locale.command_descriptions.tsign}",
+      CommandPermissions::Uncooldown   => "/uncooldown [name/OID] - #{locale.command_descriptions.uncooldown}",
+      CommandPermissions::Whitelist    => "/whitelist [ID] - #{locale.command_descriptions.whitelist}",
+      CommandPermissions::Purge        => "/purge - #{locale.command_descriptions.purge}",
+      CommandPermissions::MotdSet      => "/motd - #{locale.command_descriptions.motd_set}",
     }
 
     reply_required = {
-      :upvote      => "+1 - #{locale.command_descriptions.upvote}",
-      :downvote    => "-1 - #{locale.command_descriptions.downvote}",
-      :warn        => "/warn [reason] - #{locale.command_descriptions.warn}",
-      :delete      => "/delete [reason] - #{locale.command_descriptions.delete}",
-      :spoiler     => "/spoiler - #{locale.command_descriptions.spoiler}",
-      :remove      => "/remove [reason] - #{locale.command_descriptions.remove}",
-      :blacklist   => "/blacklist [reason] - #{locale.command_descriptions.blacklist}",
-      :ranked_info => "/info - #{locale.command_descriptions.ranked_info}",
+      CommandPermissions::Upvote     => "+1 - #{locale.command_descriptions.upvote}",
+      CommandPermissions::Downvote   => "-1 - #{locale.command_descriptions.downvote}",
+      CommandPermissions::Warn       => "/warn [reason] - #{locale.command_descriptions.warn}",
+      CommandPermissions::Delete     => "/delete [reason] - #{locale.command_descriptions.delete}",
+      CommandPermissions::Spoiler    => "/spoiler - #{locale.command_descriptions.spoiler}",
+      CommandPermissions::Remove     => "/remove [reason] - #{locale.command_descriptions.remove}",
+      CommandPermissions::Blacklist  => "/blacklist [reason] - #{locale.command_descriptions.blacklist}",
+      CommandPermissions::RankedInfo => "/info - #{locale.command_descriptions.ranked_info}",
+      CommandPermissions::Reveal     => "/reveal - #{locale.command_descriptions.reveal}",
+      CommandPermissions::Pin        => "/pin - #{locale.command_descriptions.pin}",
+      CommandPermissions::Unpin      => "/unpin - #{locale.command_descriptions.unpin}",
     }
 
     String.build do |str|
