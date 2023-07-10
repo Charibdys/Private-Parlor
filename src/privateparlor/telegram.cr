@@ -23,7 +23,7 @@ class PrivateParlor < Tourmaline::Client
   getter warn_expire_hours : Int32
   getter karma_warn_penalty : Int32
 
-  getter log_channel : String
+  property log_channel : String
   getter allow_media_spoilers : Bool?
   getter regular_forwards : Bool?
   getter inactivity_limit : Int32

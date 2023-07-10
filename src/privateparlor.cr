@@ -7,7 +7,14 @@ VERSION = "0.9"
 
 bot = PrivateParlor.new(Configuration.parse_config)
 
-bot.log_output(bot.locale.logs.start, {"version" => VERSION})
+begin
+  bot.log_output(bot.locale.logs.start, {"version" => VERSION})
+rescue ex
+  Log.error(exception: ex) { 
+    "Failed to send message to log channel; check that the bot is an admin in the chanel and can post messages"
+  }
+  bot.log_channel = ""
+end
 
 Signal::INT.trap do
   bot.stop_polling
