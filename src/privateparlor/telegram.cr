@@ -13,7 +13,7 @@ class PrivateParlor < Tourmaline::Client
   getter queue : MessageQueue
   getter locale : Locale
 
-  getter tasks : Hash(Symbol, Tasker::Task) = {} of Symbol => Tasker::Task
+  getter tasks : Array(Tasker::Task) = [] of Tasker::Task
   getter albums : Hash(String, Album) = {} of String => Album
   getter spam_handler : SpamScoreHandler | Nil
 
@@ -228,15 +228,15 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Starts various background tasks and stores them in a hash.
-  def register_tasks(spam_interval_seconds : Int32) : Hash(Symbol, Tasker::Task)
-    tasks = {} of Symbol => Tasker::Task
-    tasks[:cache] = Tasker.every(@history.lifespan * (1/4)) { @history.expire }
-    tasks[:warnings] = Tasker.every(15.minutes) { @database.expire_warnings(warn_expire_hours) }
+  def register_tasks(spam_interval_seconds : Int32) : Array(Tasker::Task)
+    task = [] of Tasker::Task
+    tasks << Tasker.every(@history.lifespan * (1/4)) { @history.expire }
+    tasks << Tasker.every(15.minutes) { @database.expire_warnings(warn_expire_hours) }
     if spam = @spam_handler
-      tasks[:spam] = Tasker.every(spam_interval_seconds.seconds) { spam.expire }
+      tasks << Tasker.every(spam_interval_seconds.seconds) { spam.expire }
     end
     if @inactivity_limit > 0
-      tasks[:inactivity] = Tasker.every(6.hours) { kick_inactive_users }
+      tasks << Tasker.every(6.hours) { kick_inactive_users }
     end
     tasks
   end
