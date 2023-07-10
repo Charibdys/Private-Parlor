@@ -7,7 +7,7 @@ class AuthorizedRanks
   # Returns `true` if user rank has the given permission; user is authorized.
   #
   # Returns `false` otherwise, or `nil` if the user rank does not exist in `ranks`
-  def authorized?(user_rank : Int32, permission : Symbol) : Bool?
+  def authorized?(user_rank : Int32, permission : CommandPermissions) : Bool?
     if rank = @ranks[user_rank]?
       rank.permissions.includes?(permission)
     end
@@ -18,7 +18,7 @@ class AuthorizedRanks
   # Returns`nil` if the user rank does not exist in `ranks` or if the rank does not have any of the given permissions.
   #
   # Used for checking groups of permissions that are similar.
-  def authorized?(user_rank : Int32, *permissions : Symbol) : Symbol?
+  def authorized?(user_rank : Int32, *permissions : CommandPermissions) : CommandPermissions?
     if rank = @ranks[user_rank]?
       (rank.permissions & permissions.to_set).first?
     end
@@ -52,7 +52,7 @@ class AuthorizedRanks
   end
 
   # Returns true if the user to be promoted (receiver) can be promoted with the given rank.
-  def can_promote?(rank : Int32, invoker : Int32, receiver : Int32, permission : Symbol) : Bool
+  def can_promote?(rank : Int32, invoker : Int32, receiver : Int32, permission : CommandPermissions) : Bool
     if rank <= receiver || rank > invoker || rank == -10
       return false
     end
@@ -74,7 +74,7 @@ class AuthorizedRanks
   end
 
   # Returns `true` if the user can sign a message with the given rank.
-  def can_ranksay?(rank : Int32, invoker : Int32, permission : Symbol) : Bool
+  def can_ranksay?(rank : Int32, invoker : Int32, permission : CommandPermissions) : Bool
     rank != -10 && (rank < invoker && permission == :ranksay_lower) || rank == invoker
   end
 

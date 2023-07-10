@@ -706,7 +706,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
-  def promote_from_reply(user : Database::User, info : Tourmaline::User, authority : Symbol, arg : String?, msid : Int64, reply : Int64) : Nil
+  def promote_from_reply(user : Database::User, info : Tourmaline::User, authority : CommandPermissions, arg : String?, msid : Int64, reply : Int64) : Nil
     if arg.nil? && authority.in?(:promote, :promote_same)
       tuple = {user.rank, @access.ranks[user.rank]}
     elsif arg
@@ -742,7 +742,7 @@ class PrivateParlor < Tourmaline::Client
     relay_to_one(msid, user.id, @locale.replies.success)
   end
 
-  def promote_from_args(user : Database::User, info : Tourmaline::User, authority : Symbol, args : Array(String) | Nil, msid : Int64) : Nil
+  def promote_from_args(user : Database::User, info : Tourmaline::User, authority : CommandPermissions, args : Array(String) | Nil, msid : Int64) : Nil
     unless args
       return relay_to_one(msid, user.id, @locale.replies.missing_args)
     end
@@ -1552,7 +1552,7 @@ class PrivateParlor < Tourmaline::Client
     if @pseudonymous || !@enable_tripsign
       return relay_to_one(msid, user.id, @locale.replies.command_disabled)
     end
-    unless @access.authorized?(user.rank, :tsign)
+    unless @access.authorized?(user.rank, :TSign)
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
     unless tripkey = user.tripcode

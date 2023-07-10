@@ -56,39 +56,33 @@ module Configuration
   #
   # Returns an updated `Config` object
   def check_and_init_ranks(config : Config) : Config
-    command_keys = Set{
-      :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote,
-      :sign, :tsign, :reveal, :spoiler, :pin, :unpin, :ranksay, :ranksay_lower, :warn,
-      :delete, :uncooldown, :remove, :purge, :blacklist, :whitelist, :motd_set, :ranked_info,
+    promote_keys = Set{
+      CommandPermissions::Promote,
+      CommandPermissions::PromoteLower,
+      CommandPermissions::PromoteSame,
     }
 
-    promote_keys = Set{:promote, :promote_lower, :promote_same}
+    ranksay_keys = Set{
+      CommandPermissions::Ranksay,
+      CommandPermissions::RanksayLower,
+    }
 
-    ranksay_keys = Set{:ranksay, :ranksay_lower}
-
-    config.intermediary_ranks.each do |ri|
-      if (invalid = ri.permissions.to_set - command_keys.map(&.to_s)) && !invalid.empty?
+    config.ranks.each do |key, rank|
+      permissions = rank.permissions
+      if (invalid_promote = rank.permissions & promote_keys) && invalid_promote.size > 1
         Log.notice {
-          "Rank #{ri.name} (#{ri.value}) has the following invalid permissions: [#{invalid.join(", ")}]"
+          "Removed the following mutually exclusive permissions from Rank #{rank.name}: [#{invalid_promote.join(", ")}]"
         }
+        permissions = rank.permissions - promote_keys
       end
-      if (invalid_promote = ri.permissions & promote_keys.map(&.to_s)) && invalid_promote.size > 1
+      if (invalid_ranksay = rank.permissions & ranksay_keys) && invalid_ranksay.size > 1
         Log.notice {
-          "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_promote.join(", ")}]"
+          "Removed the following mutually exclusive permissions from Rank #{rank.name}: [#{invalid_ranksay.join(", ")}]"
         }
-        ri.permissions = ri.permissions - promote_keys.map(&.to_s)
-      end
-      if (invalid_ranksay = ri.permissions & ranksay_keys.map(&.to_s)) && invalid_ranksay.size > 1
-        Log.notice {
-          "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_ranksay.join(", ")}]"
-        }
-        ri.permissions = ri.permissions - ranksay_keys.map(&.to_s)
+        permissions = rank.permissions - ranksay_keys
       end
 
-      config.ranks[ri.value] = Rank.new(
-        ri.name,
-        command_keys.compact_map { |key| key if ri.permissions.includes?(key.to_s) }.to_set
-      )
+      config.ranks[key] = Rank.new(rank.name, permissions)
     end
 
     config

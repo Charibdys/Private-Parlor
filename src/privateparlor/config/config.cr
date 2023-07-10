@@ -41,12 +41,9 @@ class Config
   getter linked_network : Hash(String, String) = {} of String => String
 
   @[YAML::Field(key: "ranks")]
-  getter intermediary_ranks : Array(IntermediaryRank)
-
-  @[YAML::Field(ignore: true)]
-  getter ranks : Hash(Int32, Rank) = {
-    -10 => Rank.new("Banned", Set.new([] of Symbol)),
-      0 => Rank.new("User", Set.new([:upvote, :downvote, :sign, :tsign])),
+  property ranks : Hash(Int32, Rank) = {
+    -10 => Rank.new("Banned", Set.new([] of CommandPermissions)),
+      0 => Rank.new("User", Set{CommandPermissions::Upvote, CommandPermissions::Downvote, CommandPermissions::Sign, CommandPermissions::TSign}),
   }
 
   @[YAML::Field(key: "karma_levels")]

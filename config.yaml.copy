@@ -66,23 +66,23 @@ locale: "en-US"
 # sign tsign reveal spoiler pin unpin ranksay ranksay_lower warn 
 # delete uncooldown remove purge blacklist motd_set ranked_info
 ranks:
-  - name: "Banned"
-    value: -10
+  -10:
+    name: "Banned"
     permissions: []
-  - name: "User"
-    value: 0
+  0:
+    name: "User"
     permissions: ["upvote", "downvote", "sign", "tsign"]
-  - name: "Mod"
-    value: 10
+  10:
+    name: "Mod"
     permissions: ["upvote", "downvote", "sign", "tsign", 
       "ranked_info", "users", "warn", "delete", "ranksay"]
-  - name: "Admin"
-    value: 100
+  100:
+    name: "Admin"
     permissions: ["upvote", "downvote", "sign", "tsign", 
       "ranked_info", "users", "warn", "delete", "uncooldown",
       "remove", "purge", "blacklist", "ranksay"]
-  - name: "Host"
-    value: 1000
+  1000:
+    name: "Host"
     permissions: ["upvote", "downvote", "sign", "tsign", 
       "ranked_info", "users", "promote_lower", "demote", 
       "warn", "delete", "uncooldown", "remove", "purge", 
