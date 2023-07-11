@@ -110,6 +110,10 @@ ranks:
       "forward", "sticker", "dice", "dart", "basketball", "soccerball", 
       "slotmachine", "bowling", "venue", "location", "contact"]
 
+# Default rank used when adding a new user, demoting users, or reverting invalid ranks
+# Default rank must exist in the ranks defined above
+# Ranks greater than 0 are not subject to the media limit period
+default_rank: 0
 
 # Levels for karma score
 # Users can view their karma level and sign as their karma level if enabled

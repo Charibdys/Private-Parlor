@@ -33,32 +33,24 @@ class Database
     getter debug_enabled : Bool?
     getter tripcode : String?
 
-    # Create an instance of `User` from a hash with an `:id` key.
-    #
-    # If the hash does not contain any other key/value pairs, initialize using default values.
-    #
-    # Keys not found in `defaults` will default to `nil`.
-    def initialize(user = {:id})
-      defaults = {realname: "", rank: 0, joined: Time.utc, last_active: Time.utc, warnings: 0,
-                  karma: 0, hide_karma: false, debug_enabled: false}
-
-      defaults = defaults.merge(user)
-
-      @id = defaults[:id]
-      @username = defaults[:username]?
-      @realname = defaults[:realname]
-      @rank = defaults[:rank]
-      @joined = defaults[:joined]
-      @left = defaults[:left]?
-      @last_active = defaults[:last_active]
-      @cooldown_until = defaults[:cooldown_until]?
-      @blacklist_reason = defaults[:blacklist_reason]?
-      @warnings = defaults[:warnings]
-      @warn_expiry = defaults[:warn_expiry]?
-      @karma = defaults[:karma]
-      @hide_karma = defaults[:hide_karma]
-      @debug_enabled = defaults[:debug_enabled]
-      @tripcode = defaults[:tripcode]?
+    # Create an instance of `User`
+    def initialize(
+      @id,
+      @username = nil,
+      @realname = "",
+      @rank = 0,
+      @joined = Time.utc,
+      @left = nil,
+      @last_active = Time.utc,
+      @cooldown_until = nil,
+      @blacklist_reason = nil,
+      @warnings = 0,
+      @warn_expiry = nil,
+      @karma = 0,
+      @hide_karma = false,
+      @debug_enabled = false,
+      @tripcode = nil
+    )
     end
 
     # Returns an array with all the values in `User`. Used for Database query arguments.
@@ -314,7 +306,7 @@ class Database
   #
   # Returns the new `User`.
   def add_user(id, username, realname, rank = 0) : User
-    user = User.new({id: id, username: username, realname: realname, rank: rank})
+    user = User.new(id, username, realname, rank)
 
     {% begin %}
       {% arr = [] of ArrayLiteral %}

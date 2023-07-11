@@ -42,6 +42,7 @@ class PrivateParlor < Tourmaline::Client
   getter tripcode_salt : String
   getter linked_network : Hash(String, String)
   getter entity_types : Array(String)
+  getter default_rank : Int32
   getter karma_levels : Hash(Int32, String)
 
   # Creates a new instance of `PrivateParlor`.
@@ -80,6 +81,7 @@ class PrivateParlor < Tourmaline::Client
     @tripcode_salt = config.salt
     @linked_network = config.linked_network
     @entity_types = config.entities
+    @default_rank = config.default_rank
     @karma_levels = config.karma_levels
 
     db = DB.open("sqlite3://#{Path.new(config.database)}") # TODO: We'll want check if this works on Windows later
@@ -115,9 +117,10 @@ class PrivateParlor < Tourmaline::Client
   # If the rank is not valid, the user is reverted to the default user rank.
   def revert_ranked_users : Nil
     @database.get_invalid_rank_users(@access.ranks.keys).each do |user|
-      user.set_rank(0)
+      invalid_rank = user.rank
+      user.set_rank(@default_rank)
       @database.modify_user(user)
-      log_output("User #{user.id}, aka #{user.get_formatted_name}, had an invalid rank (was #{user.rank}) and was reverted to user rank (0)")
+      log_output("User #{user.id}, aka #{user.get_formatted_name}, had an invalid rank (was #{invalid_rank}) and was reverted to default rank (#{@default_rank})")
     end
   end
 
@@ -280,7 +283,7 @@ class PrivateParlor < Tourmaline::Client
       if database.no_users?
         user = database.add_user(info.id, info.username, info.full_name, @access.max_rank)
       else
-        user = database.add_user(info.id, info.username, info.full_name)
+        user = database.add_user(info.id, info.username, info.full_name, @default_rank)
       end
 
       if motd = @database.get_motd
@@ -812,7 +815,7 @@ class PrivateParlor < Tourmaline::Client
 
   def demote_from_reply(user : Database::User, info : Tourmaline::User, arg : String?, msid : Int64, reply : Int64) : Nil
     if arg.nil?
-      tuple = {0, @access.ranks[0]}
+      tuple = {@default_rank, @access.ranks[@default_rank]}
     elsif arg
       tuple = @access.find_rank(arg.downcase, arg.to_i?)
     else
@@ -1206,7 +1209,7 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    database.add_user(arg, "", "WHITELISTED", 0)
+    database.add_user(arg, "", "WHITELISTED", @default_rank)
 
     # Will throw if user has not started a chat with the bot, or throw and
     # force leave user if bot is blocked, but user is still whitelisted

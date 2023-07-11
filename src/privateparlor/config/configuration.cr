@@ -61,6 +61,26 @@ module Configuration
       CommandPermissions::RanksayLower,
     }
 
+    if config.ranks[config.default_rank]? == nil
+      Log.notice { "Default rank #{config.default_rank} does not exist in ranks, using User with rank 0 as default" }
+      config.default_rank = 0
+
+      config.ranks[0] = Rank.new(
+        "User",
+        Set{
+          CommandPermissions::Upvote, CommandPermissions::Downvote, CommandPermissions::Sign, CommandPermissions::TSign,
+        },
+        Set{
+          MessagePermissions::Text, MessagePermissions::Animation, MessagePermissions::Audio, MessagePermissions::Document,
+          MessagePermissions::Video, MessagePermissions::VideoNote, MessagePermissions::Voice, MessagePermissions::Photo,
+          MessagePermissions::MediaGroup, MessagePermissions::Poll, MessagePermissions::Forward, MessagePermissions::Sticker,
+          MessagePermissions::Dice, MessagePermissions::Dart, MessagePermissions::Basketball, MessagePermissions::Soccerball,
+          MessagePermissions::SlotMachine, MessagePermissions::Bowling, MessagePermissions::Venue,
+          MessagePermissions::Location, MessagePermissions::Contact,
+        }
+      )
+    end
+
     config.ranks.each do |key, rank|
       permissions = rank.command_permissions
       if (invalid_promote = rank.command_permissions & promote_keys) && invalid_promote.size > 1

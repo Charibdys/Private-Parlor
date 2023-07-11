@@ -49,6 +49,9 @@ class Config
     ),
   }
 
+  @[YAML::Field(key: "default_rank")]
+  property default_rank : Int32 = 0
+
   @[YAML::Field(key: "karma_levels")]
   property karma_levels : Hash(Int32, String) = {} of Int32 => String
 
