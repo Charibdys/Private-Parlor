@@ -17,8 +17,9 @@ locale: "en-US"
 #log_channel: -100XXXXXXXXXX
 
 # Modify lifetime of a message, in hours (24 hours is the default)
-# Can be set greater than or equal to 1
-# NOTE: Increasing this value will increase RAM usage if database history is not enabled
+# Can be greater than or equal to 0
+# If 0, messages exist indefinitely
+# NOTE: This will increase ram usage if database history is not enabled
 #lifetime: 24
 
 # Limit usage of /sign and /tsign for once every interval (seconds)
