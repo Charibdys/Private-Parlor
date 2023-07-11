@@ -42,8 +42,11 @@ class Config
 
   @[YAML::Field(key: "ranks")]
   property ranks : Hash(Int32, Rank) = {
-    -10 => Rank.new("Banned", Set.new([] of CommandPermissions)),
-      0 => Rank.new("User", Set{CommandPermissions::Upvote, CommandPermissions::Downvote, CommandPermissions::Sign, CommandPermissions::TSign}),
+    -10 => Rank.new(
+      "Banned",
+      Set.new([] of CommandPermissions),
+      Set.new([] of MessagePermissions)
+    ),
   }
 
   @[YAML::Field(key: "karma_levels")]

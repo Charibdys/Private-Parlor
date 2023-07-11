@@ -2,8 +2,9 @@ class Rank
   include YAML::Serializable
 
   getter name : String
-  getter permissions : Set(CommandPermissions)
+  getter command_permissions : Set(CommandPermissions)
+  getter message_permissions : Set(MessagePermissions)
 
-  def initialize(@name, @permissions)
+  def initialize(@name, @command_permissions, @message_permissions)
   end
 end

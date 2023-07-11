@@ -395,15 +395,15 @@ module Format
       reply_commands = [] of String
 
       if rank = ranks[user.rank]?
-        if rank.permissions.includes?(:ranksay_lower)
+        if rank.command_permissions.includes?(:ranksay_lower)
           ranks.each do |k, v|
-            if k <= user.rank && k != -10 && v.permissions.includes?(:ranksay)
+            if k <= user.rank && k != -10 && v.command_permissions.includes?(:ranksay)
               rank_commands << escape_html("/#{v.name.downcase}say [text] - #{locale.command_descriptions.ranksay}")
             end
           end
         end
 
-        rank.permissions.each do |permission|
+        rank.command_permissions.each do |permission|
           if ranked.keys.includes?(permission)
             rank_commands << escape_html(ranked[permission])
           elsif reply_required.keys.includes?(permission)

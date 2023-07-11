@@ -4,23 +4,32 @@ class AuthorizedRanks
   def initialize(@ranks : Hash(Int32, Rank))
   end
 
-  # Returns `true` if user rank has the given permission; user is authorized.
+  # Returns `true` if user rank has the given command permission; user is authorized.
   #
   # Returns `false` otherwise, or `nil` if the user rank does not exist in `ranks`
   def authorized?(user_rank : Int32, permission : CommandPermissions) : Bool?
     if rank = @ranks[user_rank]?
-      rank.permissions.includes?(permission)
+      rank.command_permissions.includes?(permission)
     end
   end
 
-  # Returns the first symbol found from intersecting the user permissions and the given permissions; user is authorized.
+  # Returns the first symbol found from intersecting the user command permissions and the given permissions; user is authorized.
   #
   # Returns`nil` if the user rank does not exist in `ranks` or if the rank does not have any of the given permissions.
   #
-  # Used for checking groups of permissions that are similar.
+  # Used for checking groups of command permissions that are similar.
   def authorized?(user_rank : Int32, *permissions : CommandPermissions) : CommandPermissions?
     if rank = @ranks[user_rank]?
-      (rank.permissions & permissions.to_set).first?
+      (rank.command_permissions & permissions.to_set).first?
+    end
+  end
+
+  # Returns `true` if user rank has the given message permission; user is authorized.
+  #
+  # Returns `false` otherwise, or `nil` if the user rank does not exist in `ranks`
+  def authorized?(user_rank : Int32, permission : MessagePermissions) : Bool?
+    if rank = @ranks[user_rank]?
+      rank.message_permissions.includes?(permission)
     end
   end
 

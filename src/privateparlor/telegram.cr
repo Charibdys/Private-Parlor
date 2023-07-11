@@ -221,7 +221,7 @@ class PrivateParlor < Tourmaline::Client
     if config.relay_{{media_type.id}}
       add_event_handler(UpdateHandler.new(:{{media_type.id}}) {|update| handle_{{media_type.id}}(update)})
     else
-      add_event_handler(UpdateHandler.new(:{{media_type.id}}) {|update| media_disabled(update, "{{media_type.id}}")})
+      add_event_handler(UpdateHandler.new(:{{media_type.id}}) {|update| media_disabled(update, {{media_type}})})
     end
 
     {% end %}
@@ -229,7 +229,7 @@ class PrivateParlor < Tourmaline::Client
 
   # Starts various background tasks and stores them in a hash.
   def register_tasks(spam_interval_seconds : Int32) : Array(Tasker::Task)
-    task = [] of Tasker::Task
+    tasks = [] of Tasker::Task
     tasks << Tasker.every(@history.lifespan * (1/4)) { @history.expire }
     tasks << Tasker.every(15.minutes) { @database.expire_warnings(warn_expire_hours) }
     if spam = @spam_handler
@@ -1671,6 +1671,9 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
+    unless @access.authorized?(user.rank, :text)
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "text"})
+    end
     unless (raw_text = message.text) && (text = check_text(Format.strip_format(raw_text, message.entities, @entity_types, @linked_network), user, message.message_id))
       return
     end
@@ -1718,6 +1721,9 @@ class PrivateParlor < Tourmaline::Client
     end
     unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :{{captioned_type}})
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => {{captioned_type}}})
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_{{captioned_type.id}})
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
@@ -1784,6 +1790,9 @@ class PrivateParlor < Tourmaline::Client
     end
     unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :media_group)
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "media_group"})
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_media_group)
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
@@ -1870,6 +1879,9 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
+    unless @access.authorized?(user.rank, :poll)
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "poll"})
+    end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_poll)
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
     end
@@ -1918,6 +1930,9 @@ class PrivateParlor < Tourmaline::Client
     end
     unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :forward)
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "forwarded_message"})
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_forwarded_message)
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
@@ -2053,6 +2068,9 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?(@media_limit_period.hours)
       return deny_user(user)
     end
+    unless @access.authorized?(user.rank, :sticker)
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "sticker"})
+    end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_sticker)
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
     end
@@ -2082,6 +2100,9 @@ class PrivateParlor < Tourmaline::Client
     end
     unless user.can_chat?
       return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :{{luck_type}})
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => {{luck_type}}})
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_{{luck_type.id}})
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
@@ -2115,6 +2136,9 @@ class PrivateParlor < Tourmaline::Client
     end
     unless user.can_chat?
       return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :venue)
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "venue"})
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_venue)
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
@@ -2159,6 +2183,9 @@ class PrivateParlor < Tourmaline::Client
     unless user.can_chat?
       return deny_user(user)
     end
+    unless @access.authorized?(user.rank, :location)
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "location"})
+    end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_location)
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
     end
@@ -2195,6 +2222,9 @@ class PrivateParlor < Tourmaline::Client
     end
     unless user.can_chat?
       return deny_user(user)
+    end
+    unless @access.authorized?(user.rank, :contact)
+      return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "contact"})
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_contact)
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)

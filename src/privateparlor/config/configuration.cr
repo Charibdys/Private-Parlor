@@ -68,21 +68,21 @@ module Configuration
     }
 
     config.ranks.each do |key, rank|
-      permissions = rank.permissions
-      if (invalid_promote = rank.permissions & promote_keys) && invalid_promote.size > 1
+      permissions = rank.command_permissions
+      if (invalid_promote = rank.command_permissions & promote_keys) && invalid_promote.size > 1
         Log.notice {
           "Removed the following mutually exclusive permissions from Rank #{rank.name}: [#{invalid_promote.join(", ")}]"
         }
-        permissions = rank.permissions - promote_keys
+        permissions = rank.command_permissions - promote_keys
       end
-      if (invalid_ranksay = rank.permissions & ranksay_keys) && invalid_ranksay.size > 1
+      if (invalid_ranksay = rank.command_permissions & ranksay_keys) && invalid_ranksay.size > 1
         Log.notice {
           "Removed the following mutually exclusive permissions from Rank #{rank.name}: [#{invalid_ranksay.join(", ")}]"
         }
-        permissions = rank.permissions - ranksay_keys
+        permissions = rank.command_permissions - ranksay_keys
       end
 
-      config.ranks[key] = Rank.new(rank.name, permissions)
+      config.ranks[key] = Rank.new(rank.name, permissions, rank.message_permissions)
     end
 
     config
