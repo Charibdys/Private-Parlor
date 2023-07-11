@@ -2334,16 +2334,30 @@ class PrivateParlor < Tourmaline::Client
   end
 
   # Caches a message and sends it to the queue for relaying.
-  def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64 | Array(Int64), proc : MessageProc) : Nil
+  def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64, proc : MessageProc) : Nil
     if reply_message
       if (reply_msids = @history.get_all_msids(reply_message.message_id)) && reply_msids.empty?
-        relay_to_one(cached_msid.is_a?(Int64) ? cached_msid : cached_msid[0], user.id, @locale.replies.not_in_cache)
-        if cached_msid.is_a?(Int64)
-          @history.del_message_group(cached_msid)
-        else
-          cached_msid.each { |msid| @history.del_message_group(msid) }
-        end
+        relay_to_one(cached_msid, user.id, @locale.replies.not_in_cache)
+        @history.del_message_group(cached_msid)
+        return
+      end
+    end
 
+    @queue.add_to_queue(
+      cached_msid,
+      user.id,
+      @database.get_prioritized_users(user),
+      reply_msids,
+      proc
+    )
+  end
+
+  # Caches an album message and sends it to the queue for relaying.
+  def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Array(Int64), proc : MessageProc) : Nil
+    if reply_message
+      if (reply_msids = @history.get_all_msids(reply_message.message_id)) && reply_msids.empty?
+        relay_to_one(cached_msid[0], user.id, @locale.replies.not_in_cache)
+        cached_msid.each { |msid| @history.del_message_group(msid) }
         return
       end
     end
