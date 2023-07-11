@@ -18,7 +18,6 @@ module Configuration
 
   # Run additional checks on Config instance variables.
   #
-  # Check bounds on `config.lifetime`.
   # Check size of `config.smileys`; should be 4
   # Check contents of `config.entities` for mispellings or duplicates.
   #
@@ -26,11 +25,6 @@ module Configuration
   def check_config(config : Config) : Config
     message_entities = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold", "italic",
                         "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention", "custom_emoji"]
-
-    if (1..).includes?(config.lifetime) == false
-      Log.notice { "Message lifetime not within range, was #{config.lifetime}; defaulting to 24 hours." }
-      config.lifetime = 24
-    end
 
     if config.smileys.size != 4
       Log.notice { "Not enough or too many smileys. Should be four, was #{config.smileys}; defaulting to [:), :|, :/, :(]" }

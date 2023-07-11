@@ -20,7 +20,7 @@ class Config
   getter log_channel : String = ""
 
   @[YAML::Field(key: "lifetime")]
-  property lifetime : Int32 = 24
+  property lifetime : UInt32 = 24
 
   @[YAML::Field(key: "database_history")]
   getter database_history : Bool? = false

@@ -230,8 +230,10 @@ class PrivateParlor < Tourmaline::Client
   # Starts various background tasks and stores them in a hash.
   def register_tasks(spam_interval_seconds : Int32) : Array(Tasker::Task)
     tasks = [] of Tasker::Task
-    tasks << Tasker.every(@history.lifespan * (1/4)) { @history.expire }
     tasks << Tasker.every(15.minutes) { @database.expire_warnings(warn_expire_hours) }
+    if @history.lifespan != 0.hours
+      tasks << Tasker.every(@history.lifespan * (1/4)) { @history.expire }
+    end
     if spam = @spam_handler
       tasks << Tasker.every(spam_interval_seconds.seconds) { spam.expire }
     end
