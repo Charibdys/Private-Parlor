@@ -147,7 +147,7 @@ def find_user(identity : Int64) : Nil
   DATABASES.each do |name, db|
     if user = DatabaseWarden.find_user(db, identity, name)
       puts "#{name} Database:"
-      puts "\t#{user.to_s}"
+      puts "#{user}"
       puts
     else
       puts "User not found in \"#{name}\" database"
@@ -163,7 +163,7 @@ def find_user(identity : String) : Nil
   DATABASES.each do |name, db|
     if user = DatabaseWarden.find_user(db, identity, name)
       puts "#{name} Database:"
-      puts "\t#{user.to_s}"
+      puts "#{user}"
       puts
     else
       puts "User not found in \"#{name}\" database"
@@ -177,11 +177,11 @@ def list_ranked_users : Nil
   end
 
   DATABASES.each do |name, db|
-    users = DatabaseWarden.list_ranked_users(db, name) 
+    users = DatabaseWarden.list_ranked_users(db, name)
     if users && !users.empty?
       puts "Ranked users in \"#{name}\" database:"
       users.each do |user|
-        puts "#{user.to_s}"
+        puts "#{user}"
         puts
       end
     else
@@ -196,11 +196,11 @@ def list_banned_users : Nil
   end
 
   DATABASES.each do |name, db|
-    users = DatabaseWarden.list_banned_users(db, name) 
+    users = DatabaseWarden.list_banned_users(db, name)
     if users && !users.empty?
       puts "Banned users in \"#{name}\" database:"
       users.each do |user|
-        puts "#{user.to_s}"
+        puts "#{user}"
         puts
       end
     else
@@ -255,9 +255,9 @@ def ban_user(identity : Int64) : Nil
   end
 
   DATABASES.each do |name, db|
-    if user = DatabaseWarden.find_user(db, identity, name)
+    if DatabaseWarden.find_user(db, identity, name)
       DatabaseWarden.ban_user(db, identity, name)
-      
+
       puts "Banned user #{identity} in \"#{name}\" database"
     else
       DatabaseWarden.create_banned_user(db, identity, name)
@@ -273,7 +273,7 @@ def ban_user(identity : String) : Nil
   end
 
   DATABASES.each do |name, db|
-    if user = DatabaseWarden.find_user(db, identity, name)
+    if DatabaseWarden.find_user(db, identity, name)
       DatabaseWarden.ban_user(db, identity, name)
 
       puts "Banned user #{identity} in \"#{name}\" database"
@@ -289,9 +289,9 @@ def unban_user(identity : Int64) : Nil
   end
 
   DATABASES.each do |name, db|
-    if user = DatabaseWarden.find_user(db, identity, name)
+    if DatabaseWarden.find_user(db, identity, name)
       DatabaseWarden.unban_user(db, identity, name)
-      
+
       puts "Unbanned user #{identity} in \"#{name}\" database"
     else
       STDERR.puts "Could not unban user #{identity} in \"#{name}\" database because user does not exist there"
@@ -305,7 +305,7 @@ def unban_user(identity : String) : Nil
   end
 
   DATABASES.each do |name, db|
-    if user = DatabaseWarden.find_user(db, identity, name)
+    if DatabaseWarden.find_user(db, identity, name)
       DatabaseWarden.unban_user(db, identity, name)
 
       puts "Unbanned user #{identity} in \"#{name}\" database"
