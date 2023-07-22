@@ -90,7 +90,7 @@ class PrivateParlor < Tourmaline::Client
     @history = get_history_type(db, config)
     @queue = MessageQueue.new
     @locale = Localization.parse_locale(config.locale)
-    @spam_handler = config.spam_score_handler if config.spam_interval_seconds != 0
+    @spam_handler = config.spam_score_handler if config.spam_interval_seconds > 0
     @tasks = register_tasks(config.spam_interval_seconds)
 
     revert_ranked_users()
