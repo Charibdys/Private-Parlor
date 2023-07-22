@@ -353,11 +353,8 @@ class PrivateParlor < Tourmaline::Client
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    if reply_user.remove_cooldown
-      cooldown_until = nil
-    else
-      cooldown_until = Format.format_cooldown_until(reply_user.cooldown_until, @locale)
-    end
+    reply_user.remove_cooldown
+    cooldown_until = Format.format_cooldown_until(reply_user.cooldown_until, @locale)
 
     relay_to_one(msid, user.id, @locale.replies.ranked_info, {
       "oid"            => reply_user.get_obfuscated_id.to_s,
@@ -389,11 +386,8 @@ class PrivateParlor < Tourmaline::Client
       current_level = ""
     end
 
-    if user.remove_cooldown
-      cooldown_until = nil
-    else
-      cooldown_until = Format.format_cooldown_until(user.cooldown_until, @locale)
-    end
+    user.remove_cooldown
+    cooldown_until = Format.format_cooldown_until(user.cooldown_until, @locale)
 
     relay_to_one(msid, user.id, @locale.replies.user_info, {
       "oid"            => user.get_obfuscated_id.to_s,
