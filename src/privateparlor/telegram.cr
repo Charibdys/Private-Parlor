@@ -306,6 +306,9 @@ class PrivateParlor < Tourmaline::Client
     unless (message = ctx.message) && (info = message.from)
       return
     end
+    unless user = database.get_user(info.id)
+      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
+    end
 
     if (user = database.get_user(info.id)) && !user.left?
       user.set_active(info.username, info.full_name)
