@@ -398,7 +398,7 @@ class PrivateParlor < Tourmaline::Client
       "rank_val"       => user.rank.to_s,
       "rank"           => @access.rank_name(user.rank),
       "karma"          => user.karma.to_s,
-      "karma_level"    => "(#{current_level})",
+      "karma_level"    => current_level.empty? ? nil : "(#{current_level})",
       "warnings"       => user.warnings.to_s,
       "warn_expiry"    => Format.format_warn_expiry(user.warn_expiry, @locale),
       "smiley"         => Format.format_smiley(user.warnings, @smileys),
