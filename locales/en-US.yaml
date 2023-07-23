@@ -65,7 +65,7 @@ replies:
    no_user_oid_found:  "<i>There was no user found with that OID.</i>"
 
    # Available placeholders: ranks
-   no_rank_found: "<i>There was no rank found with that name. Ranks are: [{ranks}]</i>"
+   no_rank_found: "<i>There was no rank found with that name. Ranks are: {ranks}</i>"
 
    # Available placeholders: rank
    promoted: "<i>You have been promoted to {rank}! Type /help to view the commands available to you.</i>"
@@ -85,7 +85,7 @@ replies:
 
    gave_upvote: "<i>You upvoted this message!</i>"
 
-   got_upvote: "<i>You've just been upvoted! (check /info to see your karma or /toggleKarma to turn these notifications off)</i>"
+   got_upvote: "<i>You've just been upvoted! (check /info to see your karma or /togglekarma to turn these notifications off)</i>"
 
    upvoted_own_message: "<i>You can't upvote your own message!</i>"
 
@@ -93,7 +93,7 @@ replies:
 
    gave_downvote: "<i>You downvoted this message!</i>"
 
-   got_downvote: "<i>You've just been downvoted! (check /info to see your karma or /toggleKarma to turn these notifications off)</i>"
+   got_downvote: "<i>You've just been downvoted! (check /info to see your karma or /togglekarma to turn these notifications off)</i>"
 
    downvoted_own_message: "<i>You can't downvote your own message!</i>"
 
@@ -317,6 +317,9 @@ logs:
 
    # Available placeholders: id, name
    unpinned: "User {id}, aka {name}, unpinned most recently pinned message"
+
+   # Available placeholders: id, name, text
+   motd_set: "User {id}, aka {name}, set the MOTD to: {text}"
 
    # Available placeholders: id, name, rank, text
    ranked_message: "User {id}, aka {name}, sent {rank} message: {text}"

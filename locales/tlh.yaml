@@ -65,7 +65,7 @@ replies:
    no_user_oid_found: "<i>OID ghajbogh meb SamlaHbe'pu'</i>"
 
    # Available placeholders: ranks
-   no_rank_found: "<i>pong ghajbogh patlh SamlaHbe'pu'. patlhmey: [{ranks}]</i>"
+   no_rank_found: "<i>pong ghajbogh patlh SamlaHbe'pu'. patlhmey: {ranks}</i>"
 
    # Available placeholders: rank
    promoted: "<i>{rank} Danumta'! rIchwInmeylIj Dalo'laHbogh SoH'e' DaleghmeH /help yItur.</i>"
@@ -85,7 +85,7 @@ replies:
 
    gave_upvote: "<i>QInvam DanaDta'!</i>"
 
-   got_upvote: "<i>Qapla'! naD DaHevta'! (naDmeylIj DaleghmeH /info Datur qoj vepmey QotlhmeH /toggleKarma Datur)</i>"
+   got_upvote: "<i>Qapla'! naD DaHevta'! (naDmeylIj DaleghmeH /info Datur qoj vepmey QotlhmeH /togglekarma Datur)</i>"
 
    upvoted_own_message: "<i>QInlIj DanaDlaHbe'!</i>"
 
@@ -93,7 +93,7 @@ replies:
 
    gave_downvote: "<i>QInvam DanaDHa'ta'.</i>"
 
-   got_downvote: "<i>vay' DunaDHa'ta'! (naDmeylIj DaleghmeH /info Datur qoj vepmey QotlhmeH /toggleKarma Datur)</i>"
+   got_downvote: "<i>vay' DunaDHa'ta'! (naDmeylIj DaleghmeH /info Datur qoj vepmey QotlhmeH /togglekarma Datur)</i>"
 
    downvoted_own_message: "<i>QInlIj DanaDHa'laHbe'!</i>"
 
@@ -324,6 +324,9 @@ logs:
 
    # Available placeholders: id, name
    unpinned: "[{msid}] QInvam ghoQ vevHa' {id} meb (pong: {name})"
+
+   # Available placeholders: id, name, text
+   motd_set: "qangtlhIn chenmoHqa'ta' {id} meb (pong: {name}). qangtlhIn chu': {text}"
 
    # Available placeholders: id, name, rank, text
    ranked_message: "patIh tlhej QIn ngeHta' {id} meb (pong: {name}). QIn: {text}"

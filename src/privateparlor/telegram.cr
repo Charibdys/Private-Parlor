@@ -476,14 +476,14 @@ class PrivateParlor < Tourmaline::Client
     unless @access.authorized?(user.rank, :upvote)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
-    if (spam = @spam_handler) && spam.spammy_upvote?(user.id, @upvote_limit_interval)
-      return relay_to_one(message.message_id, user.id, @locale.replies.upvote_spam)
-    end
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, @locale.replies.no_reply)
     end
     unless reply_user = database.get_user(history_with_karma.get_sender_id(reply.message_id))
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
+    end
+    if (spam = @spam_handler) && spam.spammy_upvote?(user.id, @upvote_limit_interval)
+      return relay_to_one(message.message_id, user.id, @locale.replies.upvote_spam)
     end
 
     user.set_active(info.username, info.full_name)
@@ -525,14 +525,14 @@ class PrivateParlor < Tourmaline::Client
     unless @access.authorized?(user.rank, :downvote)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
-    if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @downvote_limit_interval)
-      return relay_to_one(message.message_id, user.id, @locale.replies.downvote_spam)
-    end
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, @locale.replies.no_reply)
     end
     unless reply_user = database.get_user(history_with_karma.get_sender_id(reply.message_id))
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
+    end
+    if (spam = @spam_handler) && spam.spammy_downvote?(user.id, @downvote_limit_interval)
+      return relay_to_one(message.message_id, user.id, @locale.replies.downvote_spam)
     end
 
     user.set_active(info.username, info.full_name)
@@ -612,9 +612,6 @@ class PrivateParlor < Tourmaline::Client
     if (chat = get_chat(user.id)) && chat.has_private_forwards
       return relay_to_one(message.message_id, user.id, @locale.replies.private_sign)
     end
-    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
-      return relay_to_one(message.message_id, user.id, @locale.replies.sign_spam)
-    end
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, @locale.replies.no_reply)
     end
@@ -623,6 +620,9 @@ class PrivateParlor < Tourmaline::Client
     end
     if reply_user.id == user.id
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
+    end
+    if (spam = @spam_handler) && spam.spammy_sign?(user.id, @sign_limit_interval)
+      return relay_to_one(message.message_id, user.id, @locale.replies.sign_spam)
     end
 
     user.set_active(info.username, info.full_name)
@@ -708,8 +708,8 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
-  def promote_from_reply(user : Database::User, info : Tourmaline::User, authority : CommandPermissions, arg : String?, msid : Int64, reply : Int64) : Nil
-    if arg.nil? && authority.in?(:promote, :promote_same)
+  def promote_from_reply(user : Database::User, info : Tourmaline::User, authority : CommandPermissions, arg : String?, msid : Int64, reply : Int64) : Nil    
+    if arg.nil? && authority.in?(CommandPermissions::Promote, CommandPermissions::PromoteSame)
       tuple = {user.rank, @access.ranks[user.rank]}
     elsif arg
       tuple = @access.find_rank(arg.downcase, arg.to_i?)
@@ -721,7 +721,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.no_rank_found, {"ranks" => @access.rank_names(limit: user.rank).to_s})
     end
     unless promoted_user = database.get_user(@history.get_sender_id(reply))
-      return relay_to_one(msid, user.id, @locale.replies.no_user_found)
+      return relay_to_one(msid, user.id, @locale.replies.not_in_cache)
     end
     unless @access.can_promote?(tuple[0], user.rank, promoted_user.rank, authority)
       return relay_to_one(msid, user.id, @locale.replies.fail)
@@ -749,7 +749,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.missing_args)
     end
 
-    if args.size == 1 && authority.in?(:promote, :promote_same)
+    if args.size == 1 && authority.in?(CommandPermissions::Promote, CommandPermissions::PromoteSame)
       tuple = {user.rank, @access.ranks[user.rank]}
     elsif args.size == 2
       tuple = @access.find_rank(args[1].downcase, args[1].to_i?)
@@ -823,7 +823,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.no_rank_found, {"ranks" => @access.rank_names(limit: user.rank).to_s})
     end
     unless demoted_user = database.get_user(@history.get_sender_id(reply))
-      return relay_to_one(msid, user.id, @locale.replies.no_user_found)
+      return relay_to_one(msid, user.id, @locale.replies.not_in_cache)
     end
     unless @access.can_demote?(tuple[0], user.rank, demoted_user.rank)
       return relay_to_one(msid, user.id, @locale.replies.fail)
@@ -1147,33 +1147,34 @@ class PrivateParlor < Tourmaline::Client
     unless reply_user = database.get_user(@history.get_sender_id(reply.message_id))
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
     end
+    unless reply_user.rank < user.rank
+      return relay_to_one(message.message_id, user.id, @locale.replies.fail)
+    end
 
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    if reply_user.rank < user.rank
-      reason = Format.get_arg(ctx.message.text)
-      reply_user.blacklist(reason)
-      @database.modify_user(reply_user)
+    reason = Format.get_arg(ctx.message.text)
+    reply_user.blacklist(reason)
+    @database.modify_user(reply_user)
 
-      @queue.reject_messsages do |msg|
-        msg.receiver == reply_user.id || msg.sender == reply_user.id
-      end
-
-      cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
-
-      relay_to_one(cached_msid, reply_user.id, @locale.replies.blacklisted, {
-        "contact" => Format.format_contact_reply(@blacklist_contact, @locale),
-        "reason"  => Format.format_reason_reply(reason, @locale),
-      })
-      log_output(@locale.logs.blacklisted, {
-        "id"      => reply_user.id.to_s,
-        "name"    => reply_user.get_formatted_name,
-        "invoker" => user.get_formatted_name,
-        "reason"  => Format.format_reason_log(reason, @locale),
-      })
-      relay_to_one(message.message_id, user.id, @locale.replies.success)
+    @queue.reject_messsages do |msg|
+      msg.receiver == reply_user.id || msg.sender == reply_user.id
     end
+
+    cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
+
+    relay_to_one(cached_msid, reply_user.id, @locale.replies.blacklisted, {
+      "contact" => Format.format_contact_reply(@blacklist_contact, @locale),
+      "reason"  => Format.format_reason_reply(reason, @locale),
+    })
+    log_output(@locale.logs.blacklisted, {
+      "id"      => reply_user.id.to_s,
+      "name"    => reply_user.get_formatted_name,
+      "invoker" => user.get_formatted_name,
+      "reason"  => Format.format_reason_log(reason, @locale),
+    })
+    relay_to_one(message.message_id, user.id, @locale.replies.success)
   end
 
   # Whitelists a user, allowing the user to join the chat. Only applicable if registration is closed
@@ -1363,6 +1364,9 @@ class PrivateParlor < Tourmaline::Client
     unless reply = message.reply_message
       return relay_to_one(message.message_id, user.id, @locale.replies.no_reply)
     end
+    unless @history.get_sender_id(reply.message_id)
+      return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
+    end
 
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
@@ -1447,6 +1451,13 @@ class PrivateParlor < Tourmaline::Client
       @database.modify_user(user)
 
       @database.set_motd(arg)
+
+      log_output(@locale.logs.motd_set, {
+        "id"   => user.id.to_s,
+        "name" => user.get_formatted_name,
+        "text" => arg,
+      })
+
       relay_to_one(message.message_id, user.id, @locale.replies.success)
     else
       unless motd = @database.get_motd
@@ -1643,7 +1654,9 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.no_rank_found, {"ranks" => @access.rank_names(limit: user.rank).to_s})
     end
 
-    unless @access.can_ranksay?(parsed_rank[0], user.rank, authority)
+    parsed_rank_authority = @access.authorized?(parsed_rank[0], :ranksay, :ranksay_lower)
+    
+    unless @access.can_ranksay?(parsed_rank[0], user.rank, authority, parsed_rank_authority)
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 

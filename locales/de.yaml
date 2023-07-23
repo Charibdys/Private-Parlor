@@ -65,7 +65,7 @@ replies:
    no_user_oid_found: "<i>Es gibt keinen Nutzer mit diesem OID.</i>"
 
    # Available placeholders: ranks
-   no_rank_found: "<i>Es gibt keine	Ränge mit diesem Name. Die Ränge sind: [{ranks}]</i>"
+   no_rank_found: "<i>Es gibt keine	Ränge mit diesem Name. Die Ränge sind: {ranks}</i>"
 
    # Available placeholders: rank
    promoted: "<i>Du bist zum {rank} befördert worden! Benutzt den /help Befehl, um deine Befehle zu sehen.</i>"
@@ -85,7 +85,7 @@ replies:
 
    gave_upvote: "<i>Du hast Karma zu dieser Nachricht gegeben!</i>"
 
-   got_upvote: "<i>Du hast Karma bekommen! (Benutzt den /info Befehl zu dein Karma checken, oder /toggleKarma diesen Benachrichtigungen abzuschalten)</i>"
+   got_upvote: "<i>Du hast Karma bekommen! (Benutzt den /info Befehl zu dein Karma checken, oder /togglekarma diesen Benachrichtigungen abzuschalten)</i>"
 
    upvoted_own_message: "<i>Du kannst deine Nachricht Karma nicht geben!</i>"
 
@@ -93,7 +93,7 @@ replies:
 
    gave_downvote: "<i>Du hast Karma von dieser Nachricht entfernt!</i>"
 
-   got_downvote: "<i>Du hast Karma verlieren! (Benutzt den /info Befehl zu dein Karma checken, oder /toggleKarma diesen Benachrichtigungen abzuschalten)</i>"
+   got_downvote: "<i>Du hast Karma verlieren! (Benutzt den /info Befehl zu dein Karma checken, oder /togglekarma diesen Benachrichtigungen abzuschalten)</i>"
 
    downvoted_own_message: "<i>Du kannst deiner Nachricht Karma nicht entfernen!</i>"
 
@@ -318,6 +318,9 @@ logs:
 
    # Available placeholders: id, name
    unpinned: "Nutzer {id}, alias {name}, hat die neueste angeheftete Nachricht losgelöst"
+
+   # Available placeholders: id, name, text
+   motd_set: "Nutzer {id}, alias {name}, hat die Regeln gesetzt: {text}"
 
    # Available placeholders: id, name, rank, text
    ranked_message: "Nutzer {id}, alias {name}, hat eine {rank} Rangnachricht geschickt: {text}"

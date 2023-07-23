@@ -51,7 +51,7 @@ class AuthorizedRanks
   # Returns a 2-tuple with the rank value and the rank associated with that rank,
   # or `nil` if no rank exists with the given values.
   def find_rank(name : String, value : Int32? = nil) : Tuple(Int32, Rank)?
-    if value && @ranks[value]
+    if value && @ranks[value]?
       {value, @ranks[value]}
     else
       @ranks.find do |k, v|
@@ -66,11 +66,11 @@ class AuthorizedRanks
       return false
     end
 
-    if rank <= invoker && permission == :promote
+    if rank <= invoker && permission == CommandPermissions::Promote
       true
-    elsif rank < invoker && permission == :promote_lower
+    elsif rank < invoker && permission == CommandPermissions::PromoteLower
       true
-    elsif rank == invoker && permission == :promote_same
+    elsif rank == invoker && permission == CommandPermissions::PromoteSame
       true
     else
       false
@@ -79,12 +79,14 @@ class AuthorizedRanks
 
   # Returns `true` if the user to be demoted (receiver) can be demoted with the given rank.
   def can_demote?(rank : Int32, invoker : Int32, receiver : Int32) : Bool
-    rank < receiver && rank < invoker && rank != -10
+    rank < receiver && receiver < invoker && rank != -10
   end
 
   # Returns `true` if the user can sign a message with the given rank.
-  def can_ranksay?(rank : Int32, invoker : Int32, permission : CommandPermissions) : Bool
-    rank != -10 && (rank < invoker && permission == :ranksay_lower) || rank == invoker
+  def can_ranksay?(rank : Int32, invoker : Int32, invoker_permission : CommandPermissions, rank_permission : CommandPermissions?) : Bool
+    return false if rank == -10 || rank_permission.nil?
+
+    (rank < invoker && invoker_permission == CommandPermissions::RanksayLower) || rank == invoker
   end
 
   # Returns an array of all the rank names in the ranks hash.
