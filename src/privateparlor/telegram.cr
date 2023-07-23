@@ -1105,21 +1105,22 @@ class PrivateParlor < Tourmaline::Client
     unless @access.authorized?(user.rank, :purge)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
+
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
-    if banned_users = @database.get_blacklisted_users
-      delete_msids = 0
+    delete_msids = 0
 
+    if banned_users = @database.get_blacklisted_users
       banned_users.each do |banned_user|
         @history.get_msids_from_user(banned_user.id).each do |msid|
           delete_messages(msid, banned_user.id, banned_user.debug_enabled)
           delete_msids += 1
         end
       end
-
-      relay_to_one(message.message_id, user.id, @locale.replies.purge_complete, {"msgs_deleted" => delete_msids.to_s})
     end
+
+    relay_to_one(message.message_id, user.id, @locale.replies.purge_complete, {"msgs_deleted" => delete_msids.to_s})
   end
 
   # Blacklists a user from the chat, deletes the reply, and removes all the user's incoming and outgoing messages from the queue.
