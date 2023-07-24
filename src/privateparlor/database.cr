@@ -305,7 +305,7 @@ class Database
   # Inserts a user with the given *id*, *username*, and *realname* into the database.
   #
   # Returns the new `User`.
-  def add_user(id, username, realname, rank = 0) : User
+  def add_user(id, username, realname, rank = 0) : User?
     user = User.new(id, username, realname, rank)
 
     {% begin %}
@@ -320,6 +320,11 @@ class Database
     {% end %}
 
     user
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      add_user(id, username, realname, rank)
+    end
   end
 
   # Updates a user record in the database with the current state of *user*.
@@ -333,6 +338,11 @@ class Database
       # Modify user
       db.exec("UPDATE users SET #{{{arr}}} WHERE id = ?", args: user.to_array.rotate)
     {% end %}
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      modify_user(user)
+    end
   end
 
   # Queries the database for any rows in the user table
@@ -359,6 +369,11 @@ class Database
   # Sets the motd/rules to the given string.
   def set_motd(text : String) : Nil
     db.exec("REPLACE INTO system_config VALUES ('motd', ?)", text)
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      set_motd(text)
+    end
   end
 
   # Retrieves the motd/rules from the database.
@@ -395,5 +410,10 @@ class Database
       tripcode TEXT,
       PRIMARY KEY(id)
     )")
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      ensure_schema
+    end
   end
 end

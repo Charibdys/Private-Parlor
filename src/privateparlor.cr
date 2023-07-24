@@ -39,7 +39,12 @@ spawn(name: "private_parlor_loop") do
   end
 
   # Bot stopped polling from SIGINT/SIGTERM, shut down
-  bot.database.db.close
+  # Rescue if database unique constraint was encountered during runtime
+  begin
+    bot.database.db.close
+  rescue
+    nil
+  end
   Log.info { "Sent last messages in queue. Shutting down..." }
   exit
 end

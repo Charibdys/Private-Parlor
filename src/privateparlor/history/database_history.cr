@@ -18,6 +18,12 @@ class DatabaseHistory
       args: [msid, sender_id, Time.utc, false]
     )
     msid
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      return new_message(sender_id, msid)
+    end
+    msid
   end
 
   # Adds receiver_id and its associated msid to the receivers table
@@ -26,6 +32,11 @@ class DatabaseHistory
       "INSERT INTO receivers VALUES (?, ?, ?)",
       args: [msid, receiver_id, origin_msid]
     )
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      add_to_cache(origin_msid, msid, receiver_id)
+    end
   end
 
   # Returns the messageGroupID from the given MSID, which may or may not be in in the receivers table
@@ -94,7 +105,11 @@ class DatabaseHistory
   def add_rating(msid : Int64, uid : Int64) : Bool
     db.exec("INSERT INTO karma VALUES (?, ?)", args: [msid, uid])
     true
-  rescue SQLite3::Exception
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      return add_rating(msid, uid)
+    end
     false
   end
 
@@ -106,6 +121,11 @@ class DatabaseHistory
       WHERE messageGroupID = ?",
       get_origin_msid(msid)
     )
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      add_warning(msid)
+    end
   end
 
   # Returns true if the associated message group was warned; false otherwise.
@@ -123,9 +143,18 @@ class DatabaseHistory
   def del_message_group(msid : Int64) : Int64?
     origin_msid = get_origin_msid(msid)
 
-    db.exec("DELETE FROM message_groups WHERE messageGroupID = ?", origin_msid)
+    delete_database_message_group(origin_msid)
 
     origin_msid
+  end
+
+  def delete_database_message_group(origin_msid : Int64?)
+    db.exec("DELETE FROM message_groups WHERE messageGroupID = ?", origin_msid)
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      delete_database_message_group(origin_msid)
+    end
   end
 
   # Expire messages
@@ -138,10 +167,19 @@ class DatabaseHistory
       as: Int32
     )
 
-    db.exec("DELETE FROM message_groups WHERE sentTime <= ?", Time.utc - @lifespan)
+    delete_expired_messages
 
     if count > 0
       Log.debug { "Expired #{count} messages from the cache" }
+    end
+  end
+
+  def delete_expired_messages : Nil
+    db.exec("DELETE FROM message_groups WHERE sentTime <= ?", Time.utc - @lifespan)
+  rescue ex : SQLite3::Exception
+    if ex.code == 5
+      sleep(10.milliseconds)
+      delete_expired_messages
     end
   end
 
@@ -170,5 +208,10 @@ class DatabaseHistory
       FOREIGN KEY (messageGroupID) REFERENCES receivers(receiverMSID)
       ON DELETE CASCADE
     )")
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      ensure_schema
+    end
   end
 end

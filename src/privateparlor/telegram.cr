@@ -287,15 +287,15 @@ class PrivateParlor < Tourmaline::Client
       end
 
       if motd = @database.get_motd
-        relay_to_one(nil, user.id, motd)
+        relay_to_one(nil, info.id, motd)
       end
 
       if @pseudonymous
-        relay_to_one(message.message_id, user.id, @locale.replies.joined_pseudonym)
+        relay_to_one(message.message_id, info.id, @locale.replies.joined_pseudonym)
       else
-        relay_to_one(message.message_id, user.id, @locale.replies.joined)
+        relay_to_one(message.message_id, info.id, @locale.replies.joined)
       end
-      log_output(@locale.logs.joined, {"id" => user.id.to_s, "name" => user.get_formatted_name})
+      log_output(@locale.logs.joined, {"id" => info.id.to_s, "name" => info.username || info.full_name})
     end
   end
 
@@ -708,7 +708,7 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
-  def promote_from_reply(user : Database::User, info : Tourmaline::User, authority : CommandPermissions, arg : String?, msid : Int64, reply : Int64) : Nil    
+  def promote_from_reply(user : Database::User, info : Tourmaline::User, authority : CommandPermissions, arg : String?, msid : Int64, reply : Int64) : Nil
     if arg.nil? && authority.in?(CommandPermissions::Promote, CommandPermissions::PromoteSame)
       tuple = {user.rank, @access.ranks[user.rank]}
     elsif arg
@@ -1655,7 +1655,7 @@ class PrivateParlor < Tourmaline::Client
     end
 
     parsed_rank_authority = @access.authorized?(parsed_rank[0], :ranksay, :ranksay_lower)
-    
+
     unless @access.can_ranksay?(parsed_rank[0], user.rank, authority, parsed_rank_authority)
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
