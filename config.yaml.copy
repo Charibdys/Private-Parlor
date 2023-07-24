@@ -386,7 +386,7 @@ default_rank: 0
 
 ##
 ## NOTE: 
-##    Disabling commands may improve bot repsonse time
+##    Disabling commands may improve bot response time
 ##
 ##    All of these settings take a 2 element array of true or false values
 ##    First value toggles the command (true to enable, false to disable)
@@ -433,7 +433,7 @@ enable_unpin: [false, false]
 
 ##
 ## NOTE: 
-##    Disabling message type relaying may improve bot repsonse time
+##    Disabling message type relaying may improve bot response time
 ##
 ##    All of these settings take either a true or false value
 ##    If true, messages of that type will be relayed
