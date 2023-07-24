@@ -9,77 +9,50 @@ module Format
     fun crypt(password : UInt8*, salt : UInt8*) : UInt8*
   end
 
-  alias LocaleParameters = Hash(String, String | Array(String) | Time | Int32 | Bool | Rank | Nil)
-
-  # Globally substitutes placeholders in reply with the given variables
-  def substitute_reply(reply : String, locale : Locale, variables : LocaleParameters = {"" => ""}) : String
-    if reply.scan(/{\w*}/).size != 0
-      reply.gsub(/{\w*}/) do |match|
-        placeholder = match.strip("{}")
-        case placeholder
-        when "toggle"
-          replace = variables[placeholder]? ? locale.toggle[1] : locale.toggle[0]
-        when "rank"
-          replace = variables[placeholder]?.to_s
-        when "cooldown_until"
-          if variables[placeholder]?
-            replace = "#{locale.replies.cooldown_true} #{variables[placeholder]}"
-          else
-            replace = locale.replies.cooldown_false
-          end
-        when "warn_expiry"
-          if variables[placeholder]?
-            # Skip replace.to_md to prevent escaping Markdown twice
-            next replace = locale.replies.info_warning.gsub("{warn_expiry}") { "#{escape_html(variables[placeholder])}" }
-          end
-        when "reason"
-          if variables[placeholder]?
-            replace = "#{locale.replies.reason_prefix}#{variables[placeholder]}"
-          end
-        when "tripcode"
-          if variables[placeholder]?
-            replace = variables[placeholder].to_s
-          else
-            replace = locale.replies.tripcode_unset
-          end
-        when "contact"
-          if variables[placeholder]?
-            replace = locale.replies.blacklist_contact.gsub("{contact}") { "#{escape_html(variables[placeholder])}" }
-          else
-            replace = ""
-          end
-        else
-          replace = variables[placeholder]?.to_s
-        end
-
-        if replace
-          replace = escape_html(replace)
-        end
-        replace
-      end
-    else
-      reply
+  # Globally substitutes placeholders in message with the given variables
+  def substitute_message(msg : String, locale : Locale, variables : Hash(String, String?) = {"" => ""}) : String
+    msg.gsub(/{\w+}/) do |match|
+      escape_html(variables[match[1..-2]])
     end
   end
 
-  # Globally substitutes placeholders in log message with the given variables
-  def substitute_log(log : String, locale : Locale, variables : LocaleParameters = {"" => ""}) : String
-    if log.scan(/{\w*}/).size != 0
-      log.gsub(/{\w*}/) do |match|
-        placeholder = match.strip("{}")
-        case placeholder
-        when "rank"
-          variables[placeholder]?.to_s.downcase
-        when "reason"
-          if variables[placeholder]?
-            "#{locale.logs.reason_prefix}#{variables[placeholder]}"
-          end
-        else
-          variables[placeholder]?.to_s
-        end
-      end
+  def format_cooldown_until(expiration : Time?, locale : Locale) : String
+    if time = format_time(expiration, locale.time_format)
+      "#{locale.replies.cooldown_true} #{time}"
     else
-      log
+      locale.replies.cooldown_false
+    end
+  end
+
+  def format_warn_expiry(expiration : Time?, locale : Locale) : String?
+    if time = format_time(expiration, locale.time_format)
+      locale.replies.info_warning.gsub("{warn_expiry}", "#{time}")
+    end
+  end
+
+  def format_reason_reply(reason : String?, locale : Locale) : String?
+    if reason
+      "#{locale.replies.reason_prefix}#{reason}"
+    end
+  end
+
+  def format_tripcode_reply(tripcode : String?, locale : Locale) : String
+    if tripcode
+      tripcode
+    else
+      locale.replies.tripcode_unset
+    end
+  end
+
+  def format_contact_reply(contact : String?, locale : Locale) : String?
+    if contact
+      locale.replies.blacklist_contact.gsub("{contact}", "#{escape_html(contact)}")
+    end
+  end
+
+  def format_reason_log(reason : String?, locale : Locale) : String?
+    if reason
+      "#{locale.logs.reason_prefix}#{reason}"
     end
   end
 
@@ -131,7 +104,7 @@ module Format
   # was relayed as a regular message
   #
   # Returns true if the forward message was relayed regularly, nil otherwise
-  def is_regular_forward?(text : String?, entities : Array(Tourmaline::MessageEntity)) : Bool?
+  def regular_forward?(text : String?, entities : Array(Tourmaline::MessageEntity)) : Bool?
     return unless text
     if ent = entities.first?
       text.starts_with?("Forwarded from") && ent.type == "bold"
@@ -169,7 +142,7 @@ module Format
   # Generate a 8chan or Secretlounge-ng style tripcode from a given string in the format `name#pass`.
   #
   # Returns a named tuple containing the tripname and tripcode.
-  def generate_tripcode(tripkey : String, salt : String?) : NamedTuple
+  def generate_tripcode(tripkey : String, salt : String?) : Tuple(String, String)
     split = tripkey.split('#', 2)
     name = split[0]
     pass = split[1]
@@ -197,7 +170,7 @@ module Format
       tripcode = "!#{String.new(LibCrypt.crypt(pass[...8], salt))[-10...]}"
     end
 
-    {name: name, tripcode: tripcode}
+    {name, tripcode}
   end
 
   # Returns arguments found after a command from a message text.
@@ -222,26 +195,44 @@ module Format
     "<a href=\"tg://user?id=#{id}\"> ~~#{escape_html(name)}</a>"
   end
 
+  def get_forward_header(message : Tourmaline::Message) : String?
+    if from = message.forward_from
+      if from.bot?
+        Format.format_username_forward(from.full_name, from.username)
+      elsif from.id
+        Format.format_user_forward(from.full_name, from.id)
+      end
+    elsif (from = message.forward_from_chat) && message.forward_from_message_id
+      if from.username
+        Format.format_username_forward(from.name, from.username, message.forward_from_message_id)
+      else
+        Format.format_private_channel_forward(from.name, from.id, message.forward_from_message_id)
+      end
+    elsif from = message.forward_sender_name
+      Format.format_private_user_forward(from)
+    end
+  end
+
   # Returns a link to a given user's account, for reveal messages
   def format_user_reveal(id : Int64, name : String, locale : Locale) : String
     locale.replies.username_reveal.gsub("{username}", "<a href=\"tg://user?id=#{id}\">#{escape_html(name)}</a>")
   end
 
-  def format_user_forward(name : String, id : Int64, parsemode : Tourmaline::ParseMode) : String
+  def format_user_forward(name : String, id : Int64) : String
     "<b>Forwarded from <a href=\"tg://user?id=#{id}\">#{escape_html(name)}</a></b>"
   end
 
-  def format_private_user_forward(name : String, parsemode : Tourmaline::ParseMode) : String
+  def format_private_user_forward(name : String) : String
     "<b>Forwarded from <i>#{escape_html(name)}</i></b>"
   end
 
   # For bots or public channels
-  def format_username_forward(name : String, username : String?, parsemode : Tourmaline::ParseMode, msid : Int64? = nil) : String
+  def format_username_forward(name : String, username : String?, msid : Int64? = nil) : String
     "<b>Forwarded from <a href=\"tg://resolve?domain=#{escape_html(username)}#{"&post=#{msid}" if msid}\">#{escape_html(name)}</a></b>"
   end
 
   # Removes the "-100" prefix for private channels
-  def format_private_channel_forward(name : String, id : Int64, msid : Int64?, parsemode : Tourmaline::ParseMode) : String
+  def format_private_channel_forward(name : String, id : Int64, msid : Int64?) : String
     "<b>Forwarded from <a href=\"tg://privatepost?channel=#{id.to_s[4..]}#{"&post=#{msid}" if msid}\">#{escape_html(name)}</a></b>"
   end
 
@@ -260,9 +251,9 @@ module Format
   end
 
   def format_pseudonymous_message(text : String?, tripkey : String, salt : String) : String
-    pair = generate_tripcode(tripkey, salt)
+    name, tripcode = generate_tripcode(tripkey, salt)
     String.build do |str|
-      str << format_tripcode_sign(pair[:name], pair[:tripcode]) << ":"
+      str << format_tripcode_sign(name, tripcode) << ":"
       str << "\n"
       str << text
     end
@@ -308,7 +299,7 @@ module Format
   def format_karma_loading_bar(percentage : Float32, locale : Locale) : String
     pips = (percentage.floor.to_i).divmod(10)
 
-    unless pips[0] == 10
+    if pips[0] != 10
       String.build(10) do |str|
         str << locale.loading_bar[2] * pips[0]
 
@@ -359,18 +350,36 @@ module Format
 
   # Returns a message containing the commands the user can use.
   def format_help(user : Database::User, ranks : Hash(Int32, Rank), locale : Locale) : String
-    ranked_keys = %i(
-      promote demote ranksay sign tsign
-      uncooldown purge motd_set
-    )
+    ranked = {
+      CommandPermissions::Promote      => "/promote [name/OID/ID] [rank] - #{locale.command_descriptions.promote}",
+      CommandPermissions::PromoteSame  => "/promote [name/OID/ID] [rank] - #{locale.command_descriptions.promote}",
+      CommandPermissions::PromoteLower => "/promote [name/OID/ID] [rank] - #{locale.command_descriptions.promote}",
+      CommandPermissions::Demote       => "/demote [name/OID/ID] [rank] - #{locale.command_descriptions.demote}",
+      CommandPermissions::Ranksay      => "/#{ranks[user.rank].name.downcase}say [text] - #{locale.command_descriptions.ranksay}",
+      CommandPermissions::Sign         => "/sign [text] - #{locale.command_descriptions.sign}",
+      CommandPermissions::TSign        => "/tsign [text] - #{locale.command_descriptions.tsign}",
+      CommandPermissions::Uncooldown   => "/uncooldown [name/OID] - #{locale.command_descriptions.uncooldown}",
+      CommandPermissions::Whitelist    => "/whitelist [ID] - #{locale.command_descriptions.whitelist}",
+      CommandPermissions::Purge        => "/purge - #{locale.command_descriptions.purge}",
+      CommandPermissions::MotdSet      => "/motd - #{locale.command_descriptions.motd_set}",
+    }
 
-    reply_required_keys = %i(
-      upvote downvote warn delete spoiler
-      remove blacklist ranked_info
-    )
+    reply_required = {
+      CommandPermissions::Upvote     => "+1 - #{locale.command_descriptions.upvote}",
+      CommandPermissions::Downvote   => "-1 - #{locale.command_descriptions.downvote}",
+      CommandPermissions::Warn       => "/warn [reason] - #{locale.command_descriptions.warn}",
+      CommandPermissions::Delete     => "/delete [reason] - #{locale.command_descriptions.delete}",
+      CommandPermissions::Spoiler    => "/spoiler - #{locale.command_descriptions.spoiler}",
+      CommandPermissions::Remove     => "/remove [reason] - #{locale.command_descriptions.remove}",
+      CommandPermissions::Blacklist  => "/blacklist [reason] - #{locale.command_descriptions.blacklist}",
+      CommandPermissions::RankedInfo => "/info - #{locale.command_descriptions.ranked_info}",
+      CommandPermissions::Reveal     => "/reveal - #{locale.command_descriptions.reveal}",
+      CommandPermissions::Pin        => "/pin - #{locale.command_descriptions.pin}",
+      CommandPermissions::Unpin      => "/unpin - #{locale.command_descriptions.unpin}",
+    }
 
-    help_text = String.build do |str|
-      str << substitute_reply(locale.replies.help_header, locale)
+    String.build do |str|
+      str << substitute_message(locale.replies.help_header, locale)
       str << escape_html("\n/start - #{locale.command_descriptions.start}")
       str << escape_html("\n/stop - #{locale.command_descriptions.stop}")
       str << escape_html("\n/info - #{locale.command_descriptions.info}")
@@ -382,62 +391,34 @@ module Format
       str << escape_html("\n/motd - #{locale.command_descriptions.motd}")
       str << escape_html("\n/help - #{locale.command_descriptions.help}")
 
-      if rank = ranks[user.rank]?
-        rank_commands = [] of String
-        reply_commands = [] of String
+      rank_commands = [] of String
+      reply_commands = [] of String
 
-        rank.permissions.each do |permission|
-          if ranked_keys.includes?(permission)
-            case permission
-            when :promote
-              rank_commands << "/#{permission.to_s} [name/OID/ID] [rank] - #{locale.command_descriptions.promote}"
-            when :demote
-              rank_commands << "/#{permission.to_s} [name/OID/ID] [rank] - #{locale.command_descriptions.demote}"
-            when :sign
-              rank_commands << "/#{permission.to_s} [text] - #{locale.command_descriptions.sign}"
-            when :tsign
-              rank_commands << "/#{permission.to_s} [text] - #{locale.command_descriptions.tsign}"
-            when :ranksay
-              ranks.each do |k, v|
-                if k <= user.rank && k != -10 && v.permissions.includes?(:ranksay)
-                  rank_commands << "/#{v.name.downcase}say [text] - #{locale.command_descriptions.ranksay}"
-                end
-              end
-            when :uncooldown
-              rank_commands << "/#{permission.to_s} [name/OID] - #{locale.command_descriptions.uncooldown}"
-            when :motd_set
-              rank_commands << "/motd [text] - #{locale.command_descriptions.motd_set}"
-            end
-          elsif reply_required_keys.includes?(permission)
-            case permission
-            when :warn
-              reply_commands << "/#{permission.to_s} [reason] - #{locale.command_descriptions.warn}"
-            when :delete
-              reply_commands << "/#{permission.to_s} [reason] - #{locale.command_descriptions.delete}"
-            when :remove
-              reply_commands << "/#{permission.to_s} [reason] - #{locale.command_descriptions.remove}"
-            when :blacklist
-              reply_commands << "/#{permission.to_s} [reason] - #{locale.command_descriptions.blacklist}"
-            when :ranked_info
-              reply_commands << "/info - #{locale.command_descriptions.ranked_info}"
-            when :upvote
-              reply_commands << "+1 - #{locale.command_descriptions.upvote}"
-            when :downvote
-              reply_commands << "-1 - #{locale.command_descriptions.downvote}"
-            when :spoiler
-              reply_commands << "/spoiler - #{locale.command_descriptions.spoiler}"
+      if rank = ranks[user.rank]?
+        if rank.command_permissions.includes?(:ranksay_lower)
+          ranks.each do |k, v|
+            if k <= user.rank && k != -10 && v.command_permissions.includes?(:ranksay)
+              rank_commands << escape_html("/#{v.name.downcase}say [text] - #{locale.command_descriptions.ranksay}")
             end
           end
         end
 
-        if !rank_commands.empty?
+        rank.command_permissions.each do |permission|
+          if ranked.keys.includes?(permission)
+            rank_commands << escape_html(ranked[permission])
+          elsif reply_required.keys.includes?(permission)
+            reply_commands << escape_html(reply_required[permission])
+          end
+        end
+
+        unless rank_commands.empty?
           str << "\n\n"
-          str << substitute_reply(locale.replies.help_rank_commands, locale, {"rank" => rank.name})
+          str << substitute_message(locale.replies.help_rank_commands, locale, {"rank" => rank.name})
           rank_commands.each { |line| str << escape_html("\n#{line}") }
         end
-        if !reply_commands.empty?
+        unless reply_commands.empty?
           str << "\n\n"
-          str << substitute_reply(locale.replies.help_reply_commands, locale)
+          str << substitute_message(locale.replies.help_reply_commands, locale)
           reply_commands.each { |line| str << escape_html("\n#{line}") }
         end
       end

@@ -55,6 +55,9 @@ class Logs
   @[YAML::Field(key: "unpinned")]
   getter unpinned : String
 
+  @[YAML::Field(key: "motd_set")]
+  getter motd_set : String
+
   @[YAML::Field(key: "ranked_message")]
   getter ranked_message : String
 

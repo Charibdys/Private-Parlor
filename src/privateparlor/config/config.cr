@@ -17,10 +17,10 @@ class Config
   getter log_file : String? = nil
 
   @[YAML::Field(key: "log_channel")]
-  getter log_channel : String? = nil
+  getter log_channel : String = ""
 
   @[YAML::Field(key: "lifetime")]
-  property lifetime : Int32 = 24
+  property lifetime : UInt32 = 24
 
   @[YAML::Field(key: "database_history")]
   getter database_history : Bool? = false
@@ -41,13 +41,16 @@ class Config
   getter linked_network : Hash(String, String) = {} of String => String
 
   @[YAML::Field(key: "ranks")]
-  getter intermediary_ranks : Array(IntermediaryRank)
-
-  @[YAML::Field(ignore: true)]
-  getter ranks : Hash(Int32, Rank) = {
-    -10 => Rank.new("Banned", Set.new([] of Symbol)),
-      0 => Rank.new("User", Set.new([:upvote, :downvote, :sign, :tsign])),
+  property ranks : Hash(Int32, Rank) = {
+    -10 => Rank.new(
+      "Banned",
+      Set.new([] of CommandPermissions),
+      Set.new([] of MessagePermissions)
+    ),
   }
+
+  @[YAML::Field(key: "default_rank")]
+  property default_rank : Int32 = 0
 
   @[YAML::Field(key: "karma_levels")]
   property karma_levels : Hash(Int32, String) = {} of Int32 => String

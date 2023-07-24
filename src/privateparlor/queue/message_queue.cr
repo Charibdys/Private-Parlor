@@ -7,7 +7,7 @@ class MessageQueue
     @queue_mutex = Mutex.new
   end
 
-  def reject_messsages(&block) : Nil
+  def reject_messsages(&) : Nil
     @queue_mutex.synchronize do
       @queue.reject! do |msg|
         yield msg
@@ -28,7 +28,7 @@ class MessageQueue
   def add_to_queue(cached_msid : Int64 | Array(Int64), sender_id : Int64 | Nil, receiver_ids : Array(Int64), reply_msids : Hash(Int64, Int64), func : MessageProc) : Nil
     @queue_mutex.synchronize do
       receiver_ids.each do |receiver_id|
-        @queue.push(QueuedMessage.new(cached_msid, sender_id, receiver_id, nil, func))
+        @queue.push(QueuedMessage.new(cached_msid, sender_id, receiver_id, reply_msids[receiver_id], func))
       end
     end
   end
@@ -46,6 +46,6 @@ class MessageQueue
       msg = @queue.shift?
     end
 
-    return msg
+    msg
   end
 end

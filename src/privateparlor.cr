@@ -3,11 +3,18 @@ require "tasker"
 require "sqlite3"
 require "./privateparlor/*"
 
-VERSION = "0.9"
+VERSION = "1.0"
 
 bot = PrivateParlor.new(Configuration.parse_config)
 
-bot.log_output(bot.log_channel, Format.substitute_log(bot.locale.logs.start, bot.locale, {"version" => VERSION}))
+begin
+  bot.log_output(bot.locale.logs.start, {"version" => VERSION})
+rescue ex
+  Log.error(exception: ex) {
+    "Failed to send message to log channel; check that the bot is an admin in the chanel and can post messages"
+  }
+  bot.log_channel = ""
+end
 
 Signal::INT.trap do
   bot.stop_polling
@@ -32,7 +39,12 @@ spawn(name: "private_parlor_loop") do
   end
 
   # Bot stopped polling from SIGINT/SIGTERM, shut down
-  bot.database.db.close
+  # Rescue if database unique constraint was encountered during runtime
+  begin
+    bot.database.db.close
+  rescue
+    nil
+  end
   Log.info { "Sent last messages in queue. Shutting down..." }
   exit
 end

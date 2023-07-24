@@ -7,7 +7,7 @@ module Configuration
   #
   # Values that aren't specified in the config file will be set to a default value.
   def parse_config : Config
-    config = check_config(Config.from_yaml(File.open("config.yaml")))
+    check_config(Config.from_yaml(File.open("config.yaml")))
   rescue ex : YAML::ParseException
     Log.error(exception: ex) { "Could not parse the given value at row #{ex.line_number}. This could be because a required value was not set or the wrong type was given." }
     exit
@@ -18,7 +18,6 @@ module Configuration
 
   # Run additional checks on Config instance variables.
   #
-  # Check bounds on `config.lifetime`.
   # Check size of `config.smileys`; should be 4
   # Check contents of `config.entities` for mispellings or duplicates.
   #
@@ -26,11 +25,6 @@ module Configuration
   def check_config(config : Config) : Config
     message_entities = ["mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number", "bold", "italic",
                         "underline", "strikethrough", "spoiler", "code", "pre", "text_link", "text_mention", "custom_emoji"]
-
-    if (1..).includes?(config.lifetime) == false
-      Log.notice { "Message lifetime not within range, was #{config.lifetime}; defaulting to 24 hours." }
-      config.lifetime = 24
-    end
 
     if config.smileys.size != 4
       Log.notice { "Not enough or too many smileys. Should be four, was #{config.smileys}; defaulting to [:), :|, :/, :(]" }
@@ -42,7 +36,7 @@ module Configuration
       config.entities = ["bold", "italic", "text_link"]
     end
 
-    unless config.karma_levels.empty? || (config.karma_levels.keys.sort == config.karma_levels.keys)
+    unless config.karma_levels.empty? || (config.karma_levels.keys.sort! == config.karma_levels.keys)
       Log.notice { "Karma level keys were not in ascending order; defaulting to no karma levels." }
       config.karma_levels = {} of Int32 => String
     end
@@ -56,39 +50,53 @@ module Configuration
   #
   # Returns an updated `Config` object
   def check_and_init_ranks(config : Config) : Config
-    command_keys = Set{
-      :users, :upvote, :downvote, :promote, :promote_lower, :promote_same, :demote,
-      :sign, :tsign, :reveal, :spoiler, :pin, :unpin, :ranksay, :ranksay_lower, :warn,
-      :delete, :uncooldown, :remove, :purge, :blacklist, :whitelist, :motd_set, :ranked_info,
+    promote_keys = Set{
+      CommandPermissions::Promote,
+      CommandPermissions::PromoteLower,
+      CommandPermissions::PromoteSame,
     }
 
-    promote_keys = Set{:promote, :promote_lower, :promote_same}
+    ranksay_keys = Set{
+      CommandPermissions::Ranksay,
+      CommandPermissions::RanksayLower,
+    }
 
-    ranksay_keys = Set{:ranksay, :ranksay_lower}
+    if config.ranks[config.default_rank]? == nil
+      Log.notice { "Default rank #{config.default_rank} does not exist in ranks, using User with rank 0 as default" }
+      config.default_rank = 0
 
-    config.intermediary_ranks.each do |ri|
-      if (invalid = ri.permissions.to_set - command_keys.map(&.to_s)) && !invalid.empty?
-        Log.notice {
-          "Rank #{ri.name} (#{ri.value}) has the following invalid permissions: [#{invalid.join(", ")}]"
+      config.ranks[0] = Rank.new(
+        "User",
+        Set{
+          CommandPermissions::Upvote, CommandPermissions::Downvote, CommandPermissions::Sign, CommandPermissions::TSign,
+        },
+        Set{
+          MessagePermissions::Text, MessagePermissions::Animation, MessagePermissions::Audio, MessagePermissions::Document,
+          MessagePermissions::Video, MessagePermissions::VideoNote, MessagePermissions::Voice, MessagePermissions::Photo,
+          MessagePermissions::MediaGroup, MessagePermissions::Poll, MessagePermissions::Forward, MessagePermissions::Sticker,
+          MessagePermissions::Dice, MessagePermissions::Dart, MessagePermissions::Basketball, MessagePermissions::Soccerball,
+          MessagePermissions::SlotMachine, MessagePermissions::Bowling, MessagePermissions::Venue,
+          MessagePermissions::Location, MessagePermissions::Contact,
         }
-      end
-      if (invalid_promote = ri.permissions & promote_keys.map(&.to_s)) && invalid_promote.size > 1
-        Log.notice {
-          "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_promote.join(", ")}]"
-        }
-        ri.permissions = ri.permissions - promote_keys.map(&.to_s)
-      end
-      if (invalid_ranksay = ri.permissions & ranksay_keys.map(&.to_s)) && invalid_ranksay.size > 1
-        Log.notice {
-          "Removed the following mutually exclusive permissions from Rank #{ri.name} (#{ri.value}): [#{invalid_ranksay.join(", ")}]"
-        }
-        ri.permissions = ri.permissions - ranksay_keys.map(&.to_s)
-      end
-
-      config.ranks[ri.value] = Rank.new(
-        ri.name,
-        command_keys.compact_map { |key| key if ri.permissions.includes?(key.to_s) }.to_set
       )
+    end
+
+    config.ranks.each do |key, rank|
+      permissions = rank.command_permissions
+      if (invalid_promote = rank.command_permissions & promote_keys) && invalid_promote.size > 1
+        Log.notice {
+          "Removed the following mutually exclusive permissions from Rank #{rank.name}: [#{invalid_promote.join(", ")}]"
+        }
+        permissions = rank.command_permissions - promote_keys
+      end
+      if (invalid_ranksay = rank.command_permissions & ranksay_keys) && invalid_ranksay.size > 1
+        Log.notice {
+          "Removed the following mutually exclusive permissions from Rank #{rank.name}: [#{invalid_ranksay.join(", ")}]"
+        }
+        permissions = rank.command_permissions - ranksay_keys
+      end
+
+      config.ranks[key] = Rank.new(rank.name, permissions, rank.message_permissions)
     end
 
     config

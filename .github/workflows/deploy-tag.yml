@@ -25,9 +25,13 @@ jobs:
         crystal -v
         shards build --static --no-debug --production --release --stats --time
         strip ./bin/privateparlor
+        strip ./bin/management
         mkdir privateparlor
         mkdir privateparlor/locales
-        mv ./bin/privateparlor privateparlor/ && mv config.yaml.copy privateparlor/ && mv locales/* privateparlor/locales/
+        mv ./bin/privateparlor privateparlor/ 
+        mv config.yaml.copy privateparlor/
+        mv locales/* privateparlor/locales/
+        mv ./bin/management privateparlor/
         tar -cvf privateparlor-x86_64.tar privateparlor/
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
@@ -56,8 +60,12 @@ jobs:
           crystal -v
           shards build --static --no-debug --production --release --stats --time
           strip ./bin/privateparlor
+          strip ./bin/management
           mkdir /privateparlor/locales
-          mv ./bin/privateparlor /privateparlor && mv config.yaml.copy /privateparlor && mv locales/* /privateparlor/locales/
+          mv ./bin/privateparlor /privateparlor
+          mv config.yaml.copy /privateparlor
+          mv locales/* /privateparlor/locales/
+          mv ./bin/management /privateparlor
           tar -cvf privateparlor-arm64.tar /privateparlor
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0

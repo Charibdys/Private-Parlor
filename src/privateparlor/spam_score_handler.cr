@@ -158,54 +158,6 @@ class SpamScoreHandler
     false
   end
 
-  # Returns the associated spam score contant from a given type
-  def calculate_spam_score(type : Symbol) : Float32
-    case type
-    when :animation
-      score_animation
-    when :audio
-      score_audio
-    when :document
-      score_document
-    when :video
-      score_video
-    when :video_note
-      score_video_note
-    when :voice
-      score_voice
-    when :photo
-      score_photo
-    when :album
-      score_media_group
-    when :poll
-      score_poll
-    when :forward
-      score_forwarded_message
-    when :sticker
-      score_sticker
-    when :dice
-      score_dice
-    when :dart
-      score_dart
-    when :basketball
-      score_basketball
-    when :soccerball
-      score_soccerball
-    when :slot_machine
-      score_slot_machine
-    when :bowling
-      score_bowling
-    when :venue
-      score_venue
-    when :location
-      score_location
-    when :contact
-      score_contact
-    else
-      score_base_message
-    end
-  end
-
   def calculate_spam_score_text(text : String) : Float32
     score_base_message + (text.size * score_text_character) + (text.count('\n') * score_text_linebreak)
   end
