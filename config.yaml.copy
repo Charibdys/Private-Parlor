@@ -263,6 +263,27 @@ locale: en-US
 #  50: "Unique"
 
 # --------------------------------
+#  ROBOT9000
+# --------------------------------
+
+##
+## An algorithm by Randall Munroe designed to reduce noise of large chats and
+## encourage original content.
+##
+## ROBOT9000 will prevent users from repeating information that has
+## already been posted before. When a user's post is considered unoriginal,
+## the post will not be sent and the user will be cooldowned.
+##
+
+##
+## Toggle ROBOT9000
+##
+## Accepted values: true, false
+## Default: false
+##
+#toggle_r9k: false
+
+# --------------------------------
 #  Ranks
 # --------------------------------
 
