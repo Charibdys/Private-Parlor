@@ -276,14 +276,6 @@ locale: en-US
 ##
 
 ##
-## Toggle ROBOT9000
-##
-## Accepted values: true, false
-## Default: false
-##
-#toggle_r9k: false
-
-##
 ## Toggle ROBOT9000 for text and captions
 ##
 ## This will prevent users from repeating text or captions sent previously 

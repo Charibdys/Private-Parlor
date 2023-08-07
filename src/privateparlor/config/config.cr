@@ -55,9 +55,6 @@ class Config
   @[YAML::Field(key: "karma_levels")]
   property karma_levels : Hash(Int32, String) = {} of Int32 => String
 
-  @[YAML::Field(key: "toggle_r9k")]
-  getter toggle_r9k : Bool? = false
-
   @[YAML::Field(key: "toggle_r9k_text")]
   getter toggle_r9k_text : Bool? = false
 
