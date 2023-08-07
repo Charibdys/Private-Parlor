@@ -283,6 +283,31 @@ locale: en-US
 ##
 #toggle_r9k: false
 
+##
+## Toggle ROBOT9000 for text and captions
+##
+## This will prevent users from repeating text or captions sent previously 
+##
+## Enabling this will add a 'text' table to the database
+##
+## Accepted values: true, false
+## Default: false
+##
+#toggle_r9k_text: false
+
+##
+## Toggle ROBOT9000 for media
+##
+## This will prevent users from sending animations, videos, photos, etc. that 
+## were sent previously.
+##
+## Enabling this will add a 'file_ids' table to the database
+##
+## Accepted values: true, false
+## Default: false
+##
+#toggle_r9k_media: false
+
 # --------------------------------
 #  Ranks
 # --------------------------------

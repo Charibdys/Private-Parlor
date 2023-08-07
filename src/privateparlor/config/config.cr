@@ -58,6 +58,12 @@ class Config
   @[YAML::Field(key: "toggle_r9k")]
   getter toggle_r9k : Bool? = false
 
+  @[YAML::Field(key: "toggle_r9k_text")]
+  getter toggle_r9k_text : Bool? = false
+
+  @[YAML::Field(key: "toggle_r9k_media")]
+  getter toggle_r9k_media : Bool? = false
+
   # Command Toggles
 
   @[YAML::Field(key: "enable_start")]

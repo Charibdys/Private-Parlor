@@ -44,6 +44,7 @@ class PrivateParlor < Tourmaline::Client
   getter entity_types : Array(String)
   getter default_rank : Int32
   getter karma_levels : Hash(Int32, String)
+  getter r9k : Bool?
 
   # Creates a new instance of `PrivateParlor`.
   #
@@ -83,17 +84,18 @@ class PrivateParlor < Tourmaline::Client
     @entity_types = config.entities
     @default_rank = config.default_rank
     @karma_levels = config.karma_levels
+    @r9k = config.toggle_r9k
 
-    db = DB.open("sqlite3://#{Path.new(config.database)}") # TODO: We'll want check if this works on Windows later
-    @database = Database.new(db)
+    @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
     @access = AuthorizedRanks.new(config.ranks)
-    @history = get_history_type(db, config)
+    @history = get_history_type(@database.db, config)
     @queue = MessageQueue.new
     @locale = Localization.parse_locale(config.locale)
     @spam_handler = config.spam_score_handler if config.spam_interval_seconds > 0
     @tasks = register_tasks(config.spam_interval_seconds)
 
     revert_ranked_users()
+    Robot9000.ensure_r9k_schema(@database.db, config.toggle_r9k_text, config.toggle_r9k_media) if @r9k
     initialize_handlers(@locale.command_descriptions, config)
   end
 
