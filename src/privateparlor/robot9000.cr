@@ -25,4 +25,16 @@ module Robot9000
     end
   end
 
+  def allow_text?(text : String, ranges : Array(Range(Int32, Int32))) : Bool
+    return true if text.empty?
+
+    return false if text.codepoints.any? do |codepoint|
+      !ranges.any? do |range|
+        range.includes?(codepoint)
+      end
+    end
+
+    true
+  end
+
 end

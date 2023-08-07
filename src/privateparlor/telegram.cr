@@ -45,6 +45,7 @@ class PrivateParlor < Tourmaline::Client
   getter default_rank : Int32
   getter karma_levels : Hash(Int32, String)
   getter r9k : Bool?
+  getter valid_codepoints : Array(Range(Int32, Int32))
 
   # Creates a new instance of `PrivateParlor`.
   #
@@ -85,6 +86,7 @@ class PrivateParlor < Tourmaline::Client
     @default_rank = config.default_rank
     @karma_levels = config.karma_levels
     @r9k = config.toggle_r9k
+    @valid_codepoints = config.valid_codepoints
 
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
     @access = AuthorizedRanks.new(config.ranks)
@@ -1512,10 +1514,15 @@ class PrivateParlor < Tourmaline::Client
   #
   # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
   def check_text(text : String, user : Database::User, msid : Int64) : String?
-    if !Format.allow_text?(text)
+    if @r9k
+      permit_text = Robot9000.allow_text?(text, @valid_codepoints)
+    else
+      permit_text = Format.allow_text?(text)
+    end
+    unless permit_text
       return relay_to_one(msid, user.id, @locale.replies.rejected_message)
     end
-
+    
     case
     when !text.starts_with?('/')
       text

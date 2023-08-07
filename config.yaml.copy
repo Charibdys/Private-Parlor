@@ -308,6 +308,26 @@ locale: en-US
 ##
 #toggle_r9k_media: false
 
+##
+## Valid codepoints
+##
+## Takes a list of 2-element arrays, where the first element is the start of a 
+## Unicode codeblock range, and the second element is the end of that range.
+##
+## Text sent by a user will be checked to ensure that no character in the text
+## is absent from the given ranges.
+##
+## All ranges are expected to be inclusive.
+##
+## Ranges can contain the same value for both elements to permit a single character.
+## 
+## Accepted values: list of 2 element arrays containing hexadecimal
+## Default: [0x0000, 0x007F], [0x1F600, 0x1F64F] (ASCII and Basic Emoji)
+##
+#valid_codepoints: 
+#  - [0x0000, 0x007F]
+#  - [0x1F600, 0x1F64F] 
+
 # --------------------------------
 #  Ranks
 # --------------------------------

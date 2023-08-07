@@ -42,6 +42,7 @@ module Configuration
     end
 
     config = check_and_init_ranks(config)
+    config = init_valid_codepoints(config)
     config = check_and_init_linked_network(config)
   end
 
@@ -98,6 +99,21 @@ module Configuration
 
       config.ranks[key] = Rank.new(rank.name, permissions, rank.message_permissions)
     end
+
+    config
+  end
+
+  def init_valid_codepoints(config : Config) : Config
+    unless codepoint_tuples = config.intermediate_valid_codepoints
+      return config
+    end
+
+    ranges = [] of Range(Int32, Int32)
+    codepoint_tuples.each do |tuple|
+      ranges << Range.new(tuple[0], tuple[1])
+    end
+
+    config.valid_codepoints = ranges
 
     config
   end
