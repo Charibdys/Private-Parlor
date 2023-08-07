@@ -29,7 +29,7 @@ module Robot9000
     return true if text.empty?
 
     return false if text.codepoints.any? do |codepoint|
-      !ranges.any? do |range|
+      ranges.none? do |range|
         range.includes?(codepoint)
       end
     end
