@@ -1517,19 +1517,47 @@ class PrivateParlor < Tourmaline::Client
   # Checks if the text contains a special font or starts a sign command.
   #
   # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
-  def check_text(text : String, user : Database::User, msid : Int64) : String?
-    if @r9k_text
-      permit_text = Robot9000.allow_text?(text, @valid_codepoints)
-    else
-      permit_text = Format.allow_text?(text)
-    end
-    unless permit_text
+  def check_text(text : String, user : Database::User, msid : Int64, entities : Array(Tourmaline::MessageEntity)) : String?
+    unless Format.allow_text?(text)
       return relay_to_one(msid, user.id, @locale.replies.rejected_message)
     end
-    
-    case
-    when !text.starts_with?('/')
+
+    text = Format.strip_format(text, entities, @entity_types, @linked_network)
+
+    if text.starts_with?('/')
+      handle_embedded_command(text, user, msid)
+    else
       text
+    end
+  end
+
+  # Checks if the text contains a special font or starts a sign command.
+  #
+  # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
+  def check_r9k_text(text : String, user : Database::User, msid : Int64, entities : Array(Tourmaline::MessageEntity)) : String?
+    unless Robot9000.allow_text?(text, @valid_codepoints)
+      return relay_to_one(msid, user.id, @locale.replies.rejected_message)
+    end
+
+    stripped_text = Robot9000.strip_text(text, entities)
+    if Robot9000.unoriginal_text?(@database.db, stripped_text)
+      # Alert user and cooldown
+      return
+    end
+
+    Robot9000.add_line(@database.db, stripped_text)
+
+    text = Format.strip_format(text, entities, @entity_types, @linked_network)
+
+    if text.starts_with?('/')
+      handle_embedded_command(text, user, msid)
+    else
+      text
+    end
+  end
+
+  def handle_embedded_command(text : String, user : Database::User, msid : Int64) : String?
+    case
     when text.starts_with?("/s "), text.starts_with?("/sign ")
       handle_sign(text, user, msid)
     when text.starts_with?("/t "), text.starts_with?("/tsign ")
@@ -1703,12 +1731,19 @@ class PrivateParlor < Tourmaline::Client
     unless @access.authorized?(user.rank, :text)
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "text"})
     end
-    unless (raw_text = message.text) && (text = check_text(Format.strip_format(raw_text, message.entities, @entity_types, @linked_network), user, message.message_id))
+    unless raw_text = message.text
       return
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score_text(text))
+    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score_text(raw_text))
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
     end
+
+    if @r9k_text
+      return unless text = check_r9k_text(raw_text, user, message.message_id, message.entities)
+    else
+      return unless text = check_text(raw_text, user, message.message_id, message.entities)
+    end
+
     if @pseudonymous
       unless tripkey = user.tripcode
         return relay_to_one(message.message_id, user.id, @locale.replies.no_tripcode_set)
@@ -1770,9 +1805,10 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     if raw_caption = message.caption
-      caption = check_text(Format.strip_format(raw_caption, message.caption_entities, @entity_types, @linked_network), user, message.message_id)
-      if caption.nil? # Caption contained a special font or used a disabled command
-        return
+      if @r9k_text
+        return unless caption = check_r9k_text(raw_caption, user, message.message_id, message.entities)
+      else
+        return unless caption = check_text(raw_caption, user, message.message_id, message.entities)
       end
     end
 
@@ -1831,9 +1867,10 @@ class PrivateParlor < Tourmaline::Client
     @database.modify_user(user)
 
     if raw_caption = message.caption
-      caption = check_text(Format.strip_format(raw_caption, message.caption_entities, @entity_types, @linked_network), user, message.message_id)
-      if caption.nil? # Caption contained a special font or used a disabled command
-        return
+      if @r9k_text
+        return unless caption = check_r9k_text(raw_caption, user, message.message_id, message.entities)
+      else
+        return unless caption = check_text(raw_caption, user, message.message_id, message.entities)
       end
     end
 
