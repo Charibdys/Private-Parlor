@@ -306,7 +306,7 @@ locale: en-US
 ## This will check forwarded messages and ensure that their content has
 ## not been sent previously.
 ##
-## This check also work with regular forwards.
+## This will also check regular forwards for originality.
 ##
 ## Accepted values: true, false
 ## Default: false

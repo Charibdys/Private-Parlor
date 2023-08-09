@@ -2049,7 +2049,21 @@ class PrivateParlor < Tourmaline::Client
     end
 
     if @r9k_forwards
-      return unless check_r9k_forwards(message, user)
+      if @r9k_text && (text = message.text || message.caption)
+        text = Format.strip_forward_header(text, message.text_entities.keys)
+  
+        unless check_r9k_text(text, user, message.message_id, message.entities)
+          # Alert user and cooldown
+          return 
+        end
+      end
+  
+      if @r9k_media && (file_id = get_forward_file_id(message))
+        unless check_r9k_media(file_id, user)
+          # Alert user and cooldown
+          return
+        end
+      end
     end
 
     user.set_active(info.username, info.full_name)
@@ -2099,34 +2113,6 @@ class PrivateParlor < Tourmaline::Client
     end
 
     relay_regular_forward(user, message, text)
-  end
-
-  def check_r9k_forwards(message : Tourmaline::Message, user : Database::User) : Bool?
-    if @r9k_text
-      unless text = message.text || message.caption
-        return true # No text to check
-      end
-
-      text = Format.strip_forward_header(text, message.text_entities.keys)
-
-      unless check_r9k_text(text, user, message.message_id, message.entities)
-        # Alert user and cooldown
-        return 
-      end
-    end
-
-    if @r9k_media
-      unless file_id = get_forward_file_id(message)
-        return true # No media to check
-      end
-
-      unless check_r9k_media(file_id, user)
-        # Alert user and cooldown
-        return
-      end
-    end
-
-    true
   end
 
   def get_forward_file_id(message : Tourmaline::Message) : String?
@@ -2230,6 +2216,10 @@ class PrivateParlor < Tourmaline::Client
     end
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_sticker)
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
+    end
+
+    if @r9k_media
+      return unless check_r9k_media(sticker.file_unique_id, user)
     end
 
     user.set_active(info.username, info.full_name)
