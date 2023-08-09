@@ -7,6 +7,21 @@ VERSION = "1.0"
 
 bot = PrivateParlor.new(Configuration.parse_config)
 
+# 30 messages every second; going above may result in rate limits
+sending_routine = Tasker.every(500.milliseconds) do
+  15.times do
+    break if bot.send_messages
+  end
+end
+
+Signal::INT.trap do
+  terminate_program(bot, sending_routine)
+end
+
+Signal::TERM.trap do
+  terminate_program(bot, sending_routine)
+end
+
 begin
   bot.log_output(bot.locale.logs.start, {"version" => VERSION})
 rescue ex
@@ -16,22 +31,14 @@ rescue ex
   bot.log_channel = ""
 end
 
-Signal::INT.trap do
+bot.poll
+
+sleep
+
+def terminate_program(bot : PrivateParlor, routine : Tasker::Task)
   bot.stop_polling
-end
 
-Signal::TERM.trap do
-  bot.stop_polling
-end
-
-# Start message sending routine
-spawn(name: "private_parlor_loop") do
-  loop do
-    break unless bot.polling
-
-    bot.send_messages
-    sleep(0.5)
-  end
+  routine.cancel
 
   # Send last messages in queue
   loop do
@@ -48,7 +55,3 @@ spawn(name: "private_parlor_loop") do
   Log.info { "Sent last messages in queue. Shutting down..." }
   exit
 end
-
-bot.poll
-
-sleep
