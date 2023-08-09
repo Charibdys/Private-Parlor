@@ -129,14 +129,20 @@ module Format
   def strip_format(text : String, entities : Array(Tourmaline::MessageEntity), entity_types : Array(String), linked_network : Hash(String, String)) : String
     parser = Tourmaline::HTMLParser.new
 
-    text, parsed_ents = parser.parse(text)
-    entities = entities | parsed_ents
+    ents = remove_entities(entities, entity_types)
+    text = replace_links(text, ents)
 
-    text = replace_links(text, entities)
-    entities = remove_entities(entities, entity_types)
+    text = parser.unparse(text, ents)
 
-    text = parser.unparse(text, entities)
     replace_network_links(text, linked_network)
+  end
+
+  def contains_html?(text : String) : Bool
+    parser = Tourmaline::HTMLParser.new
+
+    string, _ = parser.parse(text)
+
+    string.size != text.size
   end
 
   # Generate a 8chan or Secretlounge-ng style tripcode from a given string in the format `name#pass`.
@@ -323,9 +329,6 @@ module Format
   def format_motd(text : String, entities : Array(Tourmaline::MessageEntity), linked_network : Hash(String, String)) : String
     parser = Tourmaline::HTMLParser.new
 
-    text, parsed_ents = parser.parse(text)
-    entities = entities | parsed_ents
-
     whitespace_start = text.index(/\s+/)
     whitespace_end = text.index(/\s\w/)
 
@@ -334,11 +337,24 @@ module Format
     unless whitespace_start && whitespace_end && text
       return ""
     end
+    if contains_html?(text)
+      return ""
+    end
 
     offset = 1 + entities[0].length + whitespace_end - whitespace_start
 
     text = parser.unparse(text, entities, offset)
-    replace_network_links(text, linked_network)
+
+    # Unparsing text with offset seems to escape some network links
+    # Replace network links using a different approach
+    text.gsub(/&gt;&gt;&gt;\/(\w+)\/|>>>\/(\w+)\//) do |match|
+      chat = match[/\/(\w+)\//, 1]
+      if linked_network[chat]?
+        "<a href=\"tg://resolve?domain=#{linked_network[chat]}\">#{match}</a>"
+      else
+        match
+      end
+    end
   end
 
   # Returns a message containing the program version and a link to its Git repo.

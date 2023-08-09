@@ -1518,6 +1518,9 @@ class PrivateParlor < Tourmaline::Client
   #
   # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
   def check_text(text : String, user : Database::User, msid : Int64, entities : Array(Tourmaline::MessageEntity)) : String?
+    if Format.contains_html?(text)
+      return # TODO: Add a reply here
+    end
     unless Format.allow_text?(text)
       return relay_to_one(msid, user.id, @locale.replies.rejected_message)
     end
@@ -1535,6 +1538,9 @@ class PrivateParlor < Tourmaline::Client
   #
   # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
   def check_r9k_text(text : String, user : Database::User, msid : Int64, entities : Array(Tourmaline::MessageEntity)) : String?
+    if Format.contains_html?(text)
+      return # TODO: Add a reply here
+    end
     unless Robot9000.allow_text?(text, @valid_codepoints)
       return relay_to_one(msid, user.id, @locale.replies.rejected_message)
     end
