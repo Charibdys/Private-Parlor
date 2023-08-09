@@ -46,6 +46,7 @@ class PrivateParlor < Tourmaline::Client
   getter karma_levels : Hash(Int32, String)
   getter r9k_text : Bool?
   getter r9k_media : Bool?
+  getter r9k_forwards : Bool?
   getter valid_codepoints : Array(Range(Int32, Int32))
 
   # Creates a new instance of `PrivateParlor`.
@@ -88,6 +89,7 @@ class PrivateParlor < Tourmaline::Client
     @karma_levels = config.karma_levels
     @r9k_text = config.toggle_r9k_text
     @r9k_media = config.toggle_r9k_media
+    @r9k_forwards = config.toggle_r9k_forwards
     @valid_codepoints = config.valid_codepoints
 
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
@@ -2046,6 +2048,10 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
     end
 
+    if @r9k_forwards
+      return unless check_r9k_forwards(message, user)
+    end
+
     user.set_active(info.username, info.full_name)
     @database.modify_user(user)
 
@@ -2093,6 +2099,49 @@ class PrivateParlor < Tourmaline::Client
     end
 
     relay_regular_forward(user, message, text)
+  end
+
+  def check_r9k_forwards(message : Tourmaline::Message, user : Database::User) : Bool?
+    if @r9k_text
+      unless text = message.text || message.caption
+        return true # No text to check
+      end
+
+      text = Format.strip_forward_header(text, message.text_entities.keys)
+
+      unless check_r9k_text(text, user, message.message_id, message.entities)
+        # Alert user and cooldown
+        return 
+      end
+    end
+
+    if @r9k_media
+      unless file_id = get_forward_file_id(message)
+        return true # No media to check
+      end
+
+      unless check_r9k_media(file_id, user)
+        # Alert user and cooldown
+        return
+      end
+    end
+
+    true
+  end
+
+  def get_forward_file_id(message : Tourmaline::Message) : String?
+    if media = message.animation
+    elsif media = message.audio
+    elsif media = message.document
+    elsif media = message.video
+    elsif media = message.video_note
+    elsif media = message.voice
+    elsif media = message.photo.last?
+    else
+      return
+    end
+
+    media.file_unique_id
   end
 
   def relay_regular_forward(user : Database::User, message : Tourmaline::Message, text : String) : Nil

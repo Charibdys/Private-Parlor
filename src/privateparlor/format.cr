@@ -111,6 +111,14 @@ module Format
     end
   end
 
+  def strip_forward_header(text : String, entities : Array(Tourmaline::MessageEntity)) : String
+    unless Format.regular_forward?(text, entities)
+      return text
+    end
+
+    text.gsub(/.+\n/, "")
+  end
+
   # Strips message entities if they're found in `entity_types`
   def remove_entities(entities : Array(Tourmaline::MessageEntity), entity_types : Array(String)) : Array(Tourmaline::MessageEntity)
     stripped_entities = [] of Tourmaline::MessageEntity

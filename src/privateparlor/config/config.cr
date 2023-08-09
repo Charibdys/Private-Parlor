@@ -61,6 +61,9 @@ class Config
   @[YAML::Field(key: "toggle_r9k_media")]
   getter toggle_r9k_media : Bool? = false
 
+  @[YAML::Field(key: "toggle_r9k_forwards")]
+  getter toggle_r9k_forwards : Bool? = false
+
   @[YAML::Field(key: "valid_codepoints")]
   getter intermediate_valid_codepoints : Array(Array(Int32))?
 

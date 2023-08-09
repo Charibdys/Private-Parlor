@@ -301,6 +301,19 @@ locale: en-US
 #toggle_r9k_media: false
 
 ##
+## Toggle ROBOT9000 for forwards
+##
+## This will check forwarded messages and ensure that their content has
+## not been sent previously.
+##
+## This check also work with regular forwards.
+##
+## Accepted values: true, false
+## Default: false
+##
+#toggle_r9k_forwards: false
+
+##
 ## Valid codepoints
 ##
 ## Takes a list of 2-element arrays, where the first element is the start of a 
