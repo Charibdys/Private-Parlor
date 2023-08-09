@@ -1769,6 +1769,17 @@ class PrivateParlor < Tourmaline::Client
     )
   end
 
+  def check_r9k_media(file_id : String, user : Database::User) : Bool?
+    if Robot9000.unoriginal_media?(@database.db, file_id)
+      # Alert user and cooldown
+      return 
+    end
+
+    Robot9000.add_file_id(@database.db, file_id)
+
+    true
+  end
+
   {% for captioned_type in ["animation", "audio", "document", "video", "video_note", "voice", "photo"] %}
   # Prepares a {{captioned_type}} message for relaying.
   def handle_{{captioned_type.id}}(update : Tourmaline::Update) : Nil
@@ -1798,17 +1809,16 @@ class PrivateParlor < Tourmaline::Client
     if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_{{captioned_type.id}})
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
     end
+
     {% if captioned_type == "photo" %}
-      file_id = (message.photo.last).file_id
+      media = (message.photo.last)
     {% else %}
-        unless (file_id = message.{{captioned_type.id}}) && (file_id = file_id.file_id)
-          return
-        end
+      return unless media = message.{{captioned_type.id}}
     {% end %}
 
-
-    user.set_active(info.username, info.full_name)
-    @database.modify_user(user)
+    if @r9k_media
+      return unless check_r9k_media(media.file_unique_id, user)
+    end
 
     if raw_caption = message.caption
       if @r9k_text
@@ -1826,6 +1836,9 @@ class PrivateParlor < Tourmaline::Client
       caption = Format.format_pseudonymous_message(caption, tripkey, @tripcode_salt)
     end
 
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
     relay(
       message.reply_message,
       user,
@@ -1833,13 +1846,13 @@ class PrivateParlor < Tourmaline::Client
       {% if ["animation", "video", "photo"].includes?(captioned_type) %}
         ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(
             receiver,
-            file_id,
+            media.file_id,
             caption: caption,
             reply_to_message: reply,
             has_spoiler: message.has_media_spoiler? && @allow_media_spoilers
             ) }
       {% else %}
-        ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, file_id, caption: caption, reply_to_message: reply) }
+        ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, media.file_id, caption: caption, reply_to_message: reply) }
       {% end %}
     )
   end
@@ -1869,9 +1882,10 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
     end
 
-    user.set_active(info.username, info.full_name)
-    @database.modify_user(user)
-
+    if @r9k_media
+      return unless check_r9k_album(message, user)
+    end
+    
     if raw_caption = message.caption
       if @r9k_text
         return unless caption = check_r9k_text(raw_caption, user, message.message_id, message.entities)
@@ -1889,7 +1903,29 @@ class PrivateParlor < Tourmaline::Client
       caption = Format.format_pseudonymous_message(caption, tripkey, @tripcode_salt)
     end
 
+    user.set_active(info.username, info.full_name)
+    @database.modify_user(user)
+
     relay_album(message, album, user, caption)
+  end
+
+  def check_r9k_album(message : Tourmaline::Message, user : Database::User) : Bool?
+    if media = message.photo.last?
+    elsif media = message.video
+    elsif media = message.audio
+    elsif media = message.document
+    else
+      return false
+    end
+
+    if Robot9000.unoriginal_media?(@database.db, media.file_unique_id)
+      # Alert user and cooldown
+      return
+    end
+
+    Robot9000.add_file_id(@database.db, media.file_unique_id)
+
+    true
   end
 
   def relay_album(message : Tourmaline::Message, album : String, user : Database::User, caption : String?, entities : Array(MessageEntity) = [] of MessageEntity) : Nil

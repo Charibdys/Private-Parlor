@@ -89,4 +89,19 @@ module Robot9000
       add_line(db, text)
     end
   end
+
+  def unoriginal_media?(db : DB::Database, id : String) : Bool?
+    db.query_one?("SELECT 1 FROM file_id WHERE id = ?", id) do
+      true
+    end
+  end
+
+  def add_file_id(db : DB::Database, id : String) : Nil
+    db.exec("INSERT INTO file_id VALUES (?)", id)
+  rescue ex : SQLite3::Exception
+    if ex.code == 5 # DB is locked
+      sleep(10.milliseconds)
+      add_file_id(db, id)
+    end
+  end
 end
