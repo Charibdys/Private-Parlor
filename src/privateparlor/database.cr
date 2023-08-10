@@ -92,10 +92,14 @@ class Database
       @left = nil
     end
 
-    # Set *last_active* to the current time and update names
-    def set_active(username : String | Nil, fullname : String) : Nil
+    # Updates *username* and *real name*
+    def update_names(username : String | Nil, fullname : String) : Nil
       @username = username
       @realname = fullname
+    end
+
+    # Set *last_active* to the current time
+    def set_active : Nil
       @last_active = Time.utc
     end
 
