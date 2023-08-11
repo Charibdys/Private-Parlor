@@ -47,6 +47,8 @@ class PrivateParlor < Tourmaline::Client
   getter r9k_text : Bool?
   getter r9k_media : Bool?
   getter r9k_forwards : Bool?
+  getter r9k_cooldown : Int32
+  getter r9k_warn : Bool?
   getter valid_codepoints : Array(Range(Int32, Int32))
 
   # Creates a new instance of `PrivateParlor`.
@@ -90,6 +92,8 @@ class PrivateParlor < Tourmaline::Client
     @r9k_text = config.toggle_r9k_text
     @r9k_media = config.toggle_r9k_media
     @r9k_forwards = config.toggle_r9k_forwards
+    @r9k_cooldown = config.r9k_cooldown
+    @r9k_warn = config.r9k_warn
     @valid_codepoints = config.valid_codepoints
 
     @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
@@ -1394,10 +1398,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
   def check_text(text : String, user : Database::User, msid : Int64, entities : Array(Tourmaline::MessageEntity)) : String?
-    if Format.contains_html?(text)
-      return # TODO: Add a reply here
-    end
-    unless Format.allow_text?(text)
+    if Format.contains_html?(text) || !Format.allow_text?(text)
       return relay_to_one(msid, user.id, @locale.replies.rejected_message)
     end
 
@@ -1411,18 +1412,47 @@ class PrivateParlor < Tourmaline::Client
   end
 
   def validate_r9k_text(text : String, user : Database::User, message : Tourmaline::Message) : Tuple(String?, String?)
-    if Format.contains_html?(text)
-      # TODO: Add a reply here
-      return nil, nil
-    end
-    unless Robot9000.allow_text?(text, @valid_codepoints)
+    if Format.contains_html?(text) || !Robot9000.allow_text?(text, @valid_codepoints)
       relay_to_one(message.message_id, user.id, @locale.replies.rejected_message)
       return nil, nil
     end
 
     stripped_text = Robot9000.strip_text(text, message.text_entities.keys)
     if Robot9000.unoriginal_text?(@database.db, stripped_text)
-      # Alert user and cooldown
+      if @r9k_cooldown > 0 && @r9k_warn
+        duration = Format.format_timespan(
+          user.cooldown_and_warn(@r9k_cooldown, @warn_expire_hours, @karma_warn_penalty),
+          @locale.time_units
+        )
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      elsif @r9k_cooldown > 0
+        duration = Format.format_timespan(user.cooldown(@r9k_cooldown), @locale.time_units)
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      elsif @r9k_warn
+        duration = Format.format_timespan(
+          user.cooldown_and_warn(
+            cooldown_time_begin,
+            cooldown_time_linear_m,
+            cooldown_time_linear_b,
+            warn_expire_hours,
+            karma_warn_penalty,
+          ),
+          @locale.time_units
+        )
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      else
+        relay_to_one(message.message_id, user.id, @locale.replies.unoriginal_message)
+      end
+
       return nil, nil
     end
 
@@ -1437,11 +1467,44 @@ class PrivateParlor < Tourmaline::Client
     return text, stripped_text
   end
 
-  def validate_r9k_media(file_id : String?, user : Database::User) : String?
+  def validate_r9k_media(file_id : String?, user : Database::User, message : Tourmaline::Message) : String?
     return unless file_id
 
     if Robot9000.unoriginal_media?(@database.db, file_id)
-      # Alert user and cooldown
+      if @r9k_cooldown > 0 && @r9k_warn
+        duration = Format.format_timespan(
+          user.cooldown_and_warn(@r9k_cooldown, @warn_expire_hours, @karma_warn_penalty),
+          @locale.time_units
+        )
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      elsif @r9k_cooldown > 0
+        duration = Format.format_timespan(user.cooldown(@r9k_cooldown), @locale.time_units)
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      elsif @r9k_warn
+        duration = Format.format_timespan(
+          user.cooldown_and_warn(
+            cooldown_time_begin,
+            cooldown_time_linear_m,
+            cooldown_time_linear_b,
+            warn_expire_hours,
+            karma_warn_penalty,
+          ),
+          @locale.time_units
+        )
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      else
+        relay_to_one(message.message_id, user.id, @locale.replies.unoriginal_message)
+      end
+
       return 
     end
 
@@ -1717,7 +1780,7 @@ class PrivateParlor < Tourmaline::Client
       return unless stripped_text
 
       if file_id = Robot9000.get_media_file_id(message)
-        valid_file_id = validate_r9k_media(file_id, user)
+        valid_file_id = validate_r9k_media(file_id, user, message)
         return unless valid_file_id
       end
     elsif @r9k_text
@@ -1725,7 +1788,7 @@ class PrivateParlor < Tourmaline::Client
       return unless stripped_text
     elsif @r9k_media
       if file_id = Robot9000.get_media_file_id(message)
-        valid_file_id = validate_r9k_media(file_id, user)
+        valid_file_id = validate_r9k_media(file_id, user, message)
         return unless valid_file_id
       end
     end
@@ -1802,7 +1865,7 @@ class PrivateParlor < Tourmaline::Client
       return unless caption && stripped_text
 
       if file_id = Robot9000.get_album_file_id(message)
-        valid_file_id = validate_r9k_media(file_id, user)
+        valid_file_id = validate_r9k_media(file_id, user, message)
         return unless valid_file_id
       end
     elsif @r9k_text
@@ -1810,7 +1873,7 @@ class PrivateParlor < Tourmaline::Client
       return unless caption && stripped_text
     elsif @r9k_media
       if file_id = Robot9000.get_album_file_id(message)
-        valid_file_id = validate_r9k_media(file_id, user)
+        valid_file_id = validate_r9k_media(file_id, user, message)
         return unless valid_file_id
       end
     end
@@ -1965,7 +2028,7 @@ class PrivateParlor < Tourmaline::Client
         return unless stripped_text
   
         if file_id = Robot9000.get_media_file_id(message)
-          valid_file_id = validate_r9k_media(file_id, user)
+          valid_file_id = validate_r9k_media(file_id, user, message)
           return unless valid_file_id
           Robot9000.add_file_id(@database.db, valid_file_id)
         end
@@ -1979,7 +2042,7 @@ class PrivateParlor < Tourmaline::Client
         Robot9000.add_line(@database.db, stripped_text)
       elsif @r9k_media
         if file_id = Robot9000.get_media_file_id(message)
-          valid_file_id = validate_r9k_media(file_id, user)
+          valid_file_id = validate_r9k_media(file_id, user, message)
           return unless valid_file_id
           Robot9000.add_file_id(@database.db, valid_file_id)
         end
@@ -2009,7 +2072,7 @@ class PrivateParlor < Tourmaline::Client
         return unless stripped_text
   
         if file_id = Robot9000.get_media_file_id(message)
-          valid_file_id = validate_r9k_media(file_id, user)
+          valid_file_id = validate_r9k_media(file_id, user, message)
           return unless valid_file_id
         end
       elsif @r9k_text
@@ -2019,7 +2082,7 @@ class PrivateParlor < Tourmaline::Client
         return unless stripped_text
       elsif @r9k_media
         if file_id = Robot9000.get_media_file_id(message)
-          valid_file_id = validate_r9k_media(file_id, user)
+          valid_file_id = validate_r9k_media(file_id, user, message)
           return unless valid_file_id
         end
       end
@@ -2160,7 +2223,7 @@ class PrivateParlor < Tourmaline::Client
     return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_sticker)
 
     if @r9k_media
-      return unless validate_r9k_media(sticker.file_unique_id, user)
+      return unless validate_r9k_media(sticker.file_unique_id, user, message)
       Robot9000.add_file_id(@database.db, sticker.file_unique_id)
     end
 

@@ -64,6 +64,12 @@ class Config
   @[YAML::Field(key: "toggle_r9k_forwards")]
   getter toggle_r9k_forwards : Bool? = false
 
+  @[YAML::Field(key: "r9k_cooldown")]
+  getter r9k_cooldown : Int32 = 0
+
+  @[YAML::Field(key: "r9k_warn")]
+  getter r9k_warn : Bool? = false
+
   @[YAML::Field(key: "valid_codepoints")]
   getter intermediate_valid_codepoints : Array(Array(Int32))?
 

@@ -314,6 +314,30 @@ locale: en-US
 #toggle_r9k_forwards: false
 
 ##
+## Cooldown length (in seconds)
+## 
+## Users who send an unoriginal message will be cooldowned
+## for this length of time.
+##
+## Accepted values: an integer
+## Default: 0
+##
+#r9k_cooldown: 0
+
+##
+## Warn for unoriginal messages
+##
+## Users who send an unoriginal message will be given a warning,
+## and a cooldown based on the user's current amount of warnings
+## unless r9k_cooldown is enabled.
+##
+## Accepted values: true, false
+## Default: false
+##
+##
+#r9k_warn: false
+
+##
 ## Valid codepoints
 ##
 ## Takes a list of 2-element arrays, where the first element is the start of a 
