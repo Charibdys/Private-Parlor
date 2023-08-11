@@ -260,7 +260,6 @@ class PrivateParlor < Tourmaline::Client
     tasks
   end
 
-
   def preliminary_message_check(ctx : CommandHandler::Context | Tourmaline::Update) : Tuple(Tourmaline::Message?, Database::User?)
     unless (message = ctx.message) && (info = message.from)
       return nil, nil
@@ -316,13 +315,13 @@ class PrivateParlor < Tourmaline::Client
       elsif user.left?
         user.rejoin
         user.update_names(info.username, info.full_name)
-        user.set_active()
+        user.set_active
         @database.modify_user(user)
         relay_to_one(message.message_id, user.id, @locale.replies.rejoined)
         log_output(@locale.logs.rejoined, {"id" => user.id.to_s, "name" => user.get_formatted_name})
       else
         user.update_names(info.username, info.full_name)
-        user.set_active()
+        user.set_active
         @database.modify_user(user)
         relay_to_one(message.message_id, user.id, @locale.replies.already_in_chat)
       end
@@ -355,14 +354,14 @@ class PrivateParlor < Tourmaline::Client
   # This will set the user status to left, meaning the user will not receive any further messages.
   def stop_command(ctx : CommandHandler::Context) : Nil
     return unless (message = ctx.message) && (info = message.from)
-      
+
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
     end
 
     if (user = database.get_user(info.id)) && !user.left?
       user.update_names(info.username, info.full_name)
-      user.set_active()
+      user.set_active
       user.set_left
       @database.modify_user(user)
       relay_to_one(message.message_id, user.id, @locale.replies.left)
@@ -394,7 +393,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.not_in_cache)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     reply_user.remove_cooldown
@@ -408,7 +407,7 @@ class PrivateParlor < Tourmaline::Client
   end
 
   def user_info(user : Database::User, msid : Int64) : Nil
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     if !@karma_levels.empty?
@@ -457,7 +456,7 @@ class PrivateParlor < Tourmaline::Client
     message, user = preliminary_message_check(ctx)
     return unless message && user
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     counts = @database.get_user_counts
@@ -479,7 +478,7 @@ class PrivateParlor < Tourmaline::Client
     message, user = preliminary_message_check(ctx)
     return unless message && user
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(message.message_id, user.id, Format.format_version)
@@ -510,7 +509,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.upvote_spam)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     if history_with_karma.get_sender_id(reply.message_id) == user.id
@@ -553,7 +552,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.downvote_spam)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     if history_with_karma.get_sender_id(reply.message_id) == user.id
@@ -576,7 +575,7 @@ class PrivateParlor < Tourmaline::Client
     message, user = preliminary_message_check(ctx)
     return unless message && user
 
-    user.set_active()
+    user.set_active
     user.toggle_karma
     @database.modify_user(user)
 
@@ -590,7 +589,7 @@ class PrivateParlor < Tourmaline::Client
     message, user = preliminary_message_check(ctx)
     return unless message && user
 
-    user.set_active()
+    user.set_active
     user.toggle_debug
     @database.modify_user(user)
 
@@ -623,7 +622,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.sign_spam)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(@history.get_msid(reply.message_id, reply_user.id), reply_user.id, Format.format_user_reveal(user.id, user.get_formatted_name, @locale))
@@ -644,7 +643,7 @@ class PrivateParlor < Tourmaline::Client
     message, user = preliminary_message_check(ctx)
     return unless message && user
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     if arg = Format.get_arg(ctx.message.text)
@@ -712,7 +711,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     promoted_user.set_rank(tuple[0])
@@ -752,7 +751,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     promoted_user.set_rank(tuple[0])
@@ -808,7 +807,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     demoted_user.set_rank(tuple[0])
@@ -838,7 +837,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     demoted_user.set_rank(tuple[0])
@@ -878,7 +877,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.already_warned)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     reason = Format.get_arg(message.text)
@@ -929,7 +928,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     reason = Format.get_arg(message.text)
@@ -975,7 +974,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.missing_args)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     if arg.size < 5
@@ -1024,7 +1023,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
@@ -1055,7 +1054,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     delete_msids = 0
@@ -1094,7 +1093,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     reason = Format.get_arg(ctx.message.text)
@@ -1142,7 +1141,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.already_whitelisted)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     database.add_user(arg, "", "WHITELISTED", @default_rank)
@@ -1187,7 +1186,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     if media = reply.photo.last?
@@ -1233,7 +1232,7 @@ class PrivateParlor < Tourmaline::Client
 
     return if @karma_levels.empty?
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     current_level = next_level = {0, ""}
@@ -1285,7 +1284,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     @history.get_all_msids(reply.message_id).each do |receiver_id, receiver_msid|
@@ -1313,7 +1312,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     @database.get_prioritized_users.each do |user_id|
@@ -1350,7 +1349,7 @@ class PrivateParlor < Tourmaline::Client
         return relay_to_one(message.message_id, user.id, @locale.replies.fail)
       end
 
-      user.set_active()
+      user.set_active
       @database.modify_user(user)
 
       @database.set_motd(arg)
@@ -1365,7 +1364,7 @@ class PrivateParlor < Tourmaline::Client
     else
       return unless motd = @database.get_motd
 
-      user.set_active()
+      user.set_active
       @database.modify_user(user)
 
       relay_to_one(message.message_id, user.id, motd)
@@ -1377,7 +1376,7 @@ class PrivateParlor < Tourmaline::Client
     message, user = preliminary_message_check(ctx)
     return unless message && user
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(message.message_id, user.id, Format.format_help(user, @access.ranks, @locale))
@@ -1388,7 +1387,7 @@ class PrivateParlor < Tourmaline::Client
     message, user = preliminary_message_check(ctx)
     return unless message && user
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(message.message_id, user.id, @locale.replies.command_disabled)
@@ -1505,7 +1504,7 @@ class PrivateParlor < Tourmaline::Client
         relay_to_one(message.message_id, user.id, @locale.replies.unoriginal_message)
       end
 
-      return 
+      return
     end
 
     file_id
@@ -1707,7 +1706,6 @@ class PrivateParlor < Tourmaline::Client
     else
       return unless text = check_text(text, user, message.message_id, message.entities)
     end
-    
 
     if @pseudonymous
       unless tripkey = user.tripcode
@@ -1723,7 +1721,7 @@ class PrivateParlor < Tourmaline::Client
       Robot9000.add_line(@database.db, stripped_text)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -1737,7 +1735,7 @@ class PrivateParlor < Tourmaline::Client
   def check_r9k_media(file_id : String, user : Database::User) : Bool?
     if Robot9000.unoriginal_media?(@database.db, file_id)
       # Alert user and cooldown
-      return 
+      return
     end
 
     Robot9000.add_file_id(@database.db, file_id)
@@ -1910,7 +1908,7 @@ class PrivateParlor < Tourmaline::Client
       end
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay_album(message, album, user, caption)
@@ -1973,7 +1971,7 @@ class PrivateParlor < Tourmaline::Client
 
     return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_poll)
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     cached_msid = @history.new_message(user.id, message.message_id)
@@ -2026,7 +2024,7 @@ class PrivateParlor < Tourmaline::Client
         text = message.text || message.caption || ""
         _, stripped_text = validate_r9k_text(text, user, message)
         return unless stripped_text
-  
+
         if file_id = Robot9000.get_media_file_id(message)
           valid_file_id = validate_r9k_media(file_id, user, message)
           return unless valid_file_id
@@ -2038,7 +2036,7 @@ class PrivateParlor < Tourmaline::Client
         text = message.text || message.caption || ""
         _, stripped_text = validate_r9k_text(text, user, message)
         return unless stripped_text
-  
+
         Robot9000.add_line(@database.db, stripped_text)
       elsif @r9k_media
         if file_id = Robot9000.get_media_file_id(message)
@@ -2049,7 +2047,7 @@ class PrivateParlor < Tourmaline::Client
       end
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -2060,17 +2058,15 @@ class PrivateParlor < Tourmaline::Client
     )
   end
 
-
   def handle_regular_forward(message : Tourmaline::Message, user : Database::User) : Nil
     text = message.text || message.caption || ""
-    
+
     if @r9k_forwards
       if @r9k_text && @r9k_media
-        
         content = Format.strip_forward_header(text, message.text_entities.keys)
         _, stripped_text = validate_r9k_text(content, user, message)
         return unless stripped_text
-  
+
         if file_id = Robot9000.get_media_file_id(message)
           valid_file_id = validate_r9k_media(file_id, user, message)
           return unless valid_file_id
@@ -2078,7 +2074,7 @@ class PrivateParlor < Tourmaline::Client
       elsif @r9k_text
         content = Format.strip_forward_header(text, message.text_entities.keys)
         _, stripped_text = validate_r9k_text(content, user, message)
-  
+
         return unless stripped_text
       elsif @r9k_media
         if file_id = Robot9000.get_media_file_id(message)
@@ -2088,7 +2084,7 @@ class PrivateParlor < Tourmaline::Client
       end
     end
 
-    if (spam = @spam_handler)
+    if spam = @spam_handler
       unless (album = message.media_group_id) && @albums[album]?
         return if spamming?(user.id, message.message_id, spam.score_forwarded_message)
       end
@@ -2101,11 +2097,11 @@ class PrivateParlor < Tourmaline::Client
           return unless valid_file_id
           Robot9000.add_file_id(@database.db, valid_file_id)
         end
-  
+
         Robot9000.add_line(@database.db, stripped_text)
       elsif @r9k_text
         return unless stripped_text
-  
+
         Robot9000.add_line(@database.db, stripped_text)
       elsif @r9k_media
         if file_id
@@ -2227,7 +2223,7 @@ class PrivateParlor < Tourmaline::Client
       Robot9000.add_file_id(@database.db, sticker.file_unique_id)
     end
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -2278,7 +2274,7 @@ class PrivateParlor < Tourmaline::Client
 
     return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_venue)
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -2314,7 +2310,7 @@ class PrivateParlor < Tourmaline::Client
 
     return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_location)
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -2344,7 +2340,7 @@ class PrivateParlor < Tourmaline::Client
 
     return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_contact)
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -2365,7 +2361,7 @@ class PrivateParlor < Tourmaline::Client
     message, user = preliminary_message_check(update)
     return unless message && user
 
-    user.set_active()
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => type})
@@ -2444,7 +2440,7 @@ class PrivateParlor < Tourmaline::Client
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64, proc : MessageProc) : Nil
     if reply_message
       reply_msids = @history.get_all_msids(reply_message.message_id)
-      
+
       if reply_msids.empty?
         relay_to_one(cached_msid, user.id, @locale.replies.not_in_cache)
         @history.del_message_group(cached_msid)
@@ -2465,7 +2461,7 @@ class PrivateParlor < Tourmaline::Client
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Array(Int64), proc : MessageProc) : Nil
     if reply_message
       reply_msids = @history.get_all_msids(reply_message.message_id)
-      
+
       if reply_msids.empty?
         relay_to_one(cached_msid[0], user.id, @locale.replies.not_in_cache)
         cached_msid.each { |msid| @history.del_message_group(msid) }

@@ -49,7 +49,7 @@ module Robot9000
 
   def strip_text(text : String, entities : Array(Tourmaline::MessageEntity)) : String
     text = remove_links(text, entities)
-    
+
     text, _ = Tourmaline::HTMLParser.new.parse(text)
 
     text = text.downcase
