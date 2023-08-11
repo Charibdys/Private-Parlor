@@ -116,7 +116,7 @@ module Format
       return text
     end
 
-    text.gsub(/.+\n/, "")
+    text.sub(/.+/, "")
   end
 
   # Strips message entities if they're found in `entity_types`

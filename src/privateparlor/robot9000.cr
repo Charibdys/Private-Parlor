@@ -75,6 +75,33 @@ module Robot9000
     text.strip
   end
 
+  def get_media_file_id(message : Tourmaline::Message) : String?
+    if media = message.animation
+    elsif media = message.audio
+    elsif media = message.document
+    elsif media = message.video
+    elsif media = message.video_note
+    elsif media = message.voice
+    elsif media = message.photo.last?
+    else
+      return
+    end
+
+    media.file_unique_id
+  end
+
+  def get_album_file_id(message : Tourmaline::Message) : String?
+    if media = message.photo.last?
+    elsif media = message.video
+    elsif media = message.audio
+    elsif media = message.document
+    else
+      return
+    end
+
+    media.file_unique_id
+  end
+
   def unoriginal_text?(db : DB::Database, text : String) : Bool?
     db.query_one?("SELECT 1 FROM text WHERE line = ?", text) do
       true

@@ -1410,32 +1410,42 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
-  # Checks if the text contains a special font or starts a sign command.
-  #
-  # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
-  def check_r9k_text(text : String, user : Database::User, msid : Int64, entities : Array(Tourmaline::MessageEntity)) : String?
+  def validate_r9k_text(text : String, user : Database::User, message : Tourmaline::Message) : Tuple(String?, String?)
     if Format.contains_html?(text)
-      return # TODO: Add a reply here
+      # TODO: Add a reply here
+      return nil, nil
     end
     unless Robot9000.allow_text?(text, @valid_codepoints)
-      return relay_to_one(msid, user.id, @locale.replies.rejected_message)
+      relay_to_one(message.message_id, user.id, @locale.replies.rejected_message)
+      return nil, nil
     end
 
-    stripped_text = Robot9000.strip_text(text, entities)
+    stripped_text = Robot9000.strip_text(text, message.text_entities.keys)
     if Robot9000.unoriginal_text?(@database.db, stripped_text)
       # Alert user and cooldown
-      return
+      return nil, nil
     end
 
-    Robot9000.add_line(@database.db, stripped_text)
-
-    text = Format.strip_format(text, entities, @entity_types, @linked_network)
+    text = Format.strip_format(text, message.text_entities.keys, @entity_types, @linked_network)
 
     if text.starts_with?('/')
-      handle_embedded_command(text, user, msid)
-    else
-      text
+      text = handle_embedded_command(text, user, message.message_id)
     end
+
+    return nil, nil unless text
+
+    return text, stripped_text
+  end
+
+  def validate_r9k_media(file_id : String?, user : Database::User) : String?
+    return unless file_id
+
+    if Robot9000.unoriginal_media?(@database.db, file_id)
+      # Alert user and cooldown
+      return 
+    end
+
+    file_id
   end
 
   def handle_embedded_command(text : String, user : Database::User, msid : Int64) : String?
@@ -1629,10 +1639,12 @@ class PrivateParlor < Tourmaline::Client
     return if @spam_handler && spamming_text?(user.id, message.message_id, text)
 
     if @r9k_text
-      return unless text = check_r9k_text(text, user, message.message_id, message.entities)
+      text, stripped_text = validate_r9k_text(text, user, message)
+      return unless stripped_text
     else
       return unless text = check_text(text, user, message.message_id, message.entities)
     end
+    
 
     if @pseudonymous
       unless tripkey = user.tripcode
@@ -1640,6 +1652,12 @@ class PrivateParlor < Tourmaline::Client
       end
 
       text = Format.format_pseudonymous_message(text, tripkey, @tripcode_salt)
+    end
+
+    if @r9k_text
+      return unless stripped_text
+
+      Robot9000.add_line(@database.db, stripped_text)
     end
 
     user.set_active()
@@ -1676,8 +1694,6 @@ class PrivateParlor < Tourmaline::Client
 
     return if message.forward_date
     return if message.media_group_id
-    return unless (message = update.message) && (info = message.from)
-
     {% if captioned_type == "document" %}
       return if message.animation
     {% end %}
@@ -1690,15 +1706,27 @@ class PrivateParlor < Tourmaline::Client
       return unless media = message.{{captioned_type.id}}
     {% end %}
 
-    if @r9k_media
-      return unless check_r9k_media(media.file_unique_id, user)
+    caption = message.caption || ""
+
+    unless @r9k_text
+      return unless caption = check_text(caption, user, message.message_id, message.entities)
     end
 
-    if raw_caption = message.caption
-      if @r9k_text
-        return unless caption = check_r9k_text(raw_caption, user, message.message_id, message.entities)
-      else
-        return unless caption = check_text(raw_caption, user, message.message_id, message.entities)
+    if @r9k_text && @r9k_media
+      caption, stripped_text = validate_r9k_text(caption, user, message)
+      return unless stripped_text
+
+      if file_id = Robot9000.get_media_file_id(message)
+        valid_file_id = validate_r9k_media(file_id, user)
+        return unless valid_file_id
+      end
+    elsif @r9k_text
+      caption, stripped_text = validate_r9k_text(caption, user, message)
+      return unless stripped_text
+    elsif @r9k_media
+      if file_id = Robot9000.get_media_file_id(message)
+        valid_file_id = validate_r9k_media(file_id, user)
+        return unless valid_file_id
       end
     end
 
@@ -1708,6 +1736,25 @@ class PrivateParlor < Tourmaline::Client
       end
 
       caption = Format.format_pseudonymous_message(caption, tripkey, @tripcode_salt)
+    end
+
+    if @r9k_text && @r9k_media
+      return unless stripped_text
+      if file_id
+        return unless valid_file_id
+        Robot9000.add_file_id(@database.db, valid_file_id)
+      end
+
+      Robot9000.add_line(@database.db, stripped_text)
+    elsif @r9k_text
+      return unless stripped_text
+
+      Robot9000.add_line(@database.db, stripped_text)
+    elsif @r9k_media
+      if file_id
+        return unless valid_file_id
+        Robot9000.add_file_id(@database.db, valid_file_id)
+      end
     end
 
     user.set_active()
@@ -1744,17 +1791,27 @@ class PrivateParlor < Tourmaline::Client
     return if message.forward_date
     return unless album = message.media_group_id
 
-    return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_media_group)
-    
-    if @r9k_media
-      return unless check_r9k_album(message, user)
+    caption = message.caption || ""
+
+    unless @r9k_text
+      return unless caption = check_text(caption, user, message.message_id, message.entities)
     end
-    
-    if raw_caption = message.caption
-      if @r9k_text
-        return unless caption = check_r9k_text(raw_caption, user, message.message_id, message.entities)
-      else
-        return unless caption = check_text(raw_caption, user, message.message_id, message.entities)
+
+    if @r9k_text && @r9k_media
+      caption, stripped_text = validate_r9k_text(caption, user, message)
+      return unless caption && stripped_text
+
+      if file_id = Robot9000.get_album_file_id(message)
+        valid_file_id = validate_r9k_media(file_id, user)
+        return unless valid_file_id
+      end
+    elsif @r9k_text
+      caption, stripped_text = validate_r9k_text(caption, user, message)
+      return unless caption && stripped_text
+    elsif @r9k_media
+      if file_id = Robot9000.get_album_file_id(message)
+        valid_file_id = validate_r9k_media(file_id, user)
+        return unless valid_file_id
       end
     end
 
@@ -1767,29 +1824,33 @@ class PrivateParlor < Tourmaline::Client
       caption = Format.format_pseudonymous_message(caption, tripkey, @tripcode_salt)
     end
 
+    if (spam = @spam_handler) && @albums[album]? == nil
+      return if spamming?(user.id, message.message_id, spam.score_media_group)
+    end
+
+    if @r9k_text && @r9k_media
+      return unless stripped_text
+      if file_id
+        return unless valid_file_id
+        Robot9000.add_file_id(@database.db, valid_file_id)
+      end
+
+      Robot9000.add_line(@database.db, stripped_text)
+    elsif @r9k_text
+      return unless stripped_text
+
+      Robot9000.add_line(@database.db, stripped_text)
+    elsif @r9k_media
+      if file_id
+        return unless valid_file_id
+        Robot9000.add_file_id(@database.db, valid_file_id)
+      end
+    end
+
     user.set_active()
     @database.modify_user(user)
 
     relay_album(message, album, user, caption)
-  end
-
-  def check_r9k_album(message : Tourmaline::Message, user : Database::User) : Bool?
-    if media = message.photo.last?
-    elsif media = message.video
-    elsif media = message.audio
-    elsif media = message.document
-    else
-      return false
-    end
-
-    if Robot9000.unoriginal_media?(@database.db, media.file_unique_id)
-      # Alert user and cooldown
-      return
-    end
-
-    Robot9000.add_file_id(@database.db, media.file_unique_id)
-
-    true
   end
 
   def relay_album(message : Tourmaline::Message, album : String, user : Database::User, caption : String?, entities : Array(MessageEntity) = [] of MessageEntity) : Nil
@@ -1891,22 +1952,36 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.deanon_poll)
     end
 
+    if @regular_forwards
+      return handle_regular_forward(message, user)
+    end
+
     return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_forwarded_message)
 
     if @r9k_forwards
-      if @r9k_text && (text = message.text || message.caption)
-        text = Format.strip_forward_header(text, message.text_entities.keys)
+      if @r9k_text && @r9k_media
+        text = message.text || message.caption || ""
+        _, stripped_text = validate_r9k_text(text, user, message)
+        return unless stripped_text
   
-        unless check_r9k_text(text, user, message.message_id, message.entities)
-          # Alert user and cooldown
-          return 
+        if file_id = Robot9000.get_media_file_id(message)
+          valid_file_id = validate_r9k_media(file_id, user)
+          return unless valid_file_id
+          Robot9000.add_file_id(@database.db, valid_file_id)
         end
-      end
+
+        Robot9000.add_line(@database.db, stripped_text)
+      elsif @r9k_text
+        text = message.text || message.caption || ""
+        _, stripped_text = validate_r9k_text(text, user, message)
+        return unless stripped_text
   
-      if @r9k_media && (file_id = get_forward_file_id(message))
-        unless check_r9k_media(file_id, user)
-          # Alert user and cooldown
-          return
+        Robot9000.add_line(@database.db, stripped_text)
+      elsif @r9k_media
+        if file_id = Robot9000.get_media_file_id(message)
+          valid_file_id = validate_r9k_media(file_id, user)
+          return unless valid_file_id
+          Robot9000.add_file_id(@database.db, valid_file_id)
         end
       end
     end
@@ -1914,20 +1989,70 @@ class PrivateParlor < Tourmaline::Client
     user.set_active()
     @database.modify_user(user)
 
-    if @regular_forwards
-      handle_regular_forward(user, message)
-    else
-      relay(
-        message.reply_message,
-        user,
-        @history.new_message(user.id, message.message_id),
-        ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
-      )
-    end
+    relay(
+      message.reply_message,
+      user,
+      @history.new_message(user.id, message.message_id),
+      ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+    )
   end
 
-  def handle_regular_forward(user : Database::User, message : Tourmaline::Message) : Nil
-    if Format.regular_forward?(message.text || message.caption, message.text_entities.keys)
+
+  def handle_regular_forward(message : Tourmaline::Message, user : Database::User) : Nil
+    text = message.text || message.caption || ""
+    
+    if @r9k_forwards
+      if @r9k_text && @r9k_media
+        
+        content = Format.strip_forward_header(text, message.text_entities.keys)
+        _, stripped_text = validate_r9k_text(content, user, message)
+        return unless stripped_text
+  
+        if file_id = Robot9000.get_media_file_id(message)
+          valid_file_id = validate_r9k_media(file_id, user)
+          return unless valid_file_id
+        end
+      elsif @r9k_text
+        content = Format.strip_forward_header(text, message.text_entities.keys)
+        _, stripped_text = validate_r9k_text(content, user, message)
+  
+        return unless stripped_text
+      elsif @r9k_media
+        if file_id = Robot9000.get_media_file_id(message)
+          valid_file_id = validate_r9k_media(file_id, user)
+          return unless valid_file_id
+        end
+      end
+    end
+
+    if (spam = @spam_handler)
+      unless (album = message.media_group_id) && @albums[album]?
+        return if spamming?(user.id, message.message_id, spam.score_forwarded_message)
+      end
+    end
+
+    if @r9k_forwards
+      if @r9k_text && @r9k_media
+        return unless stripped_text
+        if file_id
+          return unless valid_file_id
+          Robot9000.add_file_id(@database.db, valid_file_id)
+        end
+  
+        Robot9000.add_line(@database.db, stripped_text)
+      elsif @r9k_text
+        return unless stripped_text
+  
+        Robot9000.add_line(@database.db, stripped_text)
+      elsif @r9k_media
+        if file_id
+          return unless valid_file_id
+          Robot9000.add_file_id(@database.db, valid_file_id)
+        end
+      end
+    end
+
+    if Format.regular_forward?(text, message.text_entities.keys)
       return relay(
         message.reply_message,
         user,
@@ -1945,11 +2070,7 @@ class PrivateParlor < Tourmaline::Client
       )
     end
 
-    if text = message.text
-      text = Format.unparse_text(text, message.entities, Client.default_parse_mode, escape: true)
-    elsif text = message.caption
-      text = Format.unparse_text(text, message.caption_entities, Client.default_parse_mode, escape: true)
-    end
+    text = Format.unparse_text(text, message.text_entities.keys, Client.default_parse_mode, escape: true)
 
     text = String.build do |str|
       str << header
@@ -1958,21 +2079,6 @@ class PrivateParlor < Tourmaline::Client
     end
 
     relay_regular_forward(user, message, text)
-  end
-
-  def get_forward_file_id(message : Tourmaline::Message) : String?
-    if media = message.animation
-    elsif media = message.audio
-    elsif media = message.document
-    elsif media = message.video
-    elsif media = message.video_note
-    elsif media = message.voice
-    elsif media = message.photo.last?
-    else
-      return
-    end
-
-    media.file_unique_id
   end
 
   def relay_regular_forward(user : Database::User, message : Tourmaline::Message, text : String) : Nil
@@ -2054,7 +2160,8 @@ class PrivateParlor < Tourmaline::Client
     return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_sticker)
 
     if @r9k_media
-      return unless check_r9k_media(sticker.file_unique_id, user)
+      return unless validate_r9k_media(sticker.file_unique_id, user)
+      Robot9000.add_file_id(@database.db, sticker.file_unique_id)
     end
 
     user.set_active()
