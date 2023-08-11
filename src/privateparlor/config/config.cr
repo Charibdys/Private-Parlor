@@ -55,6 +55,27 @@ class Config
   @[YAML::Field(key: "karma_levels")]
   property karma_levels : Hash(Int32, String) = {} of Int32 => String
 
+  @[YAML::Field(key: "toggle_r9k_text")]
+  getter toggle_r9k_text : Bool? = false
+
+  @[YAML::Field(key: "toggle_r9k_media")]
+  getter toggle_r9k_media : Bool? = false
+
+  @[YAML::Field(key: "toggle_r9k_forwards")]
+  getter toggle_r9k_forwards : Bool? = false
+
+  @[YAML::Field(key: "r9k_cooldown")]
+  getter r9k_cooldown : Int32 = 0
+
+  @[YAML::Field(key: "r9k_warn")]
+  getter r9k_warn : Bool? = false
+
+  @[YAML::Field(key: "valid_codepoints")]
+  getter intermediate_valid_codepoints : Array(Array(Int32))?
+
+  @[YAML::Field(ignore: true)]
+  property valid_codepoints : Array(Range(Int32, Int32)) = [(0x0000..0x007F)]
+
   # Command Toggles
 
   @[YAML::Field(key: "enable_start")]

@@ -263,6 +263,101 @@ locale: en-US
 #  50: "Unique"
 
 # --------------------------------
+#  ROBOT9000
+# --------------------------------
+
+##
+## An algorithm by Randall Munroe designed to reduce noise of large chats and
+## encourage original content.
+##
+## ROBOT9000 will prevent users from repeating information that has
+## already been posted before. When a user's post is considered unoriginal,
+## the post will not be sent and the user will be cooldowned.
+##
+
+##
+## Toggle ROBOT9000 for text and captions
+##
+## This will prevent users from repeating text or captions sent previously 
+##
+## Enabling this will add a 'text' table to the database
+##
+## Accepted values: true, false
+## Default: false
+##
+#toggle_r9k_text: false
+
+##
+## Toggle ROBOT9000 for media
+##
+## This will prevent users from sending animations, videos, photos, etc. that 
+## were sent previously.
+##
+## Enabling this will add a 'file_ids' table to the database
+##
+## Accepted values: true, false
+## Default: false
+##
+#toggle_r9k_media: false
+
+##
+## Toggle ROBOT9000 for forwards
+##
+## This will check forwarded messages and ensure that their content has
+## not been sent previously.
+##
+## This will also check regular forwards for originality.
+##
+## Accepted values: true, false
+## Default: false
+##
+#toggle_r9k_forwards: false
+
+##
+## Cooldown length (in seconds)
+## 
+## Users who send an unoriginal message will be cooldowned
+## for this length of time.
+##
+## Accepted values: an integer
+## Default: 0
+##
+#r9k_cooldown: 0
+
+##
+## Warn for unoriginal messages
+##
+## Users who send an unoriginal message will be given a warning,
+## and a cooldown based on the user's current amount of warnings
+## unless r9k_cooldown is enabled.
+##
+## Accepted values: true, false
+## Default: false
+##
+##
+#r9k_warn: false
+
+##
+## Valid codepoints
+##
+## Takes a list of 2-element arrays, where the first element is the start of a 
+## Unicode codeblock range, and the second element is the end of that range.
+##
+## Text sent by a user will be checked to ensure that no character in the text
+## is absent from the given ranges.
+##
+## All ranges are expected to be inclusive.
+##
+## Ranges can contain the same value for both elements to permit a single character.
+## 
+## Accepted values: list of 2 element arrays containing hexadecimal
+## Default: [0x0000, 0x007F], [0x1F600, 0x1F64F] (ASCII and Basic Emoji)
+##
+#valid_codepoints: 
+#  - [0x0000, 0x007F]
+#  - [0x1F600, 0x1F64F] 
+
+# --------------------------------
 #  Ranks
 # --------------------------------
 

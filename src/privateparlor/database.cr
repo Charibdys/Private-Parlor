@@ -92,10 +92,14 @@ class Database
       @left = nil
     end
 
-    # Set *last_active* to the current time and update names
-    def set_active(username : String | Nil, fullname : String) : Nil
+    # Updates *username* and *real name*
+    def update_names(username : String | Nil, fullname : String) : Nil
       @username = username
       @realname = fullname
+    end
+
+    # Set *last_active* to the current time
+    def set_active : Nil
       @last_active = Time.utc
     end
 
@@ -150,6 +154,21 @@ class Database
       @warn_expiry = Time.utc + warn_expire_hours.hours
       self.decrement_karma(penalty)
       cooldown_time.minutes
+    end
+
+    def cooldown_and_warn(cooldown_time : Int32, warn_expire_hours : Int32, penalty : Int32) : Time::Span
+      @cooldown_until = Time.utc + cooldown_time.seconds
+
+      @warnings += 1
+      @warn_expiry = Time.utc + warn_expire_hours.hours
+      self.decrement_karma(penalty)
+      cooldown_time.seconds
+    end
+
+    def cooldown(cooldown_time : Int32) : Time::Span
+      @cooldown_until = Time.utc + cooldown_time.seconds
+
+      cooldown_time.seconds
     end
 
     # Removes a cooldown from a user if it has expired.

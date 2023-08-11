@@ -175,6 +175,12 @@ class Replies
   @[YAML::Field(key: "on_cooldown")]
   getter on_cooldown : String
 
+  @[YAML::Field(key: "unoriginal_message")]
+  getter unoriginal_message : String
+
+  @[YAML::Field(key: "r9k_cooldown")]
+  getter r9k_cooldown : String
+
   @[YAML::Field(key: "media_limit")]
   getter media_limit : String
 

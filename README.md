@@ -91,6 +91,7 @@ The following features are planned and being worked on:
 	- [x] Configurable time and content limits for spam filter
 - [x] Inactivity timeout
 - [x] CLI tools and utility scripts
+- [x] ROBOT 9000 Auto Moderator
 
 ## Contributing
 

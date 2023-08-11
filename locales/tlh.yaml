@@ -41,7 +41,7 @@ replies:
 
    not_in_cooldown: "<i>meb Samta' 'ach mebvam weghbe'pu'.</i>"
 
-   rejected_message: "<i>ngoq motlhbe' ghaj QInlIjmo' ngeHpu'be' 'oH'.</i>"
+   rejected_message: "<i>ngutlhmey motlhbe' ghaj QInlIjmo' ngeHpu'be' 'oH.</i>"
 
    deanon_poll: "<i>So'ghach chaw'be' ghelmeH QInlIjmo' ngeHpu'be' 'oH.</i>"
 
@@ -179,6 +179,13 @@ replies:
 
    # Available placeholders: time
    on_cooldown: "<i>{time} ngugh bIweghbe'</i>"
+
+   unoriginal_message: "<i>SIrtaHbe' 'oHmo' ngeHpu'be' QInvam.</i>"
+
+   # Available placeholders: duration
+   r9k_cooldown: |-
+      <i>SIrtaHbe' 'oHmo' ngeHpu'be' QInvam.
+      {duration} poH bIweghta'.</i>
 
    # Available placeholders: total
    media_limit: "<i>DaH QInmey DangeHbe'laH. {total} repmey ngugh bInIDqa'laH.</i>"

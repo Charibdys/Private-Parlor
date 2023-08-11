@@ -41,7 +41,7 @@ replies:
 
    not_in_cooldown: "<i>Den Nutzer wurde gefunden, aber er war in Cooldown nicht!</i>"
 
-   rejected_message: "<i>Deine Nachricht ist nicht geschickt worden, weil es eine Sonderschrift haben.</i>"
+   rejected_message: "<i>Deine Nachricht ist nicht geschickt worden, weil es ungültige Schriftzeichen haben.</i>"
 
    deanon_poll: "<i>Deine Umfrage ist nicht geschickt worden, weil es erlaubt Anonyme Stimmabgabe nicht.</i>"
 
@@ -174,6 +174,13 @@ replies:
 
    # Available placeholders: time
    on_cooldown: "<i>Du hast immer noch ein Cooldown bis {time}</i>"
+
+   unoriginal_message: "<i>Diese Nachricht war nicht schicken, weil es nicht original ist.</i>"
+
+   # Available placeholders: duration,
+   r9k_cooldown: |-
+      <i>Diese Nachricht war nicht schicken, weil es nicht original ist.
+      Du wurdest bis {duration} einen Cooldown gegeben.</i>
 
    # Available placeholders: total
    media_limit: "<i>Du kannst jetzt keine Medien oder weitergeleitete Nachrichten schicken. Du kannst in {total} Stunden wieder versuchen.</i>"

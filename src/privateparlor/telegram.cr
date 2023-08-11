@@ -44,6 +44,12 @@ class PrivateParlor < Tourmaline::Client
   getter entity_types : Array(String)
   getter default_rank : Int32
   getter karma_levels : Hash(Int32, String)
+  getter r9k_text : Bool?
+  getter r9k_media : Bool?
+  getter r9k_forwards : Bool?
+  getter r9k_cooldown : Int32
+  getter r9k_warn : Bool?
+  getter valid_codepoints : Array(Range(Int32, Int32))
 
   # Creates a new instance of `PrivateParlor`.
   #
@@ -83,17 +89,25 @@ class PrivateParlor < Tourmaline::Client
     @entity_types = config.entities
     @default_rank = config.default_rank
     @karma_levels = config.karma_levels
+    @r9k_text = config.toggle_r9k_text
+    @r9k_media = config.toggle_r9k_media
+    @r9k_forwards = config.toggle_r9k_forwards
+    @r9k_cooldown = config.r9k_cooldown
+    @r9k_warn = config.r9k_warn
+    @valid_codepoints = config.valid_codepoints
 
-    db = DB.open("sqlite3://#{Path.new(config.database)}") # TODO: We'll want check if this works on Windows later
-    @database = Database.new(db)
+    @database = Database.new(DB.open("sqlite3://#{Path.new(config.database)}")) # TODO: We'll want check if this works on Windows later
     @access = AuthorizedRanks.new(config.ranks)
-    @history = get_history_type(db, config)
+    @history = get_history_type(@database.db, config)
     @queue = MessageQueue.new
     @locale = Localization.parse_locale(config.locale)
     @spam_handler = config.spam_score_handler if config.spam_interval_seconds > 0
     @tasks = register_tasks(config.spam_interval_seconds)
 
     revert_ranked_users()
+    if @r9k_text || @r9k_media
+      Robot9000.ensure_r9k_schema(@database.db, config.toggle_r9k_text, config.toggle_r9k_media)
+    end
     initialize_handlers(@locale.command_descriptions, config)
   end
 
@@ -246,6 +260,42 @@ class PrivateParlor < Tourmaline::Client
     tasks
   end
 
+  def preliminary_message_check(ctx : CommandHandler::Context | Tourmaline::Update) : Tuple(Tourmaline::Message?, Database::User?)
+    unless (message = ctx.message) && (info = message.from)
+      return nil, nil
+    end
+    unless user = database.get_user(info.id)
+      relay_to_one(nil, info.id, @locale.replies.not_in_chat)
+      return nil, nil
+    end
+    unless user.can_use_command?
+      deny_user(user)
+      return nil, nil
+    end
+
+    user.update_names(info.username, info.full_name)
+
+    return message, user
+  end
+
+  def preliminary_message_check(update : Tourmaline::Update) : Tuple(Tourmaline::Message?, Database::User?)
+    unless (message = update.message) && (info = message.from)
+      return nil, nil
+    end
+    unless user = database.get_user(info.id)
+      relay_to_one(nil, info.id, @locale.replies.not_in_chat)
+      return nil, nil
+    end
+    unless user.can_chat?
+      deny_user(user)
+      return nil, nil
+    end
+
+    user.update_names(info.username, info.full_name)
+
+    return message, user
+  end
+
   # User starts the bot and begins receiving messages.
   #
   # If the user is not in the database, this will add the user to it
@@ -254,9 +304,7 @@ class PrivateParlor < Tourmaline::Client
   #
   # Left users can rejoin the bot with this command
   def start_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
+    return unless (message = ctx.message) && (info = message.from)
 
     if user = database.get_user(info.id)
       if user.blacklisted?
@@ -266,12 +314,14 @@ class PrivateParlor < Tourmaline::Client
         })
       elsif user.left?
         user.rejoin
-        user.set_active(info.username, info.full_name)
+        user.update_names(info.username, info.full_name)
+        user.set_active
         @database.modify_user(user)
         relay_to_one(message.message_id, user.id, @locale.replies.rejoined)
         log_output(@locale.logs.rejoined, {"id" => user.id.to_s, "name" => user.get_formatted_name})
       else
-        user.set_active(info.username, info.full_name)
+        user.update_names(info.username, info.full_name)
+        user.set_active
         @database.modify_user(user)
         relay_to_one(message.message_id, user.id, @locale.replies.already_in_chat)
       end
@@ -303,15 +353,15 @@ class PrivateParlor < Tourmaline::Client
   #
   # This will set the user status to left, meaning the user will not receive any further messages.
   def stop_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
+    return unless (message = ctx.message) && (info = message.from)
+
     unless user = database.get_user(info.id)
       return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
     end
 
     if (user = database.get_user(info.id)) && !user.left?
-      user.set_active(info.username, info.full_name)
+      user.update_names(info.username, info.full_name)
+      user.set_active
       user.set_left
       @database.modify_user(user)
       relay_to_one(message.message_id, user.id, @locale.replies.left)
@@ -325,24 +375,17 @@ class PrivateParlor < Tourmaline::Client
   #
   # If this is used with a reply, returns the user info of that message if the invoker is ranked.
   def info_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
 
     if reply = message.reply_message
-      ranked_info(user, info, message.message_id, reply.message_id)
+      ranked_info(user, message.message_id, reply.message_id)
     else
-      user_info(user, info, message.message_id)
+      user_info(user, message.message_id)
     end
   end
 
-  def ranked_info(user : Database::User, info : Tourmaline::User, msid : Int64, reply : Int64) : Nil
+  def ranked_info(user : Database::User, msid : Int64, reply : Int64) : Nil
     unless @access.authorized?(user.rank, :ranked_info)
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
@@ -350,7 +393,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.not_in_cache)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     reply_user.remove_cooldown
@@ -363,8 +406,8 @@ class PrivateParlor < Tourmaline::Client
     })
   end
 
-  def user_info(user : Database::User, info : Tourmaline::User, msid : Int64) : Nil
-    user.set_active(info.username, info.full_name)
+  def user_info(user : Database::User, msid : Int64) : Nil
+    user.set_active
     @database.modify_user(user)
 
     if !@karma_levels.empty?
@@ -410,20 +453,13 @@ class PrivateParlor < Tourmaline::Client
   # If the user does not have the "users" permission, show the total numbers of users.
   # Otherwise, return a message containing the number of joined, left, and blacklisted users.
   def users_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
-    counts = database.get_user_counts
+    counts = @database.get_user_counts
 
     if @access.authorized?(user.rank, :users)
       relay_to_one(nil, user.id, @locale.replies.user_count_full, {
@@ -439,17 +475,10 @@ class PrivateParlor < Tourmaline::Client
 
   # Returns a message containing the progam's version.
   def version_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(message.message_id, user.id, Format.format_version)
@@ -461,17 +490,11 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `upvote`, allows the user to upvote a message
   def upvote_command(ctx : CommandHandler::Context) : Nil
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryFull | HistoryRatings | DatabaseHistory)
       return
-    end
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
     end
     unless @access.authorized?(user.rank, :upvote)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
@@ -486,7 +509,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.upvote_spam)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     if history_with_karma.get_sender_id(reply.message_id) == user.id
@@ -510,17 +533,11 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `downvote`, allows the user to downvote a message
   def downvote_command(ctx : CommandHandler::Context) : Nil
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless (history_with_karma = @history) && history_with_karma.is_a?(HistoryFull | HistoryRatings | DatabaseHistory)
       return
-    end
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
     end
     unless @access.authorized?(user.rank, :downvote)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
@@ -535,7 +552,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.downvote_spam)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     if history_with_karma.get_sender_id(reply.message_id) == user.id
@@ -555,17 +572,10 @@ class PrivateParlor < Tourmaline::Client
 
   # Toggle the user's hide_karma attribute.
   def toggle_karma_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     user.toggle_karma
     @database.modify_user(user)
 
@@ -576,17 +586,10 @@ class PrivateParlor < Tourmaline::Client
 
   # Toggle the user's toggle_debug attribute.
   def toggle_debug_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     user.toggle_debug
     @database.modify_user(user)
 
@@ -597,15 +600,9 @@ class PrivateParlor < Tourmaline::Client
 
   # Privately reveal username to another user
   def reveal_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :reveal)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
@@ -625,7 +622,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.sign_spam)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(@history.get_msid(reply.message_id, reply_user.id), reply_user.id, Format.format_user_reveal(user.id, user.get_formatted_name, @locale))
@@ -643,17 +640,10 @@ class PrivateParlor < Tourmaline::Client
 
   # Set/modify/view the user's tripcode.
   def tripcode_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     if arg = Format.get_arg(ctx.message.text)
@@ -688,27 +678,21 @@ class PrivateParlor < Tourmaline::Client
   #
   # If used with a reply, the reply user is promoted to the invoker's rank or the given rank.
   def promote_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless authority = @access.authorized?(user.rank, :promote, :promote_lower, :promote_same)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
     if reply = message.reply_message
-      promote_from_reply(user, info, authority, Format.get_arg(ctx.message.text), message.message_id, reply.message_id)
+      promote_from_reply(user, authority, Format.get_arg(ctx.message.text), message.message_id, reply.message_id)
     else
-      promote_from_args(user, info, authority, Format.get_args(message.text, count: 2), message.message_id)
+      promote_from_args(user, authority, Format.get_args(message.text, count: 2), message.message_id)
     end
   end
 
-  def promote_from_reply(user : Database::User, info : Tourmaline::User, authority : CommandPermissions, arg : String?, msid : Int64, reply : Int64) : Nil
+  def promote_from_reply(user : Database::User, authority : CommandPermissions, arg : String?, msid : Int64, reply : Int64) : Nil
     if arg.nil? && authority.in?(CommandPermissions::Promote, CommandPermissions::PromoteSame)
       tuple = {user.rank, @access.ranks[user.rank]}
     elsif arg
@@ -727,7 +711,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     promoted_user.set_rank(tuple[0])
@@ -744,7 +728,7 @@ class PrivateParlor < Tourmaline::Client
     relay_to_one(msid, user.id, @locale.replies.success)
   end
 
-  def promote_from_args(user : Database::User, info : Tourmaline::User, authority : CommandPermissions, args : Array(String) | Nil, msid : Int64) : Nil
+  def promote_from_args(user : Database::User, authority : CommandPermissions, args : Array(String) | Nil, msid : Int64) : Nil
     unless args
       return relay_to_one(msid, user.id, @locale.replies.missing_args)
     end
@@ -767,7 +751,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     promoted_user.set_rank(tuple[0])
@@ -790,27 +774,21 @@ class PrivateParlor < Tourmaline::Client
   #
   # If used with a reply, the reply user is demoted to either the user rank or a given rank.
   def demote_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :demote)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
     if reply = message.reply_message
-      demote_from_reply(user, info, Format.get_arg(ctx.message.text), message.message_id, reply.message_id)
+      demote_from_reply(user, Format.get_arg(ctx.message.text), message.message_id, reply.message_id)
     else
-      demote_from_args(user, info, Format.get_args(message.text, count: 2), message.message_id)
+      demote_from_args(user, Format.get_args(message.text, count: 2), message.message_id)
     end
   end
 
-  def demote_from_reply(user : Database::User, info : Tourmaline::User, arg : String?, msid : Int64, reply : Int64) : Nil
+  def demote_from_reply(user : Database::User, arg : String?, msid : Int64, reply : Int64) : Nil
     if arg.nil?
       tuple = {@default_rank, @access.ranks[@default_rank]}
     elsif arg
@@ -829,7 +807,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     demoted_user.set_rank(tuple[0])
@@ -844,7 +822,7 @@ class PrivateParlor < Tourmaline::Client
     relay_to_one(msid, user.id, @locale.replies.success)
   end
 
-  def demote_from_args(user : Database::User, info : Tourmaline::User, args : Array(String) | Nil, msid : Int64) : Nil
+  def demote_from_args(user : Database::User, args : Array(String) | Nil, msid : Int64) : Nil
     unless args && args.size == 2
       return relay_to_one(msid, user.id, @locale.replies.missing_args)
     end
@@ -859,7 +837,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(msid, user.id, @locale.replies.fail)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     demoted_user.set_rank(tuple[0])
@@ -880,17 +858,11 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `warn`, allows the user to warn a message
   def warn_command(ctx : CommandHandler::Context) : Nil
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless (history_with_warnings = @history) && history_with_warnings.is_a?(HistoryFull | HistoryWarnings | DatabaseHistory)
       return
-    end
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
     end
     unless @access.authorized?(user.rank, :warn)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
@@ -905,7 +877,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.already_warned)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     reason = Format.get_arg(message.text)
@@ -943,15 +915,9 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `delete`, allows the user to delete a message
   def delete_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :delete)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
@@ -962,7 +928,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     reason = Format.get_arg(message.text)
@@ -998,15 +964,9 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `uncooldown`, allows the user to uncooldown another user
   def uncooldown_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :uncooldown)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
@@ -1014,7 +974,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.missing_args)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     if arg.size < 5
@@ -1050,15 +1010,9 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `remove`, allows the user to remove a message
   def remove_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :remove)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
@@ -1069,7 +1023,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     cached_msid = delete_messages(reply.message_id, reply_user.id, reply_user.debug_enabled)
@@ -1093,20 +1047,14 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `purge`, allows the user to run a purge
   def purge_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :purge)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     delete_msids = 0
@@ -1129,15 +1077,9 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `blacklist`, allows the user to blacklist another user.
   def blacklist_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :blacklist)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
@@ -1151,7 +1093,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     reason = Format.get_arg(ctx.message.text)
@@ -1183,15 +1125,9 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `whitelist`, allows the user to whitelist another user by user ID.
   def whitelist_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :whitelist)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
@@ -1205,7 +1141,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.already_whitelisted)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     database.add_user(arg, "", "WHITELISTED", @default_rank)
@@ -1230,15 +1166,9 @@ class PrivateParlor < Tourmaline::Client
   #
   # If `spoiler`, allows the user to add a spoiler to a relayed media message.
   def spoiler_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :spoiler)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
@@ -1256,7 +1186,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     if media = reply.photo.last?
@@ -1297,20 +1227,12 @@ class PrivateParlor < Tourmaline::Client
   end
 
   def karma_info_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    if @karma_levels.empty?
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
 
-    user.set_active(info.username, info.full_name)
+    return if @karma_levels.empty?
+
+    user.set_active
     @database.modify_user(user)
 
     current_level = next_level = {0, ""}
@@ -1349,15 +1271,9 @@ class PrivateParlor < Tourmaline::Client
   end
 
   def pin_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :pin)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
@@ -1368,7 +1284,7 @@ class PrivateParlor < Tourmaline::Client
       return relay_to_one(message.message_id, user.id, @locale.replies.not_in_cache)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     @history.get_all_msids(reply.message_id).each do |receiver_id, receiver_msid|
@@ -1389,20 +1305,14 @@ class PrivateParlor < Tourmaline::Client
   end
 
   def unpin_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :unpin)
       return relay_to_one(message.message_id, user.id, @locale.replies.fail)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     @database.get_prioritized_users.each do |user_id|
@@ -1423,18 +1333,10 @@ class PrivateParlor < Tourmaline::Client
   #
   # If the host invokes this command, the motd/rules can be set or modified.
   def motd_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
-    unless text = message.text
-      return
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
+
+    return unless text = message.text
 
     if text.split(2)[1]?
       unless @access.authorized?(user.rank, :motd_set)
@@ -1447,7 +1349,7 @@ class PrivateParlor < Tourmaline::Client
         return relay_to_one(message.message_id, user.id, @locale.replies.fail)
       end
 
-      user.set_active(info.username, info.full_name)
+      user.set_active
       @database.modify_user(user)
 
       @database.set_motd(arg)
@@ -1460,10 +1362,9 @@ class PrivateParlor < Tourmaline::Client
 
       relay_to_one(message.message_id, user.id, @locale.replies.success)
     else
-      unless motd = @database.get_motd
-        return
-      end
-      user.set_active(info.username, info.full_name)
+      return unless motd = @database.get_motd
+
+      user.set_active
       @database.modify_user(user)
 
       relay_to_one(message.message_id, user.id, motd)
@@ -1472,17 +1373,10 @@ class PrivateParlor < Tourmaline::Client
 
   # Returns a message containing all the commands that a user can use, according to the user's rank.
   def help_command(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(message.message_id, user.id, Format.format_help(user, @access.ranks, @locale))
@@ -1490,17 +1384,10 @@ class PrivateParlor < Tourmaline::Client
 
   # Sends a message to the user if a disabled command is used
   def command_disabled(ctx : CommandHandler::Context) : Nil
-    unless (message = ctx.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_use_command?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(ctx)
+    return unless message && user
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(message.message_id, user.id, @locale.replies.command_disabled)
@@ -1509,14 +1396,122 @@ class PrivateParlor < Tourmaline::Client
   # Checks if the text contains a special font or starts a sign command.
   #
   # Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.
-  def check_text(text : String, user : Database::User, msid : Int64) : String?
-    if !Format.allow_text?(text)
+  def check_text(text : String, user : Database::User, msid : Int64, entities : Array(Tourmaline::MessageEntity)) : String?
+    if Format.contains_html?(text) || !Format.allow_text?(text)
       return relay_to_one(msid, user.id, @locale.replies.rejected_message)
     end
 
-    case
-    when !text.starts_with?('/')
+    text = Format.strip_format(text, entities, @entity_types, @linked_network)
+
+    if text.starts_with?('/')
+      handle_embedded_command(text, user, msid)
+    else
       text
+    end
+  end
+
+  def validate_r9k_text(text : String, user : Database::User, message : Tourmaline::Message) : Tuple(String?, String?)
+    if Format.contains_html?(text) || !Robot9000.allow_text?(text, @valid_codepoints)
+      relay_to_one(message.message_id, user.id, @locale.replies.rejected_message)
+      return nil, nil
+    end
+
+    stripped_text = Robot9000.strip_text(text, message.text_entities.keys)
+    if Robot9000.unoriginal_text?(@database.db, stripped_text)
+      if @r9k_cooldown > 0 && @r9k_warn
+        duration = Format.format_timespan(
+          user.cooldown_and_warn(@r9k_cooldown, @warn_expire_hours, @karma_warn_penalty),
+          @locale.time_units
+        )
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      elsif @r9k_cooldown > 0
+        duration = Format.format_timespan(user.cooldown(@r9k_cooldown), @locale.time_units)
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      elsif @r9k_warn
+        duration = Format.format_timespan(
+          user.cooldown_and_warn(
+            cooldown_time_begin,
+            cooldown_time_linear_m,
+            cooldown_time_linear_b,
+            warn_expire_hours,
+            karma_warn_penalty,
+          ),
+          @locale.time_units
+        )
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      else
+        relay_to_one(message.message_id, user.id, @locale.replies.unoriginal_message)
+      end
+
+      return nil, nil
+    end
+
+    text = Format.strip_format(text, message.text_entities.keys, @entity_types, @linked_network)
+
+    if text.starts_with?('/')
+      text = handle_embedded_command(text, user, message.message_id)
+    end
+
+    return nil, nil unless text
+
+    return text, stripped_text
+  end
+
+  def validate_r9k_media(file_id : String?, user : Database::User, message : Tourmaline::Message) : String?
+    return unless file_id
+
+    if Robot9000.unoriginal_media?(@database.db, file_id)
+      if @r9k_cooldown > 0 && @r9k_warn
+        duration = Format.format_timespan(
+          user.cooldown_and_warn(@r9k_cooldown, @warn_expire_hours, @karma_warn_penalty),
+          @locale.time_units
+        )
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      elsif @r9k_cooldown > 0
+        duration = Format.format_timespan(user.cooldown(@r9k_cooldown), @locale.time_units)
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      elsif @r9k_warn
+        duration = Format.format_timespan(
+          user.cooldown_and_warn(
+            cooldown_time_begin,
+            cooldown_time_linear_m,
+            cooldown_time_linear_b,
+            warn_expire_hours,
+            karma_warn_penalty,
+          ),
+          @locale.time_units
+        )
+
+        relay_to_one(message.message_id, user.id, @locale.replies.r9k_cooldown, {"duration" => duration})
+
+        @database.modify_user(user)
+      else
+        relay_to_one(message.message_id, user.id, @locale.replies.unoriginal_message)
+      end
+
+      return
+    end
+
+    file_id
+  end
+
+  def handle_embedded_command(text : String, user : Database::User, msid : Int64) : String?
+    case
     when text.starts_with?("/s "), text.starts_with?("/sign ")
       handle_sign(text, user, msid)
     when text.starts_with?("/t "), text.starts_with?("/tsign ")
@@ -1673,29 +1668,45 @@ class PrivateParlor < Tourmaline::Client
     end
   end
 
+  def spamming_text?(id : Int64, msid : Int64, text : String) : Bool?
+    return unless spam = @spam_handler
+
+    if spam.spammy?(id, spam.calculate_spam_score_text(text))
+      relay_to_one(msid, id, @locale.replies.spamming)
+      true
+    end
+  end
+
+  def spamming?(id : Int64, msid : Int64, score : Float32) : Bool?
+    return unless spam = @spam_handler
+
+    if spam.spammy?(id, score)
+      relay_to_one(msid, id, @locale.replies.spamming)
+      true
+    end
+  end
+
   # Prepares a text message for relaying.
   def handle_text(update : Tourmaline::Update)
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    if message.forward_date
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :text)
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "text"})
     end
-    unless (raw_text = message.text) && (text = check_text(Format.strip_format(raw_text, message.entities, @entity_types, @linked_network), user, message.message_id))
-      return
+
+    return if message.forward_date
+    return unless text = message.text
+
+    return if @spam_handler && spamming_text?(user.id, message.message_id, text)
+
+    if @r9k_text
+      text, stripped_text = validate_r9k_text(text, user, message)
+      return unless stripped_text
+    else
+      return unless text = check_text(text, user, message.message_id, message.entities)
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.calculate_spam_score_text(text))
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
-    end
+
     if @pseudonymous
       unless tripkey = user.tripcode
         return relay_to_one(message.message_id, user.id, @locale.replies.no_tripcode_set)
@@ -1704,7 +1715,13 @@ class PrivateParlor < Tourmaline::Client
       text = Format.format_pseudonymous_message(text, tripkey, @tripcode_salt)
     end
 
-    user.set_active(info.username, info.full_name)
+    if @r9k_text
+      return unless stripped_text
+
+      Robot9000.add_line(@database.db, stripped_text)
+    end
+
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -1715,51 +1732,62 @@ class PrivateParlor < Tourmaline::Client
     )
   end
 
+  def check_r9k_media(file_id : String, user : Database::User) : Bool?
+    if Robot9000.unoriginal_media?(@database.db, file_id)
+      # Alert user and cooldown
+      return
+    end
+
+    Robot9000.add_file_id(@database.db, file_id)
+
+    true
+  end
+
   {% for captioned_type in ["animation", "audio", "document", "video", "video_note", "voice", "photo"] %}
   # Prepares a {{captioned_type}} message for relaying.
   def handle_{{captioned_type.id}}(update : Tourmaline::Update) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    {% if captioned_type == "document" %}
-        if message.animation
-          return
-        end
-    {% end %}
-    if message.forward_date
-      return
-    end
-    if message.media_group_id
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?(@media_limit_period.hours)
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :{{captioned_type}})
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => {{captioned_type}}})
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_{{captioned_type.id}})
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
-    end
-    {% if captioned_type == "photo" %}
-      file_id = (message.photo.last).file_id
-    {% else %}
-        unless (file_id = message.{{captioned_type.id}}) && (file_id = file_id.file_id)
-          return
-        end
+
+    return if message.forward_date
+    return if message.media_group_id
+    {% if captioned_type == "document" %}
+      return if message.animation
     {% end %}
 
+    return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_{{captioned_type.id}})
 
-    user.set_active(info.username, info.full_name)
-    @database.modify_user(user)
+    {% if captioned_type == "photo" %}
+      media = (message.photo.last)
+    {% else %}
+      return unless media = message.{{captioned_type.id}}
+    {% end %}
 
-    if raw_caption = message.caption
-      caption = check_text(Format.strip_format(raw_caption, message.caption_entities, @entity_types, @linked_network), user, message.message_id)
-      if caption.nil? # Caption contained a special font or used a disabled command
-        return
+    caption = message.caption || ""
+
+    unless @r9k_text
+      return unless caption = check_text(caption, user, message.message_id, message.entities)
+    end
+
+    if @r9k_text && @r9k_media
+      caption, stripped_text = validate_r9k_text(caption, user, message)
+      return unless stripped_text
+
+      if file_id = Robot9000.get_media_file_id(message)
+        valid_file_id = validate_r9k_media(file_id, user, message)
+        return unless valid_file_id
+      end
+    elsif @r9k_text
+      caption, stripped_text = validate_r9k_text(caption, user, message)
+      return unless stripped_text
+    elsif @r9k_media
+      if file_id = Robot9000.get_media_file_id(message)
+        valid_file_id = validate_r9k_media(file_id, user, message)
+        return unless valid_file_id
       end
     end
 
@@ -1771,6 +1799,28 @@ class PrivateParlor < Tourmaline::Client
       caption = Format.format_pseudonymous_message(caption, tripkey, @tripcode_salt)
     end
 
+    if @r9k_text && @r9k_media
+      return unless stripped_text
+      if file_id
+        return unless valid_file_id
+        Robot9000.add_file_id(@database.db, valid_file_id)
+      end
+
+      Robot9000.add_line(@database.db, stripped_text)
+    elsif @r9k_text
+      return unless stripped_text
+
+      Robot9000.add_line(@database.db, stripped_text)
+    elsif @r9k_media
+      if file_id
+        return unless valid_file_id
+        Robot9000.add_file_id(@database.db, valid_file_id)
+      end
+    end
+
+    user.set_active()
+    @database.modify_user(user)
+
     relay(
       message.reply_message,
       user,
@@ -1778,13 +1828,13 @@ class PrivateParlor < Tourmaline::Client
       {% if ["animation", "video", "photo"].includes?(captioned_type) %}
         ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(
             receiver,
-            file_id,
+            media.file_id,
             caption: caption,
             reply_to_message: reply,
             has_spoiler: message.has_media_spoiler? && @allow_media_spoilers
             ) }
       {% else %}
-        ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, file_id, caption: caption, reply_to_message: reply) }
+        ->(receiver : Int64, reply : Int64 | Nil) { send_{{captioned_type.id}}(receiver, media.file_id, caption: caption, reply_to_message: reply) }
       {% end %}
     )
   end
@@ -1792,35 +1842,37 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares an album message for relaying.
   def handle_media_group(update : Tourmaline::Update) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    if message.forward_date
-      return
-    end
-    unless album = message.media_group_id
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?(@media_limit_period.hours)
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :media_group)
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "media_group"})
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_media_group)
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
+
+    return if message.forward_date
+    return unless album = message.media_group_id
+
+    caption = message.caption || ""
+
+    unless @r9k_text
+      return unless caption = check_text(caption, user, message.message_id, message.entities)
     end
 
-    user.set_active(info.username, info.full_name)
-    @database.modify_user(user)
+    if @r9k_text && @r9k_media
+      caption, stripped_text = validate_r9k_text(caption, user, message)
+      return unless caption && stripped_text
 
-    if raw_caption = message.caption
-      caption = check_text(Format.strip_format(raw_caption, message.caption_entities, @entity_types, @linked_network), user, message.message_id)
-      if caption.nil? # Caption contained a special font or used a disabled command
-        return
+      if file_id = Robot9000.get_album_file_id(message)
+        valid_file_id = validate_r9k_media(file_id, user, message)
+        return unless valid_file_id
+      end
+    elsif @r9k_text
+      caption, stripped_text = validate_r9k_text(caption, user, message)
+      return unless caption && stripped_text
+    elsif @r9k_media
+      if file_id = Robot9000.get_album_file_id(message)
+        valid_file_id = validate_r9k_media(file_id, user, message)
+        return unless valid_file_id
       end
     end
 
@@ -1832,6 +1884,32 @@ class PrivateParlor < Tourmaline::Client
 
       caption = Format.format_pseudonymous_message(caption, tripkey, @tripcode_salt)
     end
+
+    if (spam = @spam_handler) && @albums[album]? == nil
+      return if spamming?(user.id, message.message_id, spam.score_media_group)
+    end
+
+    if @r9k_text && @r9k_media
+      return unless stripped_text
+      if file_id
+        return unless valid_file_id
+        Robot9000.add_file_id(@database.db, valid_file_id)
+      end
+
+      Robot9000.add_line(@database.db, stripped_text)
+    elsif @r9k_text
+      return unless stripped_text
+
+      Robot9000.add_line(@database.db, stripped_text)
+    elsif @r9k_media
+      if file_id
+        return unless valid_file_id
+        Robot9000.add_file_id(@database.db, valid_file_id)
+      end
+    end
+
+    user.set_active
+    @database.modify_user(user)
 
     relay_album(message, album, user, caption)
   end
@@ -1852,57 +1930,48 @@ class PrivateParlor < Tourmaline::Client
     if @albums[album]?
       @albums[album].message_ids << message.message_id
       @albums[album].media_ids << input
-    else
-      media_group = Album.new(message.message_id, input)
-      @albums[album] = media_group
-
-      # Wait an arbitrary amount of time for Telegram MediaGroup updates to come in before relaying the album.
-      Tasker.at(500.milliseconds.from_now) {
-        unless temp_album = @albums.delete(album)
-          next
-        end
-
-        cached_msids = Array(Int64).new
-
-        temp_album.message_ids.each do |msid|
-          cached_msids << @history.new_message(user.id, msid)
-        end
-
-        relay(
-          message.reply_message,
-          user,
-          cached_msids,
-          ->(receiver : Int64, reply : Int64 | Nil) { send_media_group(receiver, temp_album.media_ids, reply_to_message: reply) }
-        )
-      }
+      return
     end
+
+    media_group = Album.new(message.message_id, input)
+    @albums.merge!({album => media_group})
+
+    # Wait an arbitrary amount of time for Telegram MediaGroup updates to come in before relaying the album.
+    Tasker.in(500.milliseconds) {
+      unless temp_album = @albums.delete(album)
+        next
+      end
+
+      cached_msids = Array(Int64).new
+
+      temp_album.message_ids.each do |msid|
+        cached_msids << @history.new_message(user.id, msid)
+      end
+
+      relay(
+        message.reply_message,
+        user,
+        cached_msids,
+        ->(receiver : Int64, reply : Int64 | Nil) { send_media_group(receiver, temp_album.media_ids, reply_to_message: reply) }
+      )
+    }
   end
 
   # Prepares a poll for relaying.
   def handle_poll(update : Tourmaline::Update) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    if message.forward_date
-      return
-    end
-    unless poll = message.poll
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :poll)
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "poll"})
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_poll)
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
-    end
 
-    user.set_active(info.username, info.full_name)
+    return if message.forward_date
+    return unless poll = message.poll
+
+    return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_poll)
+
+    user.set_active
     @database.modify_user(user)
 
     cached_msid = @history.new_message(user.id, message.message_id)
@@ -1933,44 +2002,116 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a forwarded message for relaying.
   def handle_forwarded_message(update : Tourmaline::Update) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    if message.poll
-      unless (poll = message.poll) && (poll.anonymous?)
-        return relay_to_one(message.message_id, info.id, @locale.replies.deanon_poll)
-      end
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?(@media_limit_period.hours)
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :forward)
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "forwarded_message"})
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_forwarded_message)
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
-    end
 
-    user.set_active(info.username, info.full_name)
-    @database.modify_user(user)
+    if (poll = message.poll) && (!poll.anonymous?)
+      return relay_to_one(message.message_id, user.id, @locale.replies.deanon_poll)
+    end
 
     if @regular_forwards
-      handle_regular_forward(user, message)
-    else
-      relay(
-        message.reply_message,
-        user,
-        @history.new_message(user.id, message.message_id),
-        ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
-      )
+      return handle_regular_forward(message, user)
     end
+
+    return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_forwarded_message)
+
+    if @r9k_forwards
+      if @r9k_text && @r9k_media
+        text = message.text || message.caption || ""
+        _, stripped_text = validate_r9k_text(text, user, message)
+        return unless stripped_text
+
+        if file_id = Robot9000.get_media_file_id(message)
+          valid_file_id = validate_r9k_media(file_id, user, message)
+          return unless valid_file_id
+          Robot9000.add_file_id(@database.db, valid_file_id)
+        end
+
+        Robot9000.add_line(@database.db, stripped_text)
+      elsif @r9k_text
+        text = message.text || message.caption || ""
+        _, stripped_text = validate_r9k_text(text, user, message)
+        return unless stripped_text
+
+        Robot9000.add_line(@database.db, stripped_text)
+      elsif @r9k_media
+        if file_id = Robot9000.get_media_file_id(message)
+          valid_file_id = validate_r9k_media(file_id, user, message)
+          return unless valid_file_id
+          Robot9000.add_file_id(@database.db, valid_file_id)
+        end
+      end
+    end
+
+    user.set_active
+    @database.modify_user(user)
+
+    relay(
+      message.reply_message,
+      user,
+      @history.new_message(user.id, message.message_id),
+      ->(receiver : Int64, reply : Int64 | Nil) { forward_message(receiver, message.chat.id, message.message_id) }
+    )
   end
 
-  def handle_regular_forward(user : Database::User, message : Tourmaline::Message) : Nil
-    if Format.regular_forward?(message.text || message.caption, message.text_entities.keys)
+  def handle_regular_forward(message : Tourmaline::Message, user : Database::User) : Nil
+    text = message.text || message.caption || ""
+
+    if @r9k_forwards
+      if @r9k_text && @r9k_media
+        content = Format.strip_forward_header(text, message.text_entities.keys)
+        _, stripped_text = validate_r9k_text(content, user, message)
+        return unless stripped_text
+
+        if file_id = Robot9000.get_media_file_id(message)
+          valid_file_id = validate_r9k_media(file_id, user, message)
+          return unless valid_file_id
+        end
+      elsif @r9k_text
+        content = Format.strip_forward_header(text, message.text_entities.keys)
+        _, stripped_text = validate_r9k_text(content, user, message)
+
+        return unless stripped_text
+      elsif @r9k_media
+        if file_id = Robot9000.get_media_file_id(message)
+          valid_file_id = validate_r9k_media(file_id, user, message)
+          return unless valid_file_id
+        end
+      end
+    end
+
+    if spam = @spam_handler
+      unless (album = message.media_group_id) && @albums[album]?
+        return if spamming?(user.id, message.message_id, spam.score_forwarded_message)
+      end
+    end
+
+    if @r9k_forwards
+      if @r9k_text && @r9k_media
+        return unless stripped_text
+        if file_id
+          return unless valid_file_id
+          Robot9000.add_file_id(@database.db, valid_file_id)
+        end
+
+        Robot9000.add_line(@database.db, stripped_text)
+      elsif @r9k_text
+        return unless stripped_text
+
+        Robot9000.add_line(@database.db, stripped_text)
+      elsif @r9k_media
+        if file_id
+          return unless valid_file_id
+          Robot9000.add_file_id(@database.db, valid_file_id)
+        end
+      end
+    end
+
+    if Format.regular_forward?(text, message.text_entities.keys)
       return relay(
         message.reply_message,
         user,
@@ -1988,11 +2129,7 @@ class PrivateParlor < Tourmaline::Client
       )
     end
 
-    if text = message.text
-      text = Format.unparse_text(text, message.entities, Client.default_parse_mode, escape: true)
-    elsif text = message.caption
-      text = Format.unparse_text(text, message.caption_entities, Client.default_parse_mode, escape: true)
-    end
+    text = Format.unparse_text(text, message.text_entities.keys, Client.default_parse_mode, escape: true)
 
     text = String.build do |str|
       str << header
@@ -2009,7 +2146,7 @@ class PrivateParlor < Tourmaline::Client
         message.reply_message,
         user,
         @history.new_message(user.id, message.message_id),
-        ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text) }
+        ->(receiver : Int64, reply : Int64 | Nil) { send_message(receiver, text, link_preview: true) }
       )
     elsif album = message.media_group_id
       if @albums[album]?
@@ -2069,29 +2206,24 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a sticker message for relaying.
   def handle_sticker(update : Tourmaline::Update) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    if message.forward_date
-      return
-    end
-    unless sticker = message.sticker
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?(@media_limit_period.hours)
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :sticker)
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "sticker"})
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_sticker)
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
+
+    return if message.forward_date
+    return unless sticker = message.sticker
+
+    return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_sticker)
+
+    if @r9k_media
+      return unless validate_r9k_media(sticker.file_unique_id, user, message)
+      Robot9000.add_file_id(@database.db, sticker.file_unique_id)
     end
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -2105,26 +2237,18 @@ class PrivateParlor < Tourmaline::Client
   {% for luck_type in ["dice", "dart", "basketball", "soccerball", "slot_machine", "bowling"] %}
   # Prepares a {{luck_type}} message for relaying.
   def handle_{{luck_type.id}}(update : Tourmaline::Update) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    if message.forward_date
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :{{luck_type}})
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => {{luck_type}}})
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_{{luck_type.id}})
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
-    end
 
-    user.set_active(info.username, info.full_name)
+    return if message.forward_date
+
+    return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_{{luck_type.id}})
+
+    user.set_active()
     @database.modify_user(user)
 
     relay(
@@ -2138,29 +2262,19 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a venue message for relaying.
   def handle_venue(update : Tourmaline::Update) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    if message.forward_date
-      return
-    end
-    unless venue = message.venue
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :venue)
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "venue"})
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_venue)
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
-    end
 
-    user.set_active(info.username, info.full_name)
+    return if message.forward_date
+    return unless venue = message.venue
+
+    return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_venue)
+
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -2184,29 +2298,19 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a location message for relaying.
   def handle_location(update : Tourmaline::Update) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    if message.forward_date
-      return
-    end
-    unless location = message.location
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :location)
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "location"})
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_location)
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
-    end
 
-    user.set_active(info.username, info.full_name)
+    return if message.forward_date
+    return unless location = message.location
+
+    return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_location)
+
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -2224,29 +2328,19 @@ class PrivateParlor < Tourmaline::Client
 
   # Prepares a contact message for relaying.
   def handle_contact(update : Tourmaline::Update) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    if message.forward_date
-      return
-    end
-    unless contact = message.contact
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
+
     unless @access.authorized?(user.rank, :contact)
       return relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => "contact"})
     end
-    if (spam = @spam_handler) && spam.spammy?(info.id, spam.score_contact)
-      return relay_to_one(message.message_id, user.id, @locale.replies.spamming)
-    end
 
-    user.set_active(info.username, info.full_name)
+    return if message.forward_date
+    return unless contact = message.contact
+
+    return if (spam = @spam_handler) && spamming?(user.id, message.message_id, spam.score_contact)
+
+    user.set_active
     @database.modify_user(user)
 
     relay(
@@ -2264,17 +2358,10 @@ class PrivateParlor < Tourmaline::Client
 
   # Sends a message to the user if a disabled media type is sent
   def media_disabled(update : Tourmaline::Update, type : String) : Nil
-    unless (message = update.message) && (info = message.from)
-      return
-    end
-    unless user = database.get_user(info.id)
-      return relay_to_one(nil, info.id, @locale.replies.not_in_chat)
-    end
-    unless user.can_chat?
-      return deny_user(user)
-    end
+    message, user = preliminary_message_check(update)
+    return unless message && user
 
-    user.set_active(info.username, info.full_name)
+    user.set_active
     @database.modify_user(user)
 
     relay_to_one(message.message_id, user.id, @locale.replies.media_disabled, {"type" => type})
@@ -2352,7 +2439,9 @@ class PrivateParlor < Tourmaline::Client
   # Caches a message and sends it to the queue for relaying.
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Int64, proc : MessageProc) : Nil
     if reply_message
-      if (reply_msids = @history.get_all_msids(reply_message.message_id)) && reply_msids.empty?
+      reply_msids = @history.get_all_msids(reply_message.message_id)
+
+      if reply_msids.empty?
         relay_to_one(cached_msid, user.id, @locale.replies.not_in_cache)
         @history.del_message_group(cached_msid)
         return
@@ -2371,7 +2460,9 @@ class PrivateParlor < Tourmaline::Client
   # Caches an album message and sends it to the queue for relaying.
   def relay(reply_message : Tourmaline::Message?, user : Database::User, cached_msid : Array(Int64), proc : MessageProc) : Nil
     if reply_message
-      if (reply_msids = @history.get_all_msids(reply_message.message_id)) && reply_msids.empty?
+      reply_msids = @history.get_all_msids(reply_message.message_id)
+
+      if reply_msids.empty?
         relay_to_one(cached_msid[0], user.id, @locale.replies.not_in_cache)
         cached_msid.each { |msid| @history.del_message_group(msid) }
         return

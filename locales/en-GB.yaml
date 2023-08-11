@@ -41,7 +41,7 @@ replies:
 
    not_in_cooldown: "<i>User found, but the user was not in cooldown!</i>"
 
-   rejected_message: "<i>Your message was not relayed because it contained a special font.</i>"
+   rejected_message: "<i>Your message was not relayed because it contains invalid characters.</i>"
 
    deanon_poll: "<i>Your poll was not sent because it does not allow anonymous voting.</i>"
 
@@ -173,6 +173,13 @@ replies:
 
    # Available placeholders: time
    on_cooldown: "<i>You're on cooldown until {time}</i>"
+
+   unoriginal_message: "<i>This message was not sent because it has already been posted before.</i>"
+
+   # Available placeholders: duration,
+   r9k_cooldown: |-
+      <i>This message was not sent because it has already been posted before.
+      You have been muted for {duration}.</i>
 
    # Available placeholders: total
    media_limit: "<i>You cannot send media or forward messages at this time, try again in {total} hours.</i>"
