@@ -194,7 +194,10 @@ locale: en-US
 ##
 ## MessageEntity toggles
 ##
-## Entity types specified here will be stripped from every user message
+## Entity types specified here will be stripped from every user message.
+##
+## NOTE: Some Telegram clients will render formatting for entity types 
+## (URLs, phone numbers, emails, etc) anyways, despite being stripped.
 ##
 ## It is recommended to strip the default entity types
 ##
