@@ -157,18 +157,22 @@ module Configuration
     end
 
     # Reset log with log level; outputting to a file if a path was given
-    begin
+    Log.setup do |log|
       if path = config.log_file
-        if File.file?(path) # If log file already exists
-          Log.setup(config.log_level, Log::IOBackend.new(File.open(path, "a+")))
-        else # Log file does not exist, make one
-          Log.setup(config.log_level, Log::IOBackend.new(File.new(path, "a+")))
+        begin
+          if File.file?(path) # If log file already exists
+            file = Log::IOBackend.new(File.open(path, "a+"))
+          else # Log file does not exist, make one
+            file = Log::IOBackend.new(File.new(path, "a+"))
+          end
+        rescue ex : File::NotFoundError | File::AccessDeniedError
+          Log.error(exception: ex) { "Could not open/create log file" }
         end
-      else # Default to STDOUT
-        Log.setup(config.log_level)
+
+        log.bind("*", config.log_level, file) if file
       end
-    rescue ex : File::NotFoundError | File::AccessDeniedError
-      Log.error(exception: ex) { "Could not open/create log file" }
+
+      log.bind("*", config.log_level, Log::IOBackend.new())
     end
   end
 end
