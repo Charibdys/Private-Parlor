@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="privateparlor">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="privateparlor">
+  <title>Database - privateparlor master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          privateparlor
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="privateparlor/toplevel" data-name="top level namespace">
+      <a href="toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Album" data-name="album">
+      <a href="Album.html">Album</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/AuthorizedRanks" data-name="authorizedranks">
+      <a href="AuthorizedRanks.html">AuthorizedRanks</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandDescriptions" data-name="commanddescriptions">
+      <a href="CommandDescriptions.html">CommandDescriptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandPermissions" data-name="commandpermissions">
+      <a href="CommandPermissions.html">CommandPermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Config" data-name="config">
+      <a href="Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Configuration" data-name="configuration">
+      <a href="Configuration.html">Configuration</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="privateparlor/Database" data-name="database">
+      <a href="Database.html">Database</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/Database/User" data-name="database::user">
+      <a href="Database/User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseHistory" data-name="databasehistory">
+      <a href="DatabaseHistory.html">DatabaseHistory</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseWarden" data-name="databasewarden">
+      <a href="DatabaseWarden.html">DatabaseWarden</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Format" data-name="format">
+      <a href="Format.html">Format</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/History" data-name="history">
+      <a href="History.html">History</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/History/MessageGroup" data-name="history::messagegroup">
+      <a href="History/MessageGroup.html">MessageGroup</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryBase" data-name="historybase">
+      <a href="HistoryBase.html">HistoryBase</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryBase/MessageGroupBase" data-name="historybase::messagegroupbase">
+      <a href="HistoryBase/MessageGroupBase.html">MessageGroupBase</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryFull" data-name="historyfull">
+      <a href="HistoryFull.html">HistoryFull</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryFull/MessageGroupFull" data-name="historyfull::messagegroupfull">
+      <a href="HistoryFull/MessageGroupFull.html">MessageGroupFull</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryRatings" data-name="historyratings">
+      <a href="HistoryRatings.html">HistoryRatings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryRatings/MessageGroupRatings" data-name="historyratings::messagegroupratings">
+      <a href="HistoryRatings/MessageGroupRatings.html">MessageGroupRatings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryWarnings" data-name="historywarnings">
+      <a href="HistoryWarnings.html">HistoryWarnings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryWarnings/MessageGroupWarnings" data-name="historywarnings::messagegroupwarnings">
+      <a href="HistoryWarnings/MessageGroupWarnings.html">MessageGroupWarnings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Locale" data-name="locale">
+      <a href="Locale.html">Locale</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Localization" data-name="localization">
+      <a href="Localization.html">Localization</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Logs" data-name="logs">
+      <a href="Logs.html">Logs</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessagePermissions" data-name="messagepermissions">
+      <a href="MessagePermissions.html">MessagePermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageProc" data-name="messageproc">
+      <a href="MessageProc.html">MessageProc</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageQueue" data-name="messagequeue">
+      <a href="MessageQueue.html">MessageQueue</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/PrivateParlor" data-name="privateparlor">
+      <a href="PrivateParlor.html">PrivateParlor</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/QueuedMessage" data-name="queuedmessage">
+      <a href="QueuedMessage.html">QueuedMessage</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Rank" data-name="rank">
+      <a href="Rank.html">Rank</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Replies" data-name="replies">
+      <a href="Replies.html">Replies</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Robot9000" data-name="robot9000">
+      <a href="Robot9000.html">Robot9000</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/SpamScoreHandler" data-name="spamscorehandler">
+      <a href="SpamScoreHandler.html">SpamScoreHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/User" data-name="user">
+      <a href="User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> Database
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="Database.html">Database</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L1" target="_blank">
+        privateparlor/database.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28database%3ADB%3A%3ADatabase%29-class-method" class="signature"><strong>.new</strong>(database : DB::Database)</a>
+        
+          <div class="summary"><p>Create an instance of Database and create the appropriate schema in the SQLite database.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#add_user%28id%2Cusername%2Crealname%2Crank%3D0%29%3AUser%7CNil-instance-method" class="signature"><strong>#add_user</strong>(id, username, realname, rank = <span class="n">0</span>) : User | Nil</a>
+        
+          <div class="summary"><p>Inserts a user with the given <em>id</em>, <em>username</em>, and <em>realname</em> into the database.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#db%3ADB%3A%3ADatabase-instance-method" class="signature"><strong>#db</strong> : DB::Database</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#ensure_schema%3ANil-instance-method" class="signature"><strong>#ensure_schema</strong> : Nil</a>
+        
+          <div class="summary"><p>Ensures that the DB schema is usable by the program.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#expire_warnings%28warn_expire_hours%3AInt32%29%3ANil-instance-method" class="signature"><strong>#expire_warnings</strong>(warn_expire_hours : Int32) : Nil</a>
+        
+          <div class="summary"><p>Queries the database for warned users and removes warnings they have expired.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_blacklisted_users%3AArray%28User%29%7CNil-instance-method" class="signature"><strong>#get_blacklisted_users</strong> : Array(User) | Nil</a>
+        
+          <div class="summary"><p>Queries the database for blacklisted users who have been banned within the past 48 hours.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_inactive_users%28limit%3AInt32%29%3AArray%28User%29%7CNil-instance-method" class="signature"><strong>#get_inactive_users</strong>(limit : Int32) : Array(User) | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_invalid_rank_users%28values%3AArray%28Int32%29%29%3AArray%28User%29%7CNil-instance-method" class="signature"><strong>#get_invalid_rank_users</strong>(values : Array(Int32)) : Array(User) | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_motd%3AString%7CNil-instance-method" class="signature"><strong>#get_motd</strong> : String | Nil</a>
+        
+          <div class="summary"><p>Retrieves the motd/rules from the database.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_prioritized_users%28user%3AUser%7CNil%3Dnil%29%3AArray%28Int64%29-instance-method" class="signature"><strong>#get_prioritized_users</strong>(user : User | Nil = <span class="n">nil</span>) : Array(Int64)</a>
+        
+          <div class="summary"><p>Queries the database for all user ids, ordered by highest ranking users first then most active users.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_user%28id%29%3AUser%7CNil-instance-method" class="signature"><strong>#get_user</strong>(id) : User | Nil</a>
+        
+          <div class="summary"><p>Queries the database for a user record with the given <em>id</em>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_user_by_arg%28arg%3AString%29%3AUser%7CNil-instance-method" class="signature"><strong>#get_user_by_arg</strong>(arg : String) : User | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_user_by_name%28username%29%3AUser%7CNil-instance-method" class="signature"><strong>#get_user_by_name</strong>(username) : User | Nil</a>
+        
+          <div class="summary"><p>Queries the database for a user with a given <em>username</em>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_user_by_oid%28oid%3AString%29%3AUser%7CNil-instance-method" class="signature"><strong>#get_user_by_oid</strong>(oid : String) : User | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_user_counts%3ANamedTuple-instance-method" class="signature"><strong>#get_user_counts</strong> : NamedTuple</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_warned_users%3AArray%28User%29%7CNil-instance-method" class="signature"><strong>#get_warned_users</strong> : Array(User) | Nil</a>
+        
+          <div class="summary"><p>Queries the database for all warned users that are in the chat.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#modify_user%28user%3AUser%29%3ANil-instance-method" class="signature"><strong>#modify_user</strong>(user : User) : Nil</a>
+        
+          <div class="summary"><p>Updates a user record in the database with the current state of <em>user</em>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#no_users%3F%3ABool-instance-method" class="signature"><strong>#no_users?</strong> : Bool</a>
+        
+          <div class="summary"><p>Queries the database for any rows in the user table</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#set_motd%28text%3AString%29%3ANil-instance-method" class="signature"><strong>#set_motd</strong>(text : String) : Nil</a>
+        
+          <div class="summary"><p>Sets the motd/rules to the given string.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(database:DB::Database)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(database : DB::Database)
+
+        <a class="method-permalink" href="#new%28database%3ADB%3A%3ADatabase%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Create an instance of Database and create the appropriate schema in the SQLite database.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L5" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="add_user(id,username,realname,rank=0):User|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>add_user</strong>(id, username, realname, rank = <span class="n">0</span>) : <a href="Database/User.html">User</a> | Nil
+
+        <a class="method-permalink" href="#add_user%28id%2Cusername%2Crealname%2Crank%3D0%29%3AUser%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Inserts a user with the given <em>id</em>, <em>username</em>, and <em>realname</em> into the database.</p>
+<p>Returns the new <code><a href="Database/User.html">User</a></code>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L327" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="db:DB::Database-instance-method">
+      <div class="signature">
+        
+        def <strong>db</strong> : DB::Database
+
+        <a class="method-permalink" href="#db%3ADB%3A%3ADatabase-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L2" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="ensure_schema:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>ensure_schema</strong> : Nil
+
+        <a class="method-permalink" href="#ensure_schema%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Ensures that the DB schema is usable by the program.</p>
+<p>This is the same schema used in secretlounge-ng SQLite databases.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L408" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="expire_warnings(warn_expire_hours:Int32):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>expire_warnings</strong>(warn_expire_hours : Int32) : Nil
+
+        <a class="method-permalink" href="#expire_warnings%28warn_expire_hours%3AInt32%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Queries the database for warned users and removes warnings they have expired.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L377" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_blacklisted_users:Array(User)|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_blacklisted_users</strong> : Array(<a href="Database/User.html">User</a>) | Nil
+
+        <a class="method-permalink" href="#get_blacklisted_users%3AArray%28User%29%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Queries the database for blacklisted users who have been banned within the past 48 hours.</p>
+<p>Returns an array of <code><a href="Database/User.html">User</a></code> or <code>Nil</code> if no users were found.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L262" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_inactive_users(limit:Int32):Array(User)|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_inactive_users</strong>(limit : Int32) : Array(<a href="Database/User.html">User</a>) | Nil
+
+        <a class="method-permalink" href="#get_inactive_users%28limit%3AInt32%29%3AArray%28User%29%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L277" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_invalid_rank_users(values:Array(Int32)):Array(User)|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_invalid_rank_users</strong>(values : Array(Int32)) : Array(<a href="Database/User.html">User</a>) | Nil
+
+        <a class="method-permalink" href="#get_invalid_rank_users%28values%3AArray%28Int32%29%29%3AArray%28User%29%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L273" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_motd:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_motd</strong> : String | Nil
+
+        <a class="method-permalink" href="#get_motd%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Retrieves the motd/rules from the database.</p>
+<p>Returns the motd as a string, or returns nil if the motd could not be retrieved.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L401" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_prioritized_users(user:User|Nil=nil):Array(Int64)-instance-method">
+      <div class="signature">
+        
+        def <strong>get_prioritized_users</strong>(user : <a href="Database/User.html">User</a> | Nil = <span class="n">nil</span>) : Array(Int64)
+
+        <a class="method-permalink" href="#get_prioritized_users%28user%3AUser%7CNil%3Dnil%29%3AArray%28Int64%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Queries the database for all user ids, ordered by highest ranking users first then most active users.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L310" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_user(id):User|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_user</strong>(id) : <a href="Database/User.html">User</a> | Nil
+
+        <a class="method-permalink" href="#get_user%28id%29%3AUser%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Queries the database for a user record with the given <em>id</em>.</p>
+<p>Returns a <code><a href="Database/User.html">User</a></code> object.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L250" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_user_by_arg(arg:String):User|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_user_by_arg</strong>(arg : String) : <a href="Database/User.html">User</a> | Nil
+
+        <a class="method-permalink" href="#get_user_by_arg%28arg%3AString%29%3AUser%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L299" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_user_by_name(username):User|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_user_by_name</strong>(username) : <a href="Database/User.html">User</a> | Nil
+
+        <a class="method-permalink" href="#get_user_by_name%28username%29%3AUser%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Queries the database for a user with a given <em>username</em>.</p>
+<p>Returns a <code><a href="Database/User.html">User</a></code> object or Nil if no user was found.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L284" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_user_by_oid(oid:String):User|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_user_by_oid</strong>(oid : String) : <a href="Database/User.html">User</a> | Nil
+
+        <a class="method-permalink" href="#get_user_by_oid%28oid%3AString%29%3AUser%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L291" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_user_counts:NamedTuple-instance-method">
+      <div class="signature">
+        
+        def <strong>get_user_counts</strong> : NamedTuple
+
+        <a class="method-permalink" href="#get_user_counts%3ANamedTuple-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L254" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_warned_users:Array(User)|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_warned_users</strong> : Array(<a href="Database/User.html">User</a>) | Nil
+
+        <a class="method-permalink" href="#get_warned_users%3AArray%28User%29%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Queries the database for all warned users that are in the chat.</p>
+<p>Returns an array of <code><a href="Database/User.html">User</a></code> or <code>Nil</code> if no users were found.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L269" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="modify_user(user:User):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>modify_user</strong>(user : <a href="Database/User.html">User</a>) : Nil
+
+        <a class="method-permalink" href="#modify_user%28user%3AUser%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Updates a user record in the database with the current state of <em>user</em>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L350" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="no_users?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>no_users?</strong> : Bool
+
+        <a class="method-permalink" href="#no_users%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Queries the database for any rows in the user table</p>
+<p>Returns true if can't move to next row (table is empty). False otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L370" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="set_motd(text:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>set_motd</strong>(text : String) : Nil
+
+        <a class="method-permalink" href="#set_motd%28text%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Sets the motd/rules to the given string.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L389" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

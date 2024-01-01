@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="privateparlor">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="privateparlor">
+  <title>DatabaseHistory - privateparlor master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          privateparlor
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="privateparlor/toplevel" data-name="top level namespace">
+      <a href="toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Album" data-name="album">
+      <a href="Album.html">Album</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/AuthorizedRanks" data-name="authorizedranks">
+      <a href="AuthorizedRanks.html">AuthorizedRanks</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandDescriptions" data-name="commanddescriptions">
+      <a href="CommandDescriptions.html">CommandDescriptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandPermissions" data-name="commandpermissions">
+      <a href="CommandPermissions.html">CommandPermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Config" data-name="config">
+      <a href="Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Configuration" data-name="configuration">
+      <a href="Configuration.html">Configuration</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/Database" data-name="database">
+      <a href="Database.html">Database</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/Database/User" data-name="database::user">
+      <a href="Database/User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" current" data-id="privateparlor/DatabaseHistory" data-name="databasehistory">
+      <a href="DatabaseHistory.html">DatabaseHistory</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseWarden" data-name="databasewarden">
+      <a href="DatabaseWarden.html">DatabaseWarden</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Format" data-name="format">
+      <a href="Format.html">Format</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/History" data-name="history">
+      <a href="History.html">History</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/History/MessageGroup" data-name="history::messagegroup">
+      <a href="History/MessageGroup.html">MessageGroup</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryBase" data-name="historybase">
+      <a href="HistoryBase.html">HistoryBase</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryBase/MessageGroupBase" data-name="historybase::messagegroupbase">
+      <a href="HistoryBase/MessageGroupBase.html">MessageGroupBase</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryFull" data-name="historyfull">
+      <a href="HistoryFull.html">HistoryFull</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryFull/MessageGroupFull" data-name="historyfull::messagegroupfull">
+      <a href="HistoryFull/MessageGroupFull.html">MessageGroupFull</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryRatings" data-name="historyratings">
+      <a href="HistoryRatings.html">HistoryRatings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryRatings/MessageGroupRatings" data-name="historyratings::messagegroupratings">
+      <a href="HistoryRatings/MessageGroupRatings.html">MessageGroupRatings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryWarnings" data-name="historywarnings">
+      <a href="HistoryWarnings.html">HistoryWarnings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryWarnings/MessageGroupWarnings" data-name="historywarnings::messagegroupwarnings">
+      <a href="HistoryWarnings/MessageGroupWarnings.html">MessageGroupWarnings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Locale" data-name="locale">
+      <a href="Locale.html">Locale</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Localization" data-name="localization">
+      <a href="Localization.html">Localization</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Logs" data-name="logs">
+      <a href="Logs.html">Logs</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessagePermissions" data-name="messagepermissions">
+      <a href="MessagePermissions.html">MessagePermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageProc" data-name="messageproc">
+      <a href="MessageProc.html">MessageProc</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageQueue" data-name="messagequeue">
+      <a href="MessageQueue.html">MessageQueue</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/PrivateParlor" data-name="privateparlor">
+      <a href="PrivateParlor.html">PrivateParlor</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/QueuedMessage" data-name="queuedmessage">
+      <a href="QueuedMessage.html">QueuedMessage</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Rank" data-name="rank">
+      <a href="Rank.html">Rank</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Replies" data-name="replies">
+      <a href="Replies.html">Replies</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Robot9000" data-name="robot9000">
+      <a href="Robot9000.html">Robot9000</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/SpamScoreHandler" data-name="spamscorehandler">
+      <a href="SpamScoreHandler.html">SpamScoreHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/User" data-name="user">
+      <a href="User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> DatabaseHistory
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="DatabaseHistory.html">DatabaseHistory</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L1" target="_blank">
+        privateparlor/history/database_history.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28database%3ADB%3A%3ADatabase%2Cmessage_life%3ATime%3A%3ASpan%29-class-method" class="signature"><strong>.new</strong>(database : DB::Database, message_life : Time::Span)</a>
+        
+          <div class="summary"><p>Create an instance of DatabaseHistory and create the appropriate schema in the SQLite database.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#add_rating%28msid%3AInt64%2Cuid%3AInt64%29%3ABool-instance-method" class="signature"><strong>#add_rating</strong>(msid : Int64, uid : Int64) : Bool</a>
+        
+          <div class="summary"><p>Adds a rating entry to the karma table with the given data</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#add_to_cache%28origin_msid%3AInt64%2Cmsid%3AInt64%2Creceiver_id%3AInt64%29%3ANil-instance-method" class="signature"><strong>#add_to_cache</strong>(origin_msid : Int64, msid : Int64, receiver_id : Int64) : Nil</a>
+        
+          <div class="summary"><p>Adds receiver_id and its associated msid to the receivers table</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#add_warning%28msid%3AInt64%29%3ANil-instance-method" class="signature"><strong>#add_warning</strong>(msid : Int64) : Nil</a>
+        
+          <div class="summary"><p>Set the warned attribute to true in message group associated with the given MSID.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#db%3ADB%3A%3ADatabase-instance-method" class="signature"><strong>#db</strong> : DB::Database</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#del_message_group%28msid%3AInt64%29%3AInt64%7CNil-instance-method" class="signature"><strong>#del_message_group</strong>(msid : Int64) : Int64 | Nil</a>
+        
+          <div class="summary"><p>Delete message group</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#delete_database_message_group%28origin_msid%3AInt64%7CNil%29-instance-method" class="signature"><strong>#delete_database_message_group</strong>(origin_msid : Int64 | Nil)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#delete_expired_messages%3ANil-instance-method" class="signature"><strong>#delete_expired_messages</strong> : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#ensure_schema%3ANil-instance-method" class="signature"><strong>#ensure_schema</strong> : Nil</a>
+        
+          <div class="summary"><p>Ensures that the DB schema for persisting message history is usable by the program.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#expire%3ANil-instance-method" class="signature"><strong>#expire</strong> : Nil</a>
+        
+          <div class="summary"><p>Expire messages</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_all_msids%28msid%3AInt64%29%3AHash-instance-method" class="signature"><strong>#get_all_msids</strong>(msid : Int64) : Hash</a>
+        
+          <div class="summary"><p>Get all receivers for a message group associated with the given MSID</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_msid%28msid%3AInt64%2Creceiver_id%3AInt64%29%3AInt64%7CNil-instance-method" class="signature"><strong>#get_msid</strong>(msid : Int64, receiver_id : Int64) : Int64 | Nil</a>
+        
+          <div class="summary"><p>Get receiver msid from the given MSID and receiver ID</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_msids_from_user%28uid%3AInt64%29%3ASet%28Int64%29-instance-method" class="signature"><strong>#get_msids_from_user</strong>(uid : Int64) : Set(Int64)</a>
+        
+          <div class="summary"><p>Get all MSIDs sent by a user</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_origin_msid%28msid%3AInt64%29%3AInt64%7CNil-instance-method" class="signature"><strong>#get_origin_msid</strong>(msid : Int64) : Int64 | Nil</a>
+        
+          <div class="summary"><p>Returns the messageGroupID from the given MSID, which may or may not be in in the receivers table</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_sender_id%28msid%3AInt64%29%3AInt64%7CNil-instance-method" class="signature"><strong>#get_sender_id</strong>(msid : Int64) : Int64 | Nil</a>
+        
+          <div class="summary"><p>Get sender_id of a specific message group</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_warning%28msid%3AInt64%29%3ABool%7CNil-instance-method" class="signature"><strong>#get_warning</strong>(msid : Int64) : Bool | Nil</a>
+        
+          <div class="summary"><p>Returns true if the associated message group was warned; false otherwise.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#lifespan%3ATime%3A%3ASpan-instance-method" class="signature"><strong>#lifespan</strong> : Time::Span</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#new_message%28sender_id%3AInt64%2Cmsid%3AInt64%29%3AInt64-instance-method" class="signature"><strong>#new_message</strong>(sender_id : Int64, msid : Int64) : Int64</a>
+        
+          <div class="summary"><p>Adds a new entry to the message_groups table with the <em>sender_id</em> and its associated <em>msid</em></p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(database:DB::Database,message_life:Time::Span)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(database : DB::Database, message_life : Time::Span)
+
+        <a class="method-permalink" href="#new%28database%3ADB%3A%3ADatabase%2Cmessage_life%3ATime%3A%3ASpan%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Create an instance of DatabaseHistory and create the appropriate schema in the SQLite database.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L6" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="add_rating(msid:Int64,uid:Int64):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>add_rating</strong>(msid : Int64, uid : Int64) : Bool
+
+        <a class="method-permalink" href="#add_rating%28msid%3AInt64%2Cuid%3AInt64%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Adds a rating entry to the karma table with the given data</p>
+<p>Returns true if the user was successfully added to the karma table; false if the user was already in it.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L105" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="add_to_cache(origin_msid:Int64,msid:Int64,receiver_id:Int64):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>add_to_cache</strong>(origin_msid : Int64, msid : Int64, receiver_id : Int64) : Nil
+
+        <a class="method-permalink" href="#add_to_cache%28origin_msid%3AInt64%2Cmsid%3AInt64%2Creceiver_id%3AInt64%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Adds receiver_id and its associated msid to the receivers table</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L30" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="add_warning(msid:Int64):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>add_warning</strong>(msid : Int64) : Nil
+
+        <a class="method-permalink" href="#add_warning%28msid%3AInt64%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set the warned attribute to true in message group associated with the given MSID.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L117" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="db:DB::Database-instance-method">
+      <div class="signature">
+        
+        def <strong>db</strong> : DB::Database
+
+        <a class="method-permalink" href="#db%3ADB%3A%3ADatabase-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L2" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="del_message_group(msid:Int64):Int64|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>del_message_group</strong>(msid : Int64) : Int64 | Nil
+
+        <a class="method-permalink" href="#del_message_group%28msid%3AInt64%29%3AInt64%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Delete message group</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L143" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="delete_database_message_group(origin_msid:Int64|Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>delete_database_message_group</strong>(origin_msid : Int64 | Nil)
+
+        <a class="method-permalink" href="#delete_database_message_group%28origin_msid%3AInt64%7CNil%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L151" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="delete_expired_messages:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>delete_expired_messages</strong> : Nil
+
+        <a class="method-permalink" href="#delete_expired_messages%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L177" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="ensure_schema:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>ensure_schema</strong> : Nil
+
+        <a class="method-permalink" href="#ensure_schema%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Ensures that the DB schema for persisting message history is usable by the program.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L187" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="expire:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>expire</strong> : Nil
+
+        <a class="method-permalink" href="#expire%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Expire messages</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L161" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_all_msids(msid:Int64):Hash-instance-method">
+      <div class="signature">
+        
+        def <strong>get_all_msids</strong>(msid : Int64) : Hash
+
+        <a class="method-permalink" href="#get_all_msids%28msid%3AInt64%29%3AHash-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Get all receivers for a message group associated with the given MSID</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L58" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_msid(msid:Int64,receiver_id:Int64):Int64|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_msid</strong>(msid : Int64, receiver_id : Int64) : Int64 | Nil
+
+        <a class="method-permalink" href="#get_msid%28msid%3AInt64%2Creceiver_id%3AInt64%29%3AInt64%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Get receiver msid from the given MSID and receiver ID</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L75" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_msids_from_user(uid:Int64):Set(Int64)-instance-method">
+      <div class="signature">
+        
+        def <strong>get_msids_from_user</strong>(uid : Int64) : Set(Int64)
+
+        <a class="method-permalink" href="#get_msids_from_user%28uid%3AInt64%29%3ASet%28Int64%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Get all MSIDs sent by a user</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L92" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_origin_msid(msid:Int64):Int64|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_origin_msid</strong>(msid : Int64) : Int64 | Nil
+
+        <a class="method-permalink" href="#get_origin_msid%28msid%3AInt64%29%3AInt64%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns the messageGroupID from the given MSID, which may or may not be in in the receivers table</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L43" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_sender_id(msid:Int64):Int64|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_sender_id</strong>(msid : Int64) : Int64 | Nil
+
+        <a class="method-permalink" href="#get_sender_id%28msid%3AInt64%29%3AInt64%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Get sender_id of a specific message group</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L80" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_warning(msid:Int64):Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_warning</strong>(msid : Int64) : Bool | Nil
+
+        <a class="method-permalink" href="#get_warning%28msid%3AInt64%29%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns true if the associated message group was warned; false otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L132" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="lifespan:Time::Span-instance-method">
+      <div class="signature">
+        
+        def <strong>lifespan</strong> : Time::Span
+
+        <a class="method-permalink" href="#lifespan%3ATime%3A%3ASpan-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L3" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new_message(sender_id:Int64,msid:Int64):Int64-instance-method">
+      <div class="signature">
+        
+        def <strong>new_message</strong>(sender_id : Int64, msid : Int64) : Int64
+
+        <a class="method-permalink" href="#new_message%28sender_id%3AInt64%2Cmsid%3AInt64%29%3AInt64-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Adds a new entry to the message_groups table with the <em>sender_id</em> and its associated <em>msid</em></p>
+<p>Returns the original msid of this message group</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/history/database_history.cr#L15" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

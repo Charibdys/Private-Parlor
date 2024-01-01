@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="privateparlor">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="privateparlor">
+  <title>CommandPermissions - privateparlor master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          privateparlor
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="privateparlor/toplevel" data-name="top level namespace">
+      <a href="toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Album" data-name="album">
+      <a href="Album.html">Album</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/AuthorizedRanks" data-name="authorizedranks">
+      <a href="AuthorizedRanks.html">AuthorizedRanks</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandDescriptions" data-name="commanddescriptions">
+      <a href="CommandDescriptions.html">CommandDescriptions</a>
+      
+    </li>
+  
+  <li class=" current" data-id="privateparlor/CommandPermissions" data-name="commandpermissions">
+      <a href="CommandPermissions.html">CommandPermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Config" data-name="config">
+      <a href="Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Configuration" data-name="configuration">
+      <a href="Configuration.html">Configuration</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/Database" data-name="database">
+      <a href="Database.html">Database</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/Database/User" data-name="database::user">
+      <a href="Database/User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseHistory" data-name="databasehistory">
+      <a href="DatabaseHistory.html">DatabaseHistory</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseWarden" data-name="databasewarden">
+      <a href="DatabaseWarden.html">DatabaseWarden</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Format" data-name="format">
+      <a href="Format.html">Format</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/History" data-name="history">
+      <a href="History.html">History</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/History/MessageGroup" data-name="history::messagegroup">
+      <a href="History/MessageGroup.html">MessageGroup</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryBase" data-name="historybase">
+      <a href="HistoryBase.html">HistoryBase</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryBase/MessageGroupBase" data-name="historybase::messagegroupbase">
+      <a href="HistoryBase/MessageGroupBase.html">MessageGroupBase</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryFull" data-name="historyfull">
+      <a href="HistoryFull.html">HistoryFull</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryFull/MessageGroupFull" data-name="historyfull::messagegroupfull">
+      <a href="HistoryFull/MessageGroupFull.html">MessageGroupFull</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryRatings" data-name="historyratings">
+      <a href="HistoryRatings.html">HistoryRatings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryRatings/MessageGroupRatings" data-name="historyratings::messagegroupratings">
+      <a href="HistoryRatings/MessageGroupRatings.html">MessageGroupRatings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryWarnings" data-name="historywarnings">
+      <a href="HistoryWarnings.html">HistoryWarnings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryWarnings/MessageGroupWarnings" data-name="historywarnings::messagegroupwarnings">
+      <a href="HistoryWarnings/MessageGroupWarnings.html">MessageGroupWarnings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Locale" data-name="locale">
+      <a href="Locale.html">Locale</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Localization" data-name="localization">
+      <a href="Localization.html">Localization</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Logs" data-name="logs">
+      <a href="Logs.html">Logs</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessagePermissions" data-name="messagepermissions">
+      <a href="MessagePermissions.html">MessagePermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageProc" data-name="messageproc">
+      <a href="MessageProc.html">MessageProc</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageQueue" data-name="messagequeue">
+      <a href="MessageQueue.html">MessageQueue</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/PrivateParlor" data-name="privateparlor">
+      <a href="PrivateParlor.html">PrivateParlor</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/QueuedMessage" data-name="queuedmessage">
+      <a href="QueuedMessage.html">QueuedMessage</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Rank" data-name="rank">
+      <a href="Rank.html">Rank</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Replies" data-name="replies">
+      <a href="Replies.html">Replies</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Robot9000" data-name="robot9000">
+      <a href="Robot9000.html">Robot9000</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/SpamScoreHandler" data-name="spamscorehandler">
+      <a href="SpamScoreHandler.html">SpamScoreHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/User" data-name="user">
+      <a href="User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">enum</span> CommandPermissions
+
+</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L1" target="_blank">
+        privateparlor/rank/command_permissions.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+  
+    <h2>
+      <a id="enum-members" class="anchor" href="#enum-members">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Enum Members
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="Users">
+        <strong>Users</strong> = <code><span class="n">0</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Upvote">
+        <strong>Upvote</strong> = <code><span class="n">1</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Downvote">
+        <strong>Downvote</strong> = <code><span class="n">2</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Promote">
+        <strong>Promote</strong> = <code><span class="n">3</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="PromoteLower">
+        <strong>PromoteLower</strong> = <code><span class="n">4</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="PromoteSame">
+        <strong>PromoteSame</strong> = <code><span class="n">5</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Demote">
+        <strong>Demote</strong> = <code><span class="n">6</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Sign">
+        <strong>Sign</strong> = <code><span class="n">7</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="TSign">
+        <strong>TSign</strong> = <code><span class="n">8</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Reveal">
+        <strong>Reveal</strong> = <code><span class="n">9</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Spoiler">
+        <strong>Spoiler</strong> = <code><span class="n">10</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Pin">
+        <strong>Pin</strong> = <code><span class="n">11</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Unpin">
+        <strong>Unpin</strong> = <code><span class="n">12</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Ranksay">
+        <strong>Ranksay</strong> = <code><span class="n">13</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="RanksayLower">
+        <strong>RanksayLower</strong> = <code><span class="n">14</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Warn">
+        <strong>Warn</strong> = <code><span class="n">15</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Delete">
+        <strong>Delete</strong> = <code><span class="n">16</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Uncooldown">
+        <strong>Uncooldown</strong> = <code><span class="n">17</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Remove">
+        <strong>Remove</strong> = <code><span class="n">18</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Purge">
+        <strong>Purge</strong> = <code><span class="n">19</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Blacklist">
+        <strong>Blacklist</strong> = <code><span class="n">20</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Whitelist">
+        <strong>Whitelist</strong> = <code><span class="n">21</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="MotdSet">
+        <strong>MotdSet</strong> = <code><span class="n">22</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="RankedInfo">
+        <strong>RankedInfo</strong> = <code><span class="n">23</span></code>
+      </dt>
+      
+    
+  </dl>
+
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#blacklist%3F-instance-method" class="signature"><strong>#blacklist?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#delete%3F-instance-method" class="signature"><strong>#delete?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#demote%3F-instance-method" class="signature"><strong>#demote?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#downvote%3F-instance-method" class="signature"><strong>#downvote?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#motd_set%3F-instance-method" class="signature"><strong>#motd_set?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pin%3F-instance-method" class="signature"><strong>#pin?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#promote%3F-instance-method" class="signature"><strong>#promote?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#promote_lower%3F-instance-method" class="signature"><strong>#promote_lower?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#promote_same%3F-instance-method" class="signature"><strong>#promote_same?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#purge%3F-instance-method" class="signature"><strong>#purge?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#ranked_info%3F-instance-method" class="signature"><strong>#ranked_info?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#ranksay%3F-instance-method" class="signature"><strong>#ranksay?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#ranksay_lower%3F-instance-method" class="signature"><strong>#ranksay_lower?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#remove%3F-instance-method" class="signature"><strong>#remove?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#reveal%3F-instance-method" class="signature"><strong>#reveal?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#sign%3F-instance-method" class="signature"><strong>#sign?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spoiler%3F-instance-method" class="signature"><strong>#spoiler?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#t_sign%3F-instance-method" class="signature"><strong>#t_sign?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#uncooldown%3F-instance-method" class="signature"><strong>#uncooldown?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#unpin%3F-instance-method" class="signature"><strong>#unpin?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#upvote%3F-instance-method" class="signature"><strong>#upvote?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#users%3F-instance-method" class="signature"><strong>#users?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#warn%3F-instance-method" class="signature"><strong>#warn?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#whitelist%3F-instance-method" class="signature"><strong>#whitelist?</strong></a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="blacklist?-instance-method">
+      <div class="signature">
+        
+        def <strong>blacklist?</strong>
+
+        <a class="method-permalink" href="#blacklist%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L22" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="delete?-instance-method">
+      <div class="signature">
+        
+        def <strong>delete?</strong>
+
+        <a class="method-permalink" href="#delete%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L18" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="demote?-instance-method">
+      <div class="signature">
+        
+        def <strong>demote?</strong>
+
+        <a class="method-permalink" href="#demote%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L8" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="downvote?-instance-method">
+      <div class="signature">
+        
+        def <strong>downvote?</strong>
+
+        <a class="method-permalink" href="#downvote%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L4" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="motd_set?-instance-method">
+      <div class="signature">
+        
+        def <strong>motd_set?</strong>
+
+        <a class="method-permalink" href="#motd_set%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L24" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pin?-instance-method">
+      <div class="signature">
+        
+        def <strong>pin?</strong>
+
+        <a class="method-permalink" href="#pin%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L13" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="promote?-instance-method">
+      <div class="signature">
+        
+        def <strong>promote?</strong>
+
+        <a class="method-permalink" href="#promote%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L5" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="promote_lower?-instance-method">
+      <div class="signature">
+        
+        def <strong>promote_lower?</strong>
+
+        <a class="method-permalink" href="#promote_lower%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L6" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="promote_same?-instance-method">
+      <div class="signature">
+        
+        def <strong>promote_same?</strong>
+
+        <a class="method-permalink" href="#promote_same%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L7" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="purge?-instance-method">
+      <div class="signature">
+        
+        def <strong>purge?</strong>
+
+        <a class="method-permalink" href="#purge%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L21" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="ranked_info?-instance-method">
+      <div class="signature">
+        
+        def <strong>ranked_info?</strong>
+
+        <a class="method-permalink" href="#ranked_info%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L25" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="ranksay?-instance-method">
+      <div class="signature">
+        
+        def <strong>ranksay?</strong>
+
+        <a class="method-permalink" href="#ranksay%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L15" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="ranksay_lower?-instance-method">
+      <div class="signature">
+        
+        def <strong>ranksay_lower?</strong>
+
+        <a class="method-permalink" href="#ranksay_lower%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L16" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="remove?-instance-method">
+      <div class="signature">
+        
+        def <strong>remove?</strong>
+
+        <a class="method-permalink" href="#remove%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L20" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="reveal?-instance-method">
+      <div class="signature">
+        
+        def <strong>reveal?</strong>
+
+        <a class="method-permalink" href="#reveal%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L11" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="sign?-instance-method">
+      <div class="signature">
+        
+        def <strong>sign?</strong>
+
+        <a class="method-permalink" href="#sign%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L9" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spoiler?-instance-method">
+      <div class="signature">
+        
+        def <strong>spoiler?</strong>
+
+        <a class="method-permalink" href="#spoiler%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L12" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="t_sign?-instance-method">
+      <div class="signature">
+        
+        def <strong>t_sign?</strong>
+
+        <a class="method-permalink" href="#t_sign%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L10" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="uncooldown?-instance-method">
+      <div class="signature">
+        
+        def <strong>uncooldown?</strong>
+
+        <a class="method-permalink" href="#uncooldown%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L19" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="unpin?-instance-method">
+      <div class="signature">
+        
+        def <strong>unpin?</strong>
+
+        <a class="method-permalink" href="#unpin%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="upvote?-instance-method">
+      <div class="signature">
+        
+        def <strong>upvote?</strong>
+
+        <a class="method-permalink" href="#upvote%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L3" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="users?-instance-method">
+      <div class="signature">
+        
+        def <strong>users?</strong>
+
+        <a class="method-permalink" href="#users%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L2" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="warn?-instance-method">
+      <div class="signature">
+        
+        def <strong>warn?</strong>
+
+        <a class="method-permalink" href="#warn%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L17" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="whitelist?-instance-method">
+      <div class="signature">
+        
+        def <strong>whitelist?</strong>
+
+        <a class="method-permalink" href="#whitelist%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/rank/command_permissions.cr#L23" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

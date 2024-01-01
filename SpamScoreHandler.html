@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="privateparlor">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="privateparlor">
+  <title>SpamScoreHandler - privateparlor master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          privateparlor
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="privateparlor/toplevel" data-name="top level namespace">
+      <a href="toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Album" data-name="album">
+      <a href="Album.html">Album</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/AuthorizedRanks" data-name="authorizedranks">
+      <a href="AuthorizedRanks.html">AuthorizedRanks</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandDescriptions" data-name="commanddescriptions">
+      <a href="CommandDescriptions.html">CommandDescriptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandPermissions" data-name="commandpermissions">
+      <a href="CommandPermissions.html">CommandPermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Config" data-name="config">
+      <a href="Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Configuration" data-name="configuration">
+      <a href="Configuration.html">Configuration</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/Database" data-name="database">
+      <a href="Database.html">Database</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/Database/User" data-name="database::user">
+      <a href="Database/User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseHistory" data-name="databasehistory">
+      <a href="DatabaseHistory.html">DatabaseHistory</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseWarden" data-name="databasewarden">
+      <a href="DatabaseWarden.html">DatabaseWarden</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Format" data-name="format">
+      <a href="Format.html">Format</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/History" data-name="history">
+      <a href="History.html">History</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/History/MessageGroup" data-name="history::messagegroup">
+      <a href="History/MessageGroup.html">MessageGroup</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryBase" data-name="historybase">
+      <a href="HistoryBase.html">HistoryBase</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryBase/MessageGroupBase" data-name="historybase::messagegroupbase">
+      <a href="HistoryBase/MessageGroupBase.html">MessageGroupBase</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryFull" data-name="historyfull">
+      <a href="HistoryFull.html">HistoryFull</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryFull/MessageGroupFull" data-name="historyfull::messagegroupfull">
+      <a href="HistoryFull/MessageGroupFull.html">MessageGroupFull</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryRatings" data-name="historyratings">
+      <a href="HistoryRatings.html">HistoryRatings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryRatings/MessageGroupRatings" data-name="historyratings::messagegroupratings">
+      <a href="HistoryRatings/MessageGroupRatings.html">MessageGroupRatings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryWarnings" data-name="historywarnings">
+      <a href="HistoryWarnings.html">HistoryWarnings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryWarnings/MessageGroupWarnings" data-name="historywarnings::messagegroupwarnings">
+      <a href="HistoryWarnings/MessageGroupWarnings.html">MessageGroupWarnings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Locale" data-name="locale">
+      <a href="Locale.html">Locale</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Localization" data-name="localization">
+      <a href="Localization.html">Localization</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Logs" data-name="logs">
+      <a href="Logs.html">Logs</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessagePermissions" data-name="messagepermissions">
+      <a href="MessagePermissions.html">MessagePermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageProc" data-name="messageproc">
+      <a href="MessageProc.html">MessageProc</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageQueue" data-name="messagequeue">
+      <a href="MessageQueue.html">MessageQueue</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/PrivateParlor" data-name="privateparlor">
+      <a href="PrivateParlor.html">PrivateParlor</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/QueuedMessage" data-name="queuedmessage">
+      <a href="QueuedMessage.html">QueuedMessage</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Rank" data-name="rank">
+      <a href="Rank.html">Rank</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Replies" data-name="replies">
+      <a href="Replies.html">Replies</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Robot9000" data-name="robot9000">
+      <a href="Robot9000.html">Robot9000</a>
+      
+    </li>
+  
+  <li class=" current" data-id="privateparlor/SpamScoreHandler" data-name="spamscorehandler">
+      <a href="SpamScoreHandler.html">SpamScoreHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/User" data-name="user">
+      <a href="User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> SpamScoreHandler
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="SpamScoreHandler.html">SpamScoreHandler</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="included-modules" class="anchor" href="#included-modules">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Included Modules
+  </h2>
+  <ul class="other-types-list">
+    
+      <li class="other-type">YAML::Serializable</li>
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L3" target="_blank">
+        privateparlor/spam_score_handler.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28ctx%3AYAML%3A%3AParseContext%2Cnode%3AYAML%3A%3ANodes%3A%3ANode%29-class-method" class="signature"><strong>.new</strong>(ctx : YAML::ParseContext, node : YAML::Nodes::Node)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#calculate_spam_score_text%28text%3AString%29%3AFloat32-instance-method" class="signature"><strong>#calculate_spam_score_text</strong>(text : String) : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#downvote_last_used%3AHash%28Int64%2CTime%29-instance-method" class="signature"><strong>#downvote_last_used</strong> : Hash(Int64, Time)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#expire-instance-method" class="signature"><strong>#expire</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_animation%3AFloat32-instance-method" class="signature"><strong>#score_animation</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_audio%3AFloat32-instance-method" class="signature"><strong>#score_audio</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_base_message%3AFloat32-instance-method" class="signature"><strong>#score_base_message</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_basketball%3AFloat32-instance-method" class="signature"><strong>#score_basketball</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_bowling%3AFloat32-instance-method" class="signature"><strong>#score_bowling</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_contact%3AFloat32-instance-method" class="signature"><strong>#score_contact</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_dart%3AFloat32-instance-method" class="signature"><strong>#score_dart</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_dice%3AFloat32-instance-method" class="signature"><strong>#score_dice</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_document%3AFloat32-instance-method" class="signature"><strong>#score_document</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_forwarded_message%3AFloat32-instance-method" class="signature"><strong>#score_forwarded_message</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_location%3AFloat32-instance-method" class="signature"><strong>#score_location</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_media_group%3AFloat32-instance-method" class="signature"><strong>#score_media_group</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_photo%3AFloat32-instance-method" class="signature"><strong>#score_photo</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_poll%3AFloat32-instance-method" class="signature"><strong>#score_poll</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_slot_machine%3AFloat32-instance-method" class="signature"><strong>#score_slot_machine</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_soccerball%3AFloat32-instance-method" class="signature"><strong>#score_soccerball</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_sticker%3AFloat32-instance-method" class="signature"><strong>#score_sticker</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_text_character%3AFloat32-instance-method" class="signature"><strong>#score_text_character</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_text_linebreak%3AFloat32-instance-method" class="signature"><strong>#score_text_linebreak</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_venue%3AFloat32-instance-method" class="signature"><strong>#score_venue</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_video%3AFloat32-instance-method" class="signature"><strong>#score_video</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_video_note%3AFloat32-instance-method" class="signature"><strong>#score_video_note</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#score_voice%3AFloat32-instance-method" class="signature"><strong>#score_voice</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#scores%3AHash%28Int64%2CFloat32%29-instance-method" class="signature"><strong>#scores</strong> : Hash(Int64, Float32)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#sign_last_used%3AHash%28Int64%2CTime%29-instance-method" class="signature"><strong>#sign_last_used</strong> : Hash(Int64, Time)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spam_limit%3AFloat32-instance-method" class="signature"><strong>#spam_limit</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spam_limit_hit%3AFloat32-instance-method" class="signature"><strong>#spam_limit_hit</strong> : Float32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spammy%3F%28user%3AInt64%2Cincrement%3AFloat32%29%3ABool-instance-method" class="signature"><strong>#spammy?</strong>(user : Int64, increment : Float32) : Bool</a>
+        
+          <div class="summary"><p>Check if user's spam score triggers the spam filter</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spammy_downvote%3F%28user%3AInt64%2Cinterval%3AInt32%29%3ABool-instance-method" class="signature"><strong>#spammy_downvote?</strong>(user : Int64, interval : Int32) : Bool</a>
+        
+          <div class="summary"><p>Check if user has downvoted within an interval of time</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spammy_sign%3F%28user%3AInt64%2Cinterval%3AInt32%29%3ABool-instance-method" class="signature"><strong>#spammy_sign?</strong>(user : Int64, interval : Int32) : Bool</a>
+        
+          <div class="summary"><p>Check if user has signed within an interval of time</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spammy_upvote%3F%28user%3AInt64%2Cinterval%3AInt32%29%3ABool-instance-method" class="signature"><strong>#spammy_upvote?</strong>(user : Int64, interval : Int32) : Bool</a>
+        
+          <div class="summary"><p>Check if user has upvoted within an interval of time</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#upvote_last_used%3AHash%28Int64%2CTime%29-instance-method" class="signature"><strong>#upvote_last_used</strong> : Hash(Int64, Time)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(ctx:YAML::ParseContext,node:YAML::Nodes::Node)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(ctx : YAML::ParseContext, node : YAML::Nodes::Node)
+
+        <a class="method-permalink" href="#new%28ctx%3AYAML%3A%3AParseContext%2Cnode%3AYAML%3A%3ANodes%3A%3ANode%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L4" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="calculate_spam_score_text(text:String):Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>calculate_spam_score_text</strong>(text : String) : Float32
+
+        <a class="method-permalink" href="#calculate_spam_score_text%28text%3AString%29%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L161" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="downvote_last_used:Hash(Int64,Time)-instance-method">
+      <div class="signature">
+        
+        def <strong>downvote_last_used</strong> : Hash(Int64, Time)
+
+        <a class="method-permalink" href="#downvote_last_used%3AHash%28Int64%2CTime%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L9" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="expire-instance-method">
+      <div class="signature">
+        
+        def <strong>expire</strong>
+
+        <a class="method-permalink" href="#expire-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L165" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_animation:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_animation</strong> : Float32
+
+        <a class="method-permalink" href="#score_animation%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L27" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_audio:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_audio</strong> : Float32
+
+        <a class="method-permalink" href="#score_audio%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L30" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_base_message:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_base_message</strong> : Float32
+
+        <a class="method-permalink" href="#score_base_message%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L18" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_basketball:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_basketball</strong> : Float32
+
+        <a class="method-permalink" href="#score_basketball%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L66" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_bowling:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_bowling</strong> : Float32
+
+        <a class="method-permalink" href="#score_bowling%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L75" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_contact:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_contact</strong> : Float32
+
+        <a class="method-permalink" href="#score_contact%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L84" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_dart:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_dart</strong> : Float32
+
+        <a class="method-permalink" href="#score_dart%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L63" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_dice:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_dice</strong> : Float32
+
+        <a class="method-permalink" href="#score_dice%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L60" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_document:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_document</strong> : Float32
+
+        <a class="method-permalink" href="#score_document%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L33" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_forwarded_message:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_forwarded_message</strong> : Float32
+
+        <a class="method-permalink" href="#score_forwarded_message%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L54" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_location:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_location</strong> : Float32
+
+        <a class="method-permalink" href="#score_location%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L81" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_media_group:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_media_group</strong> : Float32
+
+        <a class="method-permalink" href="#score_media_group%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L48" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_photo:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_photo</strong> : Float32
+
+        <a class="method-permalink" href="#score_photo%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L45" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_poll:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_poll</strong> : Float32
+
+        <a class="method-permalink" href="#score_poll%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L51" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_slot_machine:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_slot_machine</strong> : Float32
+
+        <a class="method-permalink" href="#score_slot_machine%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L72" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_soccerball:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_soccerball</strong> : Float32
+
+        <a class="method-permalink" href="#score_soccerball%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L69" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_sticker:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_sticker</strong> : Float32
+
+        <a class="method-permalink" href="#score_sticker%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L57" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_text_character:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_text_character</strong> : Float32
+
+        <a class="method-permalink" href="#score_text_character%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L21" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_text_linebreak:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_text_linebreak</strong> : Float32
+
+        <a class="method-permalink" href="#score_text_linebreak%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L24" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_venue:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_venue</strong> : Float32
+
+        <a class="method-permalink" href="#score_venue%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L78" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_video:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_video</strong> : Float32
+
+        <a class="method-permalink" href="#score_video%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L36" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_video_note:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_video_note</strong> : Float32
+
+        <a class="method-permalink" href="#score_video_note%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L39" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="score_voice:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>score_voice</strong> : Float32
+
+        <a class="method-permalink" href="#score_voice%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L42" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="scores:Hash(Int64,Float32)-instance-method">
+      <div class="signature">
+        
+        def <strong>scores</strong> : Hash(Int64, Float32)
+
+        <a class="method-permalink" href="#scores%3AHash%28Int64%2CFloat32%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L6" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="sign_last_used:Hash(Int64,Time)-instance-method">
+      <div class="signature">
+        
+        def <strong>sign_last_used</strong> : Hash(Int64, Time)
+
+        <a class="method-permalink" href="#sign_last_used%3AHash%28Int64%2CTime%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L7" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spam_limit:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>spam_limit</strong> : Float32
+
+        <a class="method-permalink" href="#spam_limit%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L12" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spam_limit_hit:Float32-instance-method">
+      <div class="signature">
+        
+        def <strong>spam_limit_hit</strong> : Float32
+
+        <a class="method-permalink" href="#spam_limit_hit%3AFloat32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L15" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spammy?(user:Int64,increment:Float32):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>spammy?</strong>(user : Int64, increment : Float32) : Bool
+
+        <a class="method-permalink" href="#spammy%3F%28user%3AInt64%2Cincrement%3AFloat32%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Check if user's spam score triggers the spam filter</p>
+<p>Returns true if score is greater than spam limit, false otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L89" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spammy_downvote?(user:Int64,interval:Int32):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>spammy_downvote?</strong>(user : Int64, interval : Int32) : Bool
+
+        <a class="method-permalink" href="#spammy_downvote%3F%28user%3AInt64%2Cinterval%3AInt32%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Check if user has downvoted within an interval of time</p>
+<p>Returns true if so (user is downvoting too often), false otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L145" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spammy_sign?(user:Int64,interval:Int32):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>spammy_sign?</strong>(user : Int64, interval : Int32) : Bool
+
+        <a class="method-permalink" href="#spammy_sign%3F%28user%3AInt64%2Cinterval%3AInt32%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Check if user has signed within an interval of time</p>
+<p>Returns true if so (user is sign spamming), false otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L107" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spammy_upvote?(user:Int64,interval:Int32):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>spammy_upvote?</strong>(user : Int64, interval : Int32) : Bool
+
+        <a class="method-permalink" href="#spammy_upvote%3F%28user%3AInt64%2Cinterval%3AInt32%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Check if user has upvoted within an interval of time</p>
+<p>Returns true if so (user is upvoting too often), false otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L126" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="upvote_last_used:Hash(Int64,Time)-instance-method">
+      <div class="signature">
+        
+        def <strong>upvote_last_used</strong> : Hash(Int64, Time)
+
+        <a class="method-permalink" href="#upvote_last_used%3AHash%28Int64%2CTime%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/spam_score_handler.cr#L8" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

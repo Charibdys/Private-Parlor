@@ -1,0 +1,3780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="privateparlor">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="privateparlor">
+  <title>PrivateParlor - privateparlor master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          privateparlor
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="privateparlor/toplevel" data-name="top level namespace">
+      <a href="toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Album" data-name="album">
+      <a href="Album.html">Album</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/AuthorizedRanks" data-name="authorizedranks">
+      <a href="AuthorizedRanks.html">AuthorizedRanks</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandDescriptions" data-name="commanddescriptions">
+      <a href="CommandDescriptions.html">CommandDescriptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandPermissions" data-name="commandpermissions">
+      <a href="CommandPermissions.html">CommandPermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Config" data-name="config">
+      <a href="Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Configuration" data-name="configuration">
+      <a href="Configuration.html">Configuration</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/Database" data-name="database">
+      <a href="Database.html">Database</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/Database/User" data-name="database::user">
+      <a href="Database/User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseHistory" data-name="databasehistory">
+      <a href="DatabaseHistory.html">DatabaseHistory</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseWarden" data-name="databasewarden">
+      <a href="DatabaseWarden.html">DatabaseWarden</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Format" data-name="format">
+      <a href="Format.html">Format</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/History" data-name="history">
+      <a href="History.html">History</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/History/MessageGroup" data-name="history::messagegroup">
+      <a href="History/MessageGroup.html">MessageGroup</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryBase" data-name="historybase">
+      <a href="HistoryBase.html">HistoryBase</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryBase/MessageGroupBase" data-name="historybase::messagegroupbase">
+      <a href="HistoryBase/MessageGroupBase.html">MessageGroupBase</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryFull" data-name="historyfull">
+      <a href="HistoryFull.html">HistoryFull</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryFull/MessageGroupFull" data-name="historyfull::messagegroupfull">
+      <a href="HistoryFull/MessageGroupFull.html">MessageGroupFull</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryRatings" data-name="historyratings">
+      <a href="HistoryRatings.html">HistoryRatings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryRatings/MessageGroupRatings" data-name="historyratings::messagegroupratings">
+      <a href="HistoryRatings/MessageGroupRatings.html">MessageGroupRatings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryWarnings" data-name="historywarnings">
+      <a href="HistoryWarnings.html">HistoryWarnings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryWarnings/MessageGroupWarnings" data-name="historywarnings::messagegroupwarnings">
+      <a href="HistoryWarnings/MessageGroupWarnings.html">MessageGroupWarnings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Locale" data-name="locale">
+      <a href="Locale.html">Locale</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Localization" data-name="localization">
+      <a href="Localization.html">Localization</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Logs" data-name="logs">
+      <a href="Logs.html">Logs</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessagePermissions" data-name="messagepermissions">
+      <a href="MessagePermissions.html">MessagePermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageProc" data-name="messageproc">
+      <a href="MessageProc.html">MessageProc</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageQueue" data-name="messagequeue">
+      <a href="MessageQueue.html">MessageQueue</a>
+      
+    </li>
+  
+  <li class=" current" data-id="privateparlor/PrivateParlor" data-name="privateparlor">
+      <a href="PrivateParlor.html">PrivateParlor</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/QueuedMessage" data-name="queuedmessage">
+      <a href="QueuedMessage.html">QueuedMessage</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Rank" data-name="rank">
+      <a href="Rank.html">Rank</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Replies" data-name="replies">
+      <a href="Replies.html">Replies</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Robot9000" data-name="robot9000">
+      <a href="Robot9000.html">Robot9000</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/SpamScoreHandler" data-name="spamscorehandler">
+      <a href="SpamScoreHandler.html">SpamScoreHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/User" data-name="user">
+      <a href="User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> PrivateParlor
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="PrivateParlor.html">PrivateParlor</a></li><li class="superclass">Tourmaline::Client</li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="included-modules" class="anchor" href="#included-modules">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Included Modules
+  </h2>
+  <ul class="other-types-list">
+    
+      <li class="other-type">Tourmaline</li>
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L9" target="_blank">
+        privateparlor/telegram.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28config%3AConfig%29-class-method" class="signature"><strong>.new</strong>(config : Config)</a>
+        
+          <div class="summary"><p>Creates a new instance of <code><a href="PrivateParlor.html">PrivateParlor</a></code>.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#access%3AAuthorizedRanks-instance-method" class="signature"><strong>#access</strong> : AuthorizedRanks</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#albums%3AHash%28String%2CAlbum%29-instance-method" class="signature"><strong>#albums</strong> : Hash(String, Album)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#allow_media_spoilers%3ABool%7CNil-instance-method" class="signature"><strong>#allow_media_spoilers</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#blacklist_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#blacklist_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Blacklists a user from the chat, deletes the reply, and removes all the user's incoming and outgoing messages from the queue.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#blacklist_contact%3AString%7CNil-instance-method" class="signature"><strong>#blacklist_contact</strong> : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#check_r9k_media%28file_id%3AString%2Cuser%3ADatabase%3A%3AUser%29%3ABool%7CNil-instance-method" class="signature"><strong>#check_r9k_media</strong>(file_id : String, user : Database::User) : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#check_text%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%2Centities%3AArray%28Tourmaline%3A%3AMessageEntity%29%29%3AString%7CNil-instance-method" class="signature"><strong>#check_text</strong>(text : String, user : Database::User, msid : Int64, entities : Array(Tourmaline::MessageEntity)) : String | Nil</a>
+        
+          <div class="summary"><p>Checks if the text contains a special font or starts a sign command.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#command_disabled%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#command_disabled</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Sends a message to the user if a disabled command is used</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown_time_begin%3AArray%28Int32%29-instance-method" class="signature"><strong>#cooldown_time_begin</strong> : Array(Int32)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown_time_linear_b%3AInt32-instance-method" class="signature"><strong>#cooldown_time_linear_b</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown_time_linear_m%3AInt32-instance-method" class="signature"><strong>#cooldown_time_linear_m</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#database%3ADatabase-instance-method" class="signature"><strong>#database</strong> : Database</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#default_rank%3AInt32-instance-method" class="signature"><strong>#default_rank</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#delete_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#delete_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Delete a message from a user, give a warning and a cooldown.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#delete_messages%28msid%3AInt64%2Cuser_id%3AInt64%2Cdebug_enabled%3ABool%7CNil%29%3AInt64%7CNil-instance-method" class="signature"><strong>#delete_messages</strong>(msid : Int64, user_id : Int64, debug_enabled : Bool | Nil) : Int64 | Nil</a>
+        
+          <div class="summary"><p>Deletes the given message for all receivers and removes it from the message history.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#demote_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#demote_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Demotes a user to a given rank.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#demote_from_args%28user%3ADatabase%3A%3AUser%2Cargs%3AArray%28String%29%7CNil%2Cmsid%3AInt64%29%3ANil-instance-method" class="signature"><strong>#demote_from_args</strong>(user : Database::User, args : Array(String) | Nil, msid : Int64) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#demote_from_reply%28user%3ADatabase%3A%3AUser%2Carg%3AString%7CNil%2Cmsid%3AInt64%2Creply%3AInt64%29%3ANil-instance-method" class="signature"><strong>#demote_from_reply</strong>(user : Database::User, arg : String | Nil, msid : Int64, reply : Int64) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#deny_user%28user%3ADatabase%3A%3AUser%29%3ANil-instance-method" class="signature"><strong>#deny_user</strong>(user : Database::User) : Nil</a>
+        
+          <div class="summary"><p>Sends a message to the user explaining why they cannot chat at this time</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#downvote_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#downvote_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Downvotes a message.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#downvote_limit_interval%3AInt32-instance-method" class="signature"><strong>#downvote_limit_interval</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_karma_sign%3ABool%7CNil-instance-method" class="signature"><strong>#enable_karma_sign</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_ranksay%3ABool%7CNil-instance-method" class="signature"><strong>#enable_ranksay</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_sign%3ABool%7CNil-instance-method" class="signature"><strong>#enable_sign</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_tripsign%3ABool%7CNil-instance-method" class="signature"><strong>#enable_tripsign</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#entity_types%3AArray%28String%29-instance-method" class="signature"><strong>#entity_types</strong> : Array(String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#force_leave%28user_id%3AInt64%29%3ANil-instance-method" class="signature"><strong>#force_leave</strong>(user_id : Int64) : Nil</a>
+        
+          <div class="summary"><p>Set blocked user to left in the database and delete all incoming messages from the queue.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_history_type%28db%3ADB%3A%3ADatabase%2Cconfig%3AConfig%29%3AHistory%7CDatabaseHistory-instance-method" class="signature"><strong>#get_history_type</strong>(db : DB::Database, config : Config) : History | DatabaseHistory</a>
+        
+          <div class="summary"><p>Determine appropriate <code><a href="History.html">History</a></code> type based on given config variables</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_animation%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_animation</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;animation&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_audio%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_audio</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;audio&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_basketball%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_basketball</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;basketball&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_bowling%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_bowling</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;bowling&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_contact%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_contact</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a contact message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_dart%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_dart</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;dart&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_dice%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_dice</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;dice&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_document%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_document</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;document&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_embedded_command%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method" class="signature"><strong>#handle_embedded_command</strong>(text : String, user : Database::User, msid : Int64) : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_forwarded_message%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_forwarded_message</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a forwarded message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_karma_sign%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method" class="signature"><strong>#handle_karma_sign</strong>(text : String, user : Database::User, msid : Int64) : String | Nil</a>
+        
+          <div class="summary"><p>Given a command text, checks if karma signs are enabled and if the karma sign would be spammy, then returns the argument with a karma level signature</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_location%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_location</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a location message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_media_group%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_media_group</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares an album message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_photo%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_photo</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;photo&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_poll%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_poll</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a poll for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_ranksay%28rank%3AString%2Ctext%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method" class="signature"><strong>#handle_ranksay</strong>(rank : String, text : String, user : Database::User, msid : Int64) : String | Nil</a>
+        
+          <div class="summary"><p>Given a ranked say command, checks if ranked says are enabled and determines the rank (either given or the user's current rank), then returns the argument with a ranked signature</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_regular_forward%28message%3ATourmaline%3A%3AMessage%2Cuser%3ADatabase%3A%3AUser%29%3ANil-instance-method" class="signature"><strong>#handle_regular_forward</strong>(message : Tourmaline::Message, user : Database::User) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_sign%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method" class="signature"><strong>#handle_sign</strong>(text : String, user : Database::User, msid : Int64) : String | Nil</a>
+        
+          <div class="summary"><p>Given a command text, checks if signs are enabled, user has private forwards, or sign would be spammy, then returns the argument with a username signature</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_slot_machine%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_slot_machine</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;slot_machine&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_soccerball%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_soccerball</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;soccerball&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_sticker%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_sticker</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a sticker message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_text%28update%3ATourmaline%3A%3AUpdate%29-instance-method" class="signature"><strong>#handle_text</strong>(update : Tourmaline::Update)</a>
+        
+          <div class="summary"><p>Prepares a text message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_tripcode%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method" class="signature"><strong>#handle_tripcode</strong>(text : String, user : Database::User, msid : Int64) : String | Nil</a>
+        
+          <div class="summary"><p>Given a command text, checks if tripcodes are enabled, if tripcode would be spammy, or if user does not have a tripcode set, then returns the argument with a tripcode header</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_venue%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_venue</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a venue message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_video%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_video</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;video&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_video_note%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_video_note</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;video_note&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#handle_voice%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method" class="signature"><strong>#handle_voice</strong>(update : Tourmaline::Update) : Nil</a>
+        
+          <div class="summary"><p>Prepares a &quot;voice&quot; message for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#help_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#help_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Returns a message containing all the commands that a user can use, according to the user's rank.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#history%3AHistory%7CDatabaseHistory-instance-method" class="signature"><strong>#history</strong> : History | DatabaseHistory</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#inactivity_limit%3AInt32-instance-method" class="signature"><strong>#inactivity_limit</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#info_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#info_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Returns a message containing the user's OID, username, karma, warnings, etc.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#initialize_handlers%28descriptions%3ACommandDescriptions%2Cconfig%3AConfig%29%3ANil-instance-method" class="signature"><strong>#initialize_handlers</strong>(descriptions : CommandDescriptions, config : Config) : Nil</a>
+        
+          <div class="summary"><p>Initializes CommandHandlers and UpdateHandlers Also checks whether or not a command or media type is enabled via the config, and registers commands with BotFather</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#karma_info_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#karma_info_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#karma_levels%3AHash%28Int32%2CString%29-instance-method" class="signature"><strong>#karma_levels</strong> : Hash(Int32, String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#karma_warn_penalty%3AInt32-instance-method" class="signature"><strong>#karma_warn_penalty</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#kick_inactive_users%3ANil-instance-method" class="signature"><strong>#kick_inactive_users</strong> : Nil</a>
+        
+          <div class="summary"><p>Kicks any users that have been inactive for a duration of time.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#linked_network%3AHash%28String%2CString%29-instance-method" class="signature"><strong>#linked_network</strong> : Hash(String, String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#locale%3ALocale-instance-method" class="signature"><strong>#locale</strong> : Locale</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#log_channel%3AString-instance-method" class="signature"><strong>#log_channel</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#log_channel%3D%28log_channel%3AString%29-instance-method" class="signature"><strong>#log_channel=</strong>(log_channel : String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#log_output%28log%3AString%2Cparams%3AHash%28String%2CString%7CNil%29%3D%7B%22%22%3D%3E%22%22%7D%29%3ANil-instance-method" class="signature"><strong>#log_output</strong>(log : String, params : Hash(String, String | Nil) = {<span class="s">&quot;&quot;</span> <span class="o">=&gt;</span> <span class="s">&quot;&quot;</span>}) : Nil</a>
+        
+          <div class="summary"><p>Formats and outputs given log message to the log (either STDOUT or a file, defined in config) with INFO severity.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#media_disabled%28update%3ATourmaline%3A%3AUpdate%2Ctype%3AString%29%3ANil-instance-method" class="signature"><strong>#media_disabled</strong>(update : Tourmaline::Update, type : String) : Nil</a>
+        
+          <div class="summary"><p>Sends a message to the user if a disabled media type is sent</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#media_limit_period%3AInt32-instance-method" class="signature"><strong>#media_limit_period</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#motd_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#motd_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Replies with the motd/rules associated with this bot.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pin_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#pin_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#preliminary_message_check%28update%3ATourmaline%3A%3AUpdate%29%3ATuple%28Tourmaline%3A%3AMessage%7CNil%2CDatabase%3A%3AUser%7CNil%29-instance-method" class="signature"><strong>#preliminary_message_check</strong>(update : Tourmaline::Update) : Tuple(Tourmaline::Message | Nil, Database::User | Nil)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#preliminary_message_check%28ctx%3ACommandHandler%3A%3AContext%7CTourmaline%3A%3AUpdate%29%3ATuple%28Tourmaline%3A%3AMessage%7CNil%2CDatabase%3A%3AUser%7CNil%29-instance-method" class="signature"><strong>#preliminary_message_check</strong>(ctx : CommandHandler::Context | Tourmaline::Update) : Tuple(Tourmaline::Message | Nil, Database::User | Nil)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#promote_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#promote_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Promotes a user to a given rank.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#promote_from_args%28user%3ADatabase%3A%3AUser%2Cauthority%3ACommandPermissions%2Cargs%3AArray%28String%29%7CNil%2Cmsid%3AInt64%29%3ANil-instance-method" class="signature"><strong>#promote_from_args</strong>(user : Database::User, authority : CommandPermissions, args : Array(String) | Nil, msid : Int64) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#promote_from_reply%28user%3ADatabase%3A%3AUser%2Cauthority%3ACommandPermissions%2Carg%3AString%7CNil%2Cmsid%3AInt64%2Creply%3AInt64%29%3ANil-instance-method" class="signature"><strong>#promote_from_reply</strong>(user : Database::User, authority : CommandPermissions, arg : String | Nil, msid : Int64, reply : Int64) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pseudonymous%3ABool%7CNil-instance-method" class="signature"><strong>#pseudonymous</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#purge_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#purge_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Delete all messages from recently blacklisted users.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#queue%3AMessageQueue-instance-method" class="signature"><strong>#queue</strong> : MessageQueue</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#r9k_cooldown%3AInt32-instance-method" class="signature"><strong>#r9k_cooldown</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#r9k_forwards%3ABool%7CNil-instance-method" class="signature"><strong>#r9k_forwards</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#r9k_media%3ABool%7CNil-instance-method" class="signature"><strong>#r9k_media</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#r9k_text%3ABool%7CNil-instance-method" class="signature"><strong>#r9k_text</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#r9k_warn%3ABool%7CNil-instance-method" class="signature"><strong>#r9k_warn</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#ranked_info%28user%3ADatabase%3A%3AUser%2Cmsid%3AInt64%2Creply%3AInt64%29%3ANil-instance-method" class="signature"><strong>#ranked_info</strong>(user : Database::User, msid : Int64, reply : Int64) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#register_tasks%28spam_interval_seconds%3AInt32%29%3AArray%28Tasker%3A%3ATask%29-instance-method" class="signature"><strong>#register_tasks</strong>(spam_interval_seconds : Int32) : Array(Tasker::Task)</a>
+        
+          <div class="summary"><p>Starts various background tasks and stores them in a hash.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#registration_open%3ABool%7CNil-instance-method" class="signature"><strong>#registration_open</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#regular_forwards%3ABool%7CNil-instance-method" class="signature"><strong>#regular_forwards</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay%28reply_message%3ATourmaline%3A%3AMessage%7CNil%2Cuser%3ADatabase%3A%3AUser%2Ccached_msid%3AInt64%2Cproc%3AMessageProc%29%3ANil-instance-method" class="signature"><strong>#relay</strong>(reply_message : Tourmaline::Message | Nil, user : Database::User, cached_msid : Int64, proc : MessageProc) : Nil</a>
+        
+          <div class="summary"><p>Caches a message and sends it to the queue for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay%28reply_message%3ATourmaline%3A%3AMessage%7CNil%2Cuser%3ADatabase%3A%3AUser%2Ccached_msid%3AArray%28Int64%29%2Cproc%3AMessageProc%29%3ANil-instance-method" class="signature"><strong>#relay</strong>(reply_message : Tourmaline::Message | Nil, user : Database::User, cached_msid : Array(Int64), proc : MessageProc) : Nil</a>
+        
+          <div class="summary"><p>Caches an album message and sends it to the queue for relaying.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_album%28message%3ATourmaline%3A%3AMessage%2Calbum%3AString%2Cuser%3ADatabase%3A%3AUser%2Ccaption%3AString%7CNil%2Centities%3AArray%28MessageEntity%29%3D%5B%5DofMessageEntity%29%3ANil-instance-method" class="signature"><strong>#relay_album</strong>(message : Tourmaline::Message, album : String, user : Database::User, caption : String | Nil, entities : Array(MessageEntity) = <span class="o">[]</span> <span class="k">of</span> <span class="t">MessageEntity</span>) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_regular_forward%28user%3ADatabase%3A%3AUser%2Cmessage%3ATourmaline%3A%3AMessage%2Ctext%3AString%29%3ANil-instance-method" class="signature"><strong>#relay_regular_forward</strong>(user : Database::User, message : Tourmaline::Message, text : String) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_to_one%28reply_message%3AInt64%7CNil%2Cuser%3AInt64%2Creply%3AString%2Cparams%3AHash%28String%2CString%7CNil%29%29%3ANil-instance-method" class="signature"><strong>#relay_to_one</strong>(reply_message : Int64 | Nil, user : Int64, reply : String, params : Hash(String, String | Nil)) : Nil</a>
+        
+          <div class="summary"><p>Relay a message to a single user.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_to_one%28reply_message%3AInt64%7CNil%2Cuser%3AInt64%2Ctext%3AString%29-instance-method" class="signature"><strong>#relay_to_one</strong>(reply_message : Int64 | Nil, user : Int64, text : String)</a>
+        
+          <div class="summary"><p>Relay a message to a single user.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#remove_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#remove_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Remove a message from a user without giving a warning or cooldown.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#reveal_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#reveal_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Privately reveal username to another user</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#revert_ranked_users%3ANil-instance-method" class="signature"><strong>#revert_ranked_users</strong> : Nil</a>
+        
+          <div class="summary"><p>Checks the database for any users that have ranks not found in the <code><a href="AuthorizedRanks.html">AuthorizedRanks</a></code> hash.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#send_messages%3ABool%7CNil-instance-method" class="signature"><strong>#send_messages</strong> : Bool | Nil</a>
+        
+          <div class="summary"><p>Receives a <code>Message</code> from the <code><a href="PrivateParlor.html#queue%3AMessageQueue-instance-method">#queue</a></code>, calls its proc, and adds the returned message id to the History</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#sign_limit_interval%3AInt32-instance-method" class="signature"><strong>#sign_limit_interval</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#smileys%3AArray%28String%29-instance-method" class="signature"><strong>#smileys</strong> : Array(String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spam_handler%3ASpamScoreHandler%7CNil-instance-method" class="signature"><strong>#spam_handler</strong> : SpamScoreHandler | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spamming%3F%28id%3AInt64%2Cmsid%3AInt64%2Cscore%3AFloat32%29%3ABool%7CNil-instance-method" class="signature"><strong>#spamming?</strong>(id : Int64, msid : Int64, score : Float32) : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spamming_text%3F%28id%3AInt64%2Cmsid%3AInt64%2Ctext%3AString%29%3ABool%7CNil-instance-method" class="signature"><strong>#spamming_text?</strong>(id : Int64, msid : Int64, text : String) : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spoil_messages%28msid%3AInt64%2Cuser_id%3AInt64%2Cdebug_enabled%3ABool%7CNil%2Cinput%3AInputMedia%29%3ABool%7CNil-instance-method" class="signature"><strong>#spoil_messages</strong>(msid : Int64, user_id : Int64, debug_enabled : Bool | Nil, input : InputMedia) : Bool | Nil</a>
+        
+          <div class="summary"><p>Spoils the given media message for all receivers by editing the media with the given input.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spoiler_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#spoiler_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Adds a spoiler overlay to a media message when replied to.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#start_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#start_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>User starts the bot and begins receiving messages.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#stop_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#stop_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Stops the bot for the user.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tasks%3AArray%28Tasker%3A%3ATask%29-instance-method" class="signature"><strong>#tasks</strong> : Array(Tasker::Task)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#toggle_debug_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#toggle_debug_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Toggle the user's toggle_debug attribute.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#toggle_karma_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#toggle_karma_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Toggle the user's hide_karma attribute.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tripcode_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#tripcode_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Set/modify/view the user's tripcode.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tripcode_salt%3AString-instance-method" class="signature"><strong>#tripcode_salt</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#uncooldown_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#uncooldown_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Removes a cooldown and warning from a user if the user is in cooldown.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#unpin_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#unpin_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#upvote_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#upvote_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Upvotes a message.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#upvote_limit_interval%3AInt32-instance-method" class="signature"><strong>#upvote_limit_interval</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#user_info%28user%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3ANil-instance-method" class="signature"><strong>#user_info</strong>(user : Database::User, msid : Int64) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#users_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#users_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Return a message containing the number of users in the bot.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#valid_codepoints%3AArray%28Range%28Int32%2CInt32%29%29-instance-method" class="signature"><strong>#valid_codepoints</strong> : Array(Range(Int32, Int32))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#validate_r9k_media%28file_id%3AString%7CNil%2Cuser%3ADatabase%3A%3AUser%2Cmessage%3ATourmaline%3A%3AMessage%29%3AString%7CNil-instance-method" class="signature"><strong>#validate_r9k_media</strong>(file_id : String | Nil, user : Database::User, message : Tourmaline::Message) : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#validate_r9k_text%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmessage%3ATourmaline%3A%3AMessage%29%3ATuple%28String%7CNil%2CString%7CNil%29-instance-method" class="signature"><strong>#validate_r9k_text</strong>(text : String, user : Database::User, message : Tourmaline::Message) : Tuple(String | Nil, String | Nil)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#version_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#version_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Returns a message containing the progam's version.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#warn_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#warn_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Warns a message without deleting it.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#warn_expire_hours%3AInt32-instance-method" class="signature"><strong>#warn_expire_hours</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#whitelist_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method" class="signature"><strong>#whitelist_command</strong>(ctx : CommandHandler::Context) : Nil</a>
+        
+          <div class="summary"><p>Whitelists a user, allowing the user to join the chat.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(config:Config)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(config : <a href="Config.html">Config</a>)
+
+        <a class="method-permalink" href="#new%28config%3AConfig%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Creates a new instance of <code><a href="PrivateParlor.html">PrivateParlor</a></code>.</p>
+<h2><a id="arguments" class="anchor" href="#arguments">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Arguments:</h2>
+<p><code>config</code>
+:     a <code><a href="Config.html">Config</a></code> from parsing the <code>config.yaml</code> file</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L60" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="access:AuthorizedRanks-instance-method">
+      <div class="signature">
+        
+        def <strong>access</strong> : <a href="AuthorizedRanks.html">AuthorizedRanks</a>
+
+        <a class="method-permalink" href="#access%3AAuthorizedRanks-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L12" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="albums:Hash(String,Album)-instance-method">
+      <div class="signature">
+        
+        def <strong>albums</strong> : Hash(String, <a href="Album.html">Album</a>)
+
+        <a class="method-permalink" href="#albums%3AHash%28String%2CAlbum%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L17" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="allow_media_spoilers:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>allow_media_spoilers</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#allow_media_spoilers%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L27" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="blacklist_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>blacklist_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#blacklist_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Blacklists a user from the chat, deletes the reply, and removes all the user's incoming and outgoing messages from the queue.</p>
+<p>Checks for the following permissions: <code>blacklist</code></p>
+<p>If <code>blacklist</code>, allows the user to blacklist another user.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1079" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="blacklist_contact:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>blacklist_contact</strong> : String | Nil
+
+        <a class="method-permalink" href="#blacklist_contact%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L41" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="check_r9k_media(file_id:String,user:Database::User):Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>check_r9k_media</strong>(file_id : String, user : <a href="Database/User.html">Database::User</a>) : Bool | Nil
+
+        <a class="method-permalink" href="#check_r9k_media%28file_id%3AString%2Cuser%3ADatabase%3A%3AUser%29%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1735" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="check_text(text:String,user:Database::User,msid:Int64,entities:Array(Tourmaline::MessageEntity)):String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>check_text</strong>(text : String, user : <a href="Database/User.html">Database::User</a>, msid : Int64, entities : Array(Tourmaline::MessageEntity)) : String | Nil
+
+        <a class="method-permalink" href="#check_text%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%2Centities%3AArray%28Tourmaline%3A%3AMessageEntity%29%29%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Checks if the text contains a special font or starts a sign command.</p>
+<p>Returns the given text or a formatted text if it is allowed; nil if otherwise or a sign command could not be used.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1399" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="command_disabled(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>command_disabled</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#command_disabled%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Sends a message to the user if a disabled command is used</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1386" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown_time_begin:Array(Int32)-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown_time_begin</strong> : Array(Int32)
+
+        <a class="method-permalink" href="#cooldown_time_begin%3AArray%28Int32%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L20" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown_time_linear_b:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown_time_linear_b</strong> : Int32
+
+        <a class="method-permalink" href="#cooldown_time_linear_b%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L22" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown_time_linear_m:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown_time_linear_m</strong> : Int32
+
+        <a class="method-permalink" href="#cooldown_time_linear_m%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L21" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="database:Database-instance-method">
+      <div class="signature">
+        
+        def <strong>database</strong> : <a href="Database.html">Database</a>
+
+        <a class="method-permalink" href="#database%3ADatabase-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L10" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="default_rank:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>default_rank</strong> : Int32
+
+        <a class="method-permalink" href="#default_rank%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L45" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="delete_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>delete_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#delete_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Delete a message from a user, give a warning and a cooldown.</p>
+<p>Checks for the following permissions: <code>delete</code></p>
+<p>If <code>delete</code>, allows the user to delete a message</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L917" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="delete_messages(msid:Int64,user_id:Int64,debug_enabled:Bool|Nil):Int64|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>delete_messages</strong>(msid : Int64, user_id : Int64, debug_enabled : Bool | Nil) : Int64 | Nil
+
+        <a class="method-permalink" href="#delete_messages%28msid%3AInt64%2Cuser_id%3AInt64%2Cdebug_enabled%3ABool%7CNil%29%3AInt64%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Deletes the given message for all receivers and removes it from the message history.</p>
+<p>Returns the sender's (user_id) original message id upon success.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2402" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="demote_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>demote_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#demote_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Demotes a user to a given rank.</p>
+<p>Checks for the following permissions: <code>demote</code></p>
+<p>If used with a reply, the reply user is demoted to either the user rank or a given rank.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L776" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="demote_from_args(user:Database::User,args:Array(String)|Nil,msid:Int64):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>demote_from_args</strong>(user : <a href="Database/User.html">Database::User</a>, args : Array(String) | Nil, msid : Int64) : Nil
+
+        <a class="method-permalink" href="#demote_from_args%28user%3ADatabase%3A%3AUser%2Cargs%3AArray%28String%29%7CNil%2Cmsid%3AInt64%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L825" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="demote_from_reply(user:Database::User,arg:String|Nil,msid:Int64,reply:Int64):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>demote_from_reply</strong>(user : <a href="Database/User.html">Database::User</a>, arg : String | Nil, msid : Int64, reply : Int64) : Nil
+
+        <a class="method-permalink" href="#demote_from_reply%28user%3ADatabase%3A%3AUser%2Carg%3AString%7CNil%2Cmsid%3AInt64%2Creply%3AInt64%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L791" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="deny_user(user:Database::User):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>deny_user</strong>(user : <a href="Database/User.html">Database::User</a>) : Nil
+
+        <a class="method-permalink" href="#deny_user%28user%3ADatabase%3A%3AUser%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Sends a message to the user explaining why they cannot chat at this time</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2371" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="downvote_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>downvote_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#downvote_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Downvotes a message.</p>
+<p>Checks for the following permissions: <code>downvote</code></p>
+<p>If <code>downvote</code>, allows the user to downvote a message</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L535" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="downvote_limit_interval:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>downvote_limit_interval</strong> : Int32
+
+        <a class="method-permalink" href="#downvote_limit_interval%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L39" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_karma_sign:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_karma_sign</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#enable_karma_sign%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L35" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_ranksay:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_ranksay</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#enable_ranksay%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L36" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_sign:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_sign</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#enable_sign%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L33" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_tripsign:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_tripsign</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#enable_tripsign%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L34" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="entity_types:Array(String)-instance-method">
+      <div class="signature">
+        
+        def <strong>entity_types</strong> : Array(String)
+
+        <a class="method-permalink" href="#entity_types%3AArray%28String%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L44" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="force_leave(user_id:Int64):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>force_leave</strong>(user_id : Int64) : Nil
+
+        <a class="method-permalink" href="#force_leave%28user_id%3AInt64%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set blocked user to left in the database and delete all incoming messages from the queue.</p>
+<p>Should only be invoked in <code><a href="PrivateParlor.html#send_messages%3ABool%7CNil-instance-method">#send_messages</a></code>, as this does not check the <code>queue_mutex</code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2548" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_history_type(db:DB::Database,config:Config):History|DatabaseHistory-instance-method">
+      <div class="signature">
+        
+        def <strong>get_history_type</strong>(db : DB::Database, config : <a href="Config.html">Config</a>) : <a href="History.html">History</a> | <a href="DatabaseHistory.html">DatabaseHistory</a>
+
+        <a class="method-permalink" href="#get_history_type%28db%3ADB%3A%3ADatabase%2Cconfig%3AConfig%29%3AHistory%7CDatabaseHistory-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Determine appropriate <code><a href="History.html">History</a></code> type based on given config variables</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L115" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_animation(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_animation</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_animation%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;animation&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1746" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_audio(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_audio</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_audio%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;audio&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1746" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_basketball(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_basketball</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_basketball%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;basketball&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2237" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_bowling(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_bowling</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_bowling%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;bowling&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2237" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_contact(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_contact</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_contact%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a contact message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2330" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_dart(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_dart</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_dart%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;dart&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2237" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_dice(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_dice</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_dice%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;dice&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2237" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_document(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_document</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_document%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;document&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1746" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_embedded_command(text:String,user:Database::User,msid:Int64):String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_embedded_command</strong>(text : String, user : <a href="Database/User.html">Database::User</a>, msid : Int64) : String | Nil
+
+        <a class="method-permalink" href="#handle_embedded_command%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1513" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_forwarded_message(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_forwarded_message</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_forwarded_message%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a forwarded message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2004" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_karma_sign(text:String,user:Database::User,msid:Int64):String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_karma_sign</strong>(text : String, user : <a href="Database/User.html">Database::User</a>, msid : Int64) : String | Nil
+
+        <a class="method-permalink" href="#handle_karma_sign%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Given a command text, checks if karma signs are enabled and if the karma sign
+would be spammy, then returns the argument with a karma level signature</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1586" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_location(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_location</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_location%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a location message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2300" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_media_group(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_media_group</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_media_group%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares an album message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1844" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_photo(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_photo</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_photo%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;photo&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1746" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_poll(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_poll</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_poll%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a poll for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1961" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_ranksay(rank:String,text:String,user:Database::User,msid:Int64):String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_ranksay</strong>(rank : String, text : String, user : <a href="Database/User.html">Database::User</a>, msid : Int64) : String | Nil
+
+        <a class="method-permalink" href="#handle_ranksay%28rank%3AString%2Ctext%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Given a ranked say command, checks if ranked says are enabled and determines the rank
+(either given or the user's current rank), then returns the argument with a ranked signature</p>
+<p>Checks for the following permissions: <code>ranksay</code>, <code>ranksay_lower</code></p>
+<p>If <code>ranksay</code>, allows the user to sign a message with the user's rank name.</p>
+<p>If <code>ranksay_lower</code>, allows the user to sign a message with the user's rank name and any subordinate rank.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1631" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_regular_forward(message:Tourmaline::Message,user:Database::User):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_regular_forward</strong>(message : Tourmaline::Message, user : <a href="Database/User.html">Database::User</a>) : Nil
+
+        <a class="method-permalink" href="#handle_regular_forward%28message%3ATourmaline%3A%3AMessage%2Cuser%3ADatabase%3A%3AUser%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2061" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_sign(text:String,user:Database::User,msid:Int64):String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_sign</strong>(text : String, user : <a href="Database/User.html">Database::User</a>, msid : Int64) : String | Nil
+
+        <a class="method-permalink" href="#handle_sign%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Given a command text, checks if signs are enabled, user has private forwards,
+or sign would be spammy, then returns the argument with a username signature</p>
+<p>Checks for the following permissions: <code>sign</code></p>
+<p>If <code>sign</code>, allows the user to sign a message</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1532" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_slot_machine(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_slot_machine</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_slot_machine%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;slot_machine&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2237" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_soccerball(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_soccerball</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_soccerball%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;soccerball&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2237" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_sticker(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_sticker</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_sticker%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a sticker message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2208" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_text(update:Tourmaline::Update)-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_text</strong>(update : Tourmaline::Update)
+
+        <a class="method-permalink" href="#handle_text%28update%3ATourmaline%3A%3AUpdate%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a text message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1690" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_tripcode(text:String,user:Database::User,msid:Int64):String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_tripcode</strong>(text : String, user : <a href="Database/User.html">Database::User</a>, msid : Int64) : String | Nil
+
+        <a class="method-permalink" href="#handle_tripcode%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Given a command text, checks if tripcodes are enabled, if tripcode would be spammy,
+or if user does not have a tripcode set, then returns the argument with a tripcode header</p>
+<p>Checks for the following permissions: <code>tsign</code></p>
+<p>If <code>tsign</code>, allows the user to sign a message with a tripcode.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1560" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_venue(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_venue</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_venue%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a venue message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2264" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_video(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_video</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_video%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;video&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1746" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_video_note(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_video_note</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_video_note%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;video_note&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1746" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="handle_voice(update:Tourmaline::Update):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>handle_voice</strong>(update : Tourmaline::Update) : Nil
+
+        <a class="method-permalink" href="#handle_voice%28update%3ATourmaline%3A%3AUpdate%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Prepares a &quot;voice&quot; message for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1746" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="help_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>help_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#help_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns a message containing all the commands that a user can use, according to the user's rank.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1375" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="history:History|DatabaseHistory-instance-method">
+      <div class="signature">
+        
+        def <strong>history</strong> : <a href="History.html">History</a> | <a href="DatabaseHistory.html">DatabaseHistory</a>
+
+        <a class="method-permalink" href="#history%3AHistory%7CDatabaseHistory-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L11" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="inactivity_limit:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>inactivity_limit</strong> : Int32
+
+        <a class="method-permalink" href="#inactivity_limit%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L29" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="info_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>info_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#info_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns a message containing the user's OID, username, karma, warnings, etc.</p>
+<p>Checks for the following permissions: <code><a href="PrivateParlor.html#ranked_info%28user%3ADatabase%3A%3AUser%2Cmsid%3AInt64%2Creply%3AInt64%29%3ANil-instance-method">#ranked_info</a></code> (for replies only)</p>
+<p>If this is used with a reply, returns the user info of that message if the invoker is ranked.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L377" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="initialize_handlers(descriptions:CommandDescriptions,config:Config):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>initialize_handlers</strong>(descriptions : <a href="CommandDescriptions.html">CommandDescriptions</a>, config : <a href="Config.html">Config</a>) : Nil
+
+        <a class="method-permalink" href="#initialize_handlers%28descriptions%3ACommandDescriptions%2Cconfig%3AConfig%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Initializes CommandHandlers and UpdateHandlers
+Also checks whether or not a command or media type is enabled via the config, and registers commands with BotFather</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L143" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="karma_info_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>karma_info_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#karma_info_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1229" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="karma_levels:Hash(Int32,String)-instance-method">
+      <div class="signature">
+        
+        def <strong>karma_levels</strong> : Hash(Int32, String)
+
+        <a class="method-permalink" href="#karma_levels%3AHash%28Int32%2CString%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L46" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="karma_warn_penalty:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>karma_warn_penalty</strong> : Int32
+
+        <a class="method-permalink" href="#karma_warn_penalty%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L24" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="kick_inactive_users:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>kick_inactive_users</strong> : Nil
+
+        <a class="method-permalink" href="#kick_inactive_users%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Kicks any users that have been inactive for a duration of time.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2387" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="linked_network:Hash(String,String)-instance-method">
+      <div class="signature">
+        
+        def <strong>linked_network</strong> : Hash(String, String)
+
+        <a class="method-permalink" href="#linked_network%3AHash%28String%2CString%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L43" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="locale:Locale-instance-method">
+      <div class="signature">
+        
+        def <strong>locale</strong> : <a href="Locale.html">Locale</a>
+
+        <a class="method-permalink" href="#locale%3ALocale-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="log_channel:String-instance-method">
+      <div class="signature">
+        
+        def <strong>log_channel</strong> : String
+
+        <a class="method-permalink" href="#log_channel%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="log_channel=(log_channel:String)-instance-method">
+      <div class="signature">
+        
+        def <strong>log_channel=</strong>(log_channel : String)
+
+        <a class="method-permalink" href="#log_channel%3D%28log_channel%3AString%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="log_output(log:String,params:Hash(String,String|Nil)={&quot;&quot;=&gt;&quot;&quot;}):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>log_output</strong>(log : String, params : Hash(String, String | Nil) = {<span class="s">&quot;&quot;</span> <span class="o">=&gt;</span> <span class="s">&quot;&quot;</span>}) : Nil
+
+        <a class="method-permalink" href="#log_output%28log%3AString%2Cparams%3AHash%28String%2CString%7CNil%29%3D%7B%22%22%3D%3E%22%22%7D%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Formats and outputs given log message to the log (either STDOUT or a file, defined in config) with INFO severity.</p>
+<p>Also outputs message to a given log channel, if available</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2502" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="media_disabled(update:Tourmaline::Update,type:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>media_disabled</strong>(update : Tourmaline::Update, type : String) : Nil
+
+        <a class="method-permalink" href="#media_disabled%28update%3ATourmaline%3A%3AUpdate%2Ctype%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Sends a message to the user if a disabled media type is sent</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2360" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="media_limit_period:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>media_limit_period</strong> : Int32
+
+        <a class="method-permalink" href="#media_limit_period%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L30" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="motd_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>motd_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#motd_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Replies with the motd/rules associated with this bot.</p>
+<p>Checks for the following permissions: <code>motd_set</code> (only when an argument is given)</p>
+<p>If the host invokes this command, the motd/rules can be set or modified.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1335" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pin_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>pin_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#pin_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1273" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="preliminary_message_check(update:Tourmaline::Update):Tuple(Tourmaline::Message|Nil,Database::User|Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>preliminary_message_check</strong>(update : Tourmaline::Update) : Tuple(Tourmaline::Message | Nil, <a href="Database/User.html">Database::User</a> | Nil)
+
+        <a class="method-permalink" href="#preliminary_message_check%28update%3ATourmaline%3A%3AUpdate%29%3ATuple%28Tourmaline%3A%3AMessage%7CNil%2CDatabase%3A%3AUser%7CNil%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L281" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="preliminary_message_check(ctx:CommandHandler::Context|Tourmaline::Update):Tuple(Tourmaline::Message|Nil,Database::User|Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>preliminary_message_check</strong>(ctx : CommandHandler::Context | Tourmaline::Update) : Tuple(Tourmaline::Message | Nil, <a href="Database/User.html">Database::User</a> | Nil)
+
+        <a class="method-permalink" href="#preliminary_message_check%28ctx%3ACommandHandler%3A%3AContext%7CTourmaline%3A%3AUpdate%29%3ATuple%28Tourmaline%3A%3AMessage%7CNil%2CDatabase%3A%3AUser%7CNil%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L263" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="promote_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>promote_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#promote_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Promotes a user to a given rank.</p>
+<p>Checks for the following permissions: <code>promote</code>, <code>promote_lower</code>, <code>promote_same</code></p>
+<p>If <code>promote</code>, the reply user can be promoted to a rank lower or equal to the invoker's rank.</p>
+<p>If <code>promote_lower</code>, the reply user can be promoted to a rank lower than the invoker's rank.</p>
+<p>If <code>promote_same</code>, the reply user can only be promoted to the invoker's rank.</p>
+<p>If used with a reply, the reply user is promoted to the invoker's rank or the given rank.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L680" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="promote_from_args(user:Database::User,authority:CommandPermissions,args:Array(String)|Nil,msid:Int64):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>promote_from_args</strong>(user : <a href="Database/User.html">Database::User</a>, authority : <a href="CommandPermissions.html">CommandPermissions</a>, args : Array(String) | Nil, msid : Int64) : Nil
+
+        <a class="method-permalink" href="#promote_from_args%28user%3ADatabase%3A%3AUser%2Cauthority%3ACommandPermissions%2Cargs%3AArray%28String%29%7CNil%2Cmsid%3AInt64%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L731" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="promote_from_reply(user:Database::User,authority:CommandPermissions,arg:String|Nil,msid:Int64,reply:Int64):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>promote_from_reply</strong>(user : <a href="Database/User.html">Database::User</a>, authority : <a href="CommandPermissions.html">CommandPermissions</a>, arg : String | Nil, msid : Int64, reply : Int64) : Nil
+
+        <a class="method-permalink" href="#promote_from_reply%28user%3ADatabase%3A%3AUser%2Cauthority%3ACommandPermissions%2Carg%3AString%7CNil%2Cmsid%3AInt64%2Creply%3AInt64%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L695" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pseudonymous:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>pseudonymous</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#pseudonymous%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L32" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="purge_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>purge_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#purge_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Delete all messages from recently blacklisted users.</p>
+<p>Checks for the following permissions: <code>purge</code></p>
+<p>If <code>purge</code>, allows the user to run a purge</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1049" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="queue:MessageQueue-instance-method">
+      <div class="signature">
+        
+        def <strong>queue</strong> : <a href="MessageQueue.html">MessageQueue</a>
+
+        <a class="method-permalink" href="#queue%3AMessageQueue-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L13" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="r9k_cooldown:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>r9k_cooldown</strong> : Int32
+
+        <a class="method-permalink" href="#r9k_cooldown%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L50" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="r9k_forwards:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>r9k_forwards</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#r9k_forwards%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L49" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="r9k_media:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>r9k_media</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#r9k_media%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L48" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="r9k_text:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>r9k_text</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#r9k_text%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L47" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="r9k_warn:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>r9k_warn</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#r9k_warn%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L51" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="ranked_info(user:Database::User,msid:Int64,reply:Int64):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>ranked_info</strong>(user : <a href="Database/User.html">Database::User</a>, msid : Int64, reply : Int64) : Nil
+
+        <a class="method-permalink" href="#ranked_info%28user%3ADatabase%3A%3AUser%2Cmsid%3AInt64%2Creply%3AInt64%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L388" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="register_tasks(spam_interval_seconds:Int32):Array(Tasker::Task)-instance-method">
+      <div class="signature">
+        
+        def <strong>register_tasks</strong>(spam_interval_seconds : Int32) : Array(Tasker::Task)
+
+        <a class="method-permalink" href="#register_tasks%28spam_interval_seconds%3AInt32%29%3AArray%28Tasker%3A%3ATask%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Starts various background tasks and stores them in a hash.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L248" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="registration_open:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>registration_open</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#registration_open%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L31" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="regular_forwards:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>regular_forwards</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#regular_forwards%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L28" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay(reply_message:Tourmaline::Message|Nil,user:Database::User,cached_msid:Int64,proc:MessageProc):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay</strong>(reply_message : Tourmaline::Message | Nil, user : <a href="Database/User.html">Database::User</a>, cached_msid : Int64, proc : <a href="MessageProc.html">MessageProc</a>) : Nil
+
+        <a class="method-permalink" href="#relay%28reply_message%3ATourmaline%3A%3AMessage%7CNil%2Cuser%3ADatabase%3A%3AUser%2Ccached_msid%3AInt64%2Cproc%3AMessageProc%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Caches a message and sends it to the queue for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2440" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay(reply_message:Tourmaline::Message|Nil,user:Database::User,cached_msid:Array(Int64),proc:MessageProc):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay</strong>(reply_message : Tourmaline::Message | Nil, user : <a href="Database/User.html">Database::User</a>, cached_msid : Array(Int64), proc : <a href="MessageProc.html">MessageProc</a>) : Nil
+
+        <a class="method-permalink" href="#relay%28reply_message%3ATourmaline%3A%3AMessage%7CNil%2Cuser%3ADatabase%3A%3AUser%2Ccached_msid%3AArray%28Int64%29%2Cproc%3AMessageProc%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Caches an album message and sends it to the queue for relaying.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2461" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_album(message:Tourmaline::Message,album:String,user:Database::User,caption:String|Nil,entities:Array(MessageEntity)=[]ofMessageEntity):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_album</strong>(message : Tourmaline::Message, album : String, user : <a href="Database/User.html">Database::User</a>, caption : String | Nil, entities : Array(MessageEntity) = <span class="o">[]</span> <span class="k">of</span> <span class="t">MessageEntity</span>) : Nil
+
+        <a class="method-permalink" href="#relay_album%28message%3ATourmaline%3A%3AMessage%2Calbum%3AString%2Cuser%3ADatabase%3A%3AUser%2Ccaption%3AString%7CNil%2Centities%3AArray%28MessageEntity%29%3D%5B%5DofMessageEntity%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1917" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_regular_forward(user:Database::User,message:Tourmaline::Message,text:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_regular_forward</strong>(user : <a href="Database/User.html">Database::User</a>, message : Tourmaline::Message, text : String) : Nil
+
+        <a class="method-permalink" href="#relay_regular_forward%28user%3ADatabase%3A%3AUser%2Cmessage%3ATourmaline%3A%3AMessage%2Ctext%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2143" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_to_one(reply_message:Int64|Nil,user:Int64,reply:String,params:Hash(String,String|Nil)):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_to_one</strong>(reply_message : Int64 | Nil, user : Int64, reply : String, params : Hash(String, String | Nil)) : Nil
+
+        <a class="method-permalink" href="#relay_to_one%28reply_message%3AInt64%7CNil%2Cuser%3AInt64%2Creply%3AString%2Cparams%3AHash%28String%2CString%7CNil%29%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Relay a message to a single user. Used for system messages.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2491" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_to_one(reply_message:Int64|Nil,user:Int64,text:String)-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_to_one</strong>(reply_message : Int64 | Nil, user : Int64, text : String)
+
+        <a class="method-permalink" href="#relay_to_one%28reply_message%3AInt64%7CNil%2Cuser%3AInt64%2Ctext%3AString%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Relay a message to a single user. Used for system messages.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2482" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="remove_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>remove_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#remove_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Remove a message from a user without giving a warning or cooldown.</p>
+<p>Checks for the following permissions: <code>remove</code></p>
+<p>If <code>remove</code>, allows the user to remove a message</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1012" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="reveal_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>reveal_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#reveal_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Privately reveal username to another user</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L602" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="revert_ranked_users:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>revert_ranked_users</strong> : Nil
+
+        <a class="method-permalink" href="#revert_ranked_users%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Checks the database for any users that have ranks not found in the <code><a href="AuthorizedRanks.html">AuthorizedRanks</a></code> hash.</p>
+<p>If the rank is not valid, the user is reverted to the default user rank.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L132" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="send_messages:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>send_messages</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#send_messages%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Receives a <code>Message</code> from the <code><a href="PrivateParlor.html#queue%3AMessageQueue-instance-method">#queue</a></code>, calls its proc, and adds the returned message id to the History</p>
+<p>This function should be invoked in a Fiber.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2514" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="sign_limit_interval:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>sign_limit_interval</strong> : Int32
+
+        <a class="method-permalink" href="#sign_limit_interval%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L37" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="smileys:Array(String)-instance-method">
+      <div class="signature">
+        
+        def <strong>smileys</strong> : Array(String)
+
+        <a class="method-permalink" href="#smileys%3AArray%28String%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L40" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spam_handler:SpamScoreHandler|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>spam_handler</strong> : <a href="SpamScoreHandler.html">SpamScoreHandler</a> | Nil
+
+        <a class="method-permalink" href="#spam_handler%3ASpamScoreHandler%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L18" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spamming?(id:Int64,msid:Int64,score:Float32):Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>spamming?</strong>(id : Int64, msid : Int64, score : Float32) : Bool | Nil
+
+        <a class="method-permalink" href="#spamming%3F%28id%3AInt64%2Cmsid%3AInt64%2Cscore%3AFloat32%29%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1680" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spamming_text?(id:Int64,msid:Int64,text:String):Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>spamming_text?</strong>(id : Int64, msid : Int64, text : String) : Bool | Nil
+
+        <a class="method-permalink" href="#spamming_text%3F%28id%3AInt64%2Cmsid%3AInt64%2Ctext%3AString%29%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1671" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spoil_messages(msid:Int64,user_id:Int64,debug_enabled:Bool|Nil,input:InputMedia):Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>spoil_messages</strong>(msid : Int64, user_id : Int64, debug_enabled : Bool | Nil, input : InputMedia) : Bool | Nil
+
+        <a class="method-permalink" href="#spoil_messages%28msid%3AInt64%2Cuser_id%3AInt64%2Cdebug_enabled%3ABool%7CNil%2Cinput%3AInputMedia%29%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Spoils the given media message for all receivers by editing the media with the given input.</p>
+<p>Returns true on success, false or nil otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L2419" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spoiler_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>spoiler_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#spoiler_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Adds a spoiler overlay to a media message when replied to.</p>
+<p>Checks for the following permissions: <code>spoiler</code></p>
+<p>If <code>spoiler</code>, allows the user to add a spoiler to a relayed media message.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1168" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="start_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>start_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#start_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>User starts the bot and begins receiving messages.</p>
+<p>If the user is not in the database, this will add the user to it</p>
+<p>If blacklisted or joined, this will not allow them to rejoin</p>
+<p>Left users can rejoin the bot with this command</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L306" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="stop_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>stop_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#stop_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Stops the bot for the user.</p>
+<p>This will set the user status to left, meaning the user will not receive any further messages.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L355" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tasks:Array(Tasker::Task)-instance-method">
+      <div class="signature">
+        
+        def <strong>tasks</strong> : Array(Tasker::Task)
+
+        <a class="method-permalink" href="#tasks%3AArray%28Tasker%3A%3ATask%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L16" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="toggle_debug_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>toggle_debug_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#toggle_debug_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Toggle the user's toggle_debug attribute.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L588" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="toggle_karma_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>toggle_karma_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#toggle_karma_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Toggle the user's hide_karma attribute.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L574" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tripcode_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>tripcode_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#tripcode_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set/modify/view the user's tripcode.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L642" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tripcode_salt:String-instance-method">
+      <div class="signature">
+        
+        def <strong>tripcode_salt</strong> : String
+
+        <a class="method-permalink" href="#tripcode_salt%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L42" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="uncooldown_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>uncooldown_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#uncooldown_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Removes a cooldown and warning from a user if the user is in cooldown.</p>
+<p>Checks for the following permissions: <code>uncooldown</code></p>
+<p>If <code>uncooldown</code>, allows the user to uncooldown another user</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L966" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="unpin_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>unpin_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#unpin_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1307" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="upvote_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>upvote_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#upvote_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Upvotes a message.</p>
+<p>Checks for the following permissions: <code>upvote</code></p>
+<p>If <code>upvote</code>, allows the user to upvote a message</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L492" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="upvote_limit_interval:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>upvote_limit_interval</strong> : Int32
+
+        <a class="method-permalink" href="#upvote_limit_interval%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L38" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="user_info(user:Database::User,msid:Int64):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>user_info</strong>(user : <a href="Database/User.html">Database::User</a>, msid : Int64) : Nil
+
+        <a class="method-permalink" href="#user_info%28user%3ADatabase%3A%3AUser%2Cmsid%3AInt64%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L409" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="users_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>users_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#users_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return a message containing the number of users in the bot.</p>
+<p>Checks for the following permissions: <code>users</code></p>
+<p>If the user does not have the &quot;users&quot; permission, show the total numbers of users.
+Otherwise, return a message containing the number of joined, left, and blacklisted users.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L455" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="valid_codepoints:Array(Range(Int32,Int32))-instance-method">
+      <div class="signature">
+        
+        def <strong>valid_codepoints</strong> : Array(Range(Int32, Int32))
+
+        <a class="method-permalink" href="#valid_codepoints%3AArray%28Range%28Int32%2CInt32%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L52" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="validate_r9k_media(file_id:String|Nil,user:Database::User,message:Tourmaline::Message):String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>validate_r9k_media</strong>(file_id : String | Nil, user : <a href="Database/User.html">Database::User</a>, message : Tourmaline::Message) : String | Nil
+
+        <a class="method-permalink" href="#validate_r9k_media%28file_id%3AString%7CNil%2Cuser%3ADatabase%3A%3AUser%2Cmessage%3ATourmaline%3A%3AMessage%29%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1469" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="validate_r9k_text(text:String,user:Database::User,message:Tourmaline::Message):Tuple(String|Nil,String|Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>validate_r9k_text</strong>(text : String, user : <a href="Database/User.html">Database::User</a>, message : Tourmaline::Message) : Tuple(String | Nil, String | Nil)
+
+        <a class="method-permalink" href="#validate_r9k_text%28text%3AString%2Cuser%3ADatabase%3A%3AUser%2Cmessage%3ATourmaline%3A%3AMessage%29%3ATuple%28String%7CNil%2CString%7CNil%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1413" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="version_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>version_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#version_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns a message containing the progam's version.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L477" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="warn_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>warn_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#warn_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Warns a message without deleting it. Gives the user who sent the message a warning and a cooldown.</p>
+<p>Checks for the following permissions: <code>warn</code></p>
+<p>If <code>warn</code>, allows the user to warn a message</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L860" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="warn_expire_hours:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>warn_expire_hours</strong> : Int32
+
+        <a class="method-permalink" href="#warn_expire_hours%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L23" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="whitelist_command(ctx:CommandHandler::Context):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>whitelist_command</strong>(ctx : CommandHandler::Context) : Nil
+
+        <a class="method-permalink" href="#whitelist_command%28ctx%3ACommandHandler%3A%3AContext%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Whitelists a user, allowing the user to join the chat. Only applicable if registration is closed</p>
+<p>Checks for the following permissions: <code>whitelist</code></p>
+<p>If <code>whitelist</code>, allows the user to whitelist another user by user ID.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/telegram.cr#L1127" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

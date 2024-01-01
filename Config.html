@@ -1,0 +1,2550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="privateparlor">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="privateparlor">
+  <title>Config - privateparlor master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          privateparlor
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="privateparlor/toplevel" data-name="top level namespace">
+      <a href="toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Album" data-name="album">
+      <a href="Album.html">Album</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/AuthorizedRanks" data-name="authorizedranks">
+      <a href="AuthorizedRanks.html">AuthorizedRanks</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandDescriptions" data-name="commanddescriptions">
+      <a href="CommandDescriptions.html">CommandDescriptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandPermissions" data-name="commandpermissions">
+      <a href="CommandPermissions.html">CommandPermissions</a>
+      
+    </li>
+  
+  <li class=" current" data-id="privateparlor/Config" data-name="config">
+      <a href="Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Configuration" data-name="configuration">
+      <a href="Configuration.html">Configuration</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/Database" data-name="database">
+      <a href="Database.html">Database</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/Database/User" data-name="database::user">
+      <a href="Database/User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseHistory" data-name="databasehistory">
+      <a href="DatabaseHistory.html">DatabaseHistory</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseWarden" data-name="databasewarden">
+      <a href="DatabaseWarden.html">DatabaseWarden</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Format" data-name="format">
+      <a href="Format.html">Format</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/History" data-name="history">
+      <a href="History.html">History</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/History/MessageGroup" data-name="history::messagegroup">
+      <a href="History/MessageGroup.html">MessageGroup</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryBase" data-name="historybase">
+      <a href="HistoryBase.html">HistoryBase</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryBase/MessageGroupBase" data-name="historybase::messagegroupbase">
+      <a href="HistoryBase/MessageGroupBase.html">MessageGroupBase</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryFull" data-name="historyfull">
+      <a href="HistoryFull.html">HistoryFull</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryFull/MessageGroupFull" data-name="historyfull::messagegroupfull">
+      <a href="HistoryFull/MessageGroupFull.html">MessageGroupFull</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryRatings" data-name="historyratings">
+      <a href="HistoryRatings.html">HistoryRatings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryRatings/MessageGroupRatings" data-name="historyratings::messagegroupratings">
+      <a href="HistoryRatings/MessageGroupRatings.html">MessageGroupRatings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryWarnings" data-name="historywarnings">
+      <a href="HistoryWarnings.html">HistoryWarnings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryWarnings/MessageGroupWarnings" data-name="historywarnings::messagegroupwarnings">
+      <a href="HistoryWarnings/MessageGroupWarnings.html">MessageGroupWarnings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Locale" data-name="locale">
+      <a href="Locale.html">Locale</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Localization" data-name="localization">
+      <a href="Localization.html">Localization</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Logs" data-name="logs">
+      <a href="Logs.html">Logs</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessagePermissions" data-name="messagepermissions">
+      <a href="MessagePermissions.html">MessagePermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageProc" data-name="messageproc">
+      <a href="MessageProc.html">MessageProc</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageQueue" data-name="messagequeue">
+      <a href="MessageQueue.html">MessageQueue</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/PrivateParlor" data-name="privateparlor">
+      <a href="PrivateParlor.html">PrivateParlor</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/QueuedMessage" data-name="queuedmessage">
+      <a href="QueuedMessage.html">QueuedMessage</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Rank" data-name="rank">
+      <a href="Rank.html">Rank</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Replies" data-name="replies">
+      <a href="Replies.html">Replies</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Robot9000" data-name="robot9000">
+      <a href="Robot9000.html">Robot9000</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/SpamScoreHandler" data-name="spamscorehandler">
+      <a href="SpamScoreHandler.html">SpamScoreHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/User" data-name="user">
+      <a href="User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> Config
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="Config.html">Config</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="included-modules" class="anchor" href="#included-modules">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Included Modules
+  </h2>
+  <ul class="other-types-list">
+    
+      <li class="other-type">YAML::Serializable</li>
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L1" target="_blank">
+        privateparlor/config/config.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28ctx%3AYAML%3A%3AParseContext%2Cnode%3AYAML%3A%3ANodes%3A%3ANode%29-class-method" class="signature"><strong>.new</strong>(ctx : YAML::ParseContext, node : YAML::Nodes::Node)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#after_initialize-instance-method" class="signature"><strong>#after_initialize</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#allow_media_spoilers%3ABool%7CNil-instance-method" class="signature"><strong>#allow_media_spoilers</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#blacklist_contact%3AString%7CNil-instance-method" class="signature"><strong>#blacklist_contact</strong> : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown_time_begin%3AArray%28Int32%29-instance-method" class="signature"><strong>#cooldown_time_begin</strong> : Array(Int32)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown_time_linear_b%3AInt32-instance-method" class="signature"><strong>#cooldown_time_linear_b</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown_time_linear_m%3AInt32-instance-method" class="signature"><strong>#cooldown_time_linear_m</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#database%3AString-instance-method" class="signature"><strong>#database</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#database_history%3ABool%7CNil-instance-method" class="signature"><strong>#database_history</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#default_rank%3AInt32-instance-method" class="signature"><strong>#default_rank</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#default_rank%3D%28default_rank%3AInt32%29-instance-method" class="signature"><strong>#default_rank=</strong>(default_rank : Int32)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#downvote_limit_interval%3AInt32-instance-method" class="signature"><strong>#downvote_limit_interval</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_blacklist%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_blacklist</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_delete%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_delete</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_demote%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_demote</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_downvote%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_downvote</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_help%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_help</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_info%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_info</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_karma_info%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_karma_info</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_karma_sign%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_karma_sign</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_motd%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_motd</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_pin%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_pin</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_promote%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_promote</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_purge%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_purge</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_ranksay%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_ranksay</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_remove%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_remove</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_reveal%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_reveal</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_sign%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_sign</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_spoiler%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_spoiler</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_start%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_start</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_stop%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_stop</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_toggle_debug%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_toggle_debug</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_toggle_karma%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_toggle_karma</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_tripcode%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_tripcode</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_tripsign%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_tripsign</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_uncooldown%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_uncooldown</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_unpin%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_unpin</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_upvote%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_upvote</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_users%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_users</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_version%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_version</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_warn%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_warn</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_whitelist%3AArray%28Bool%29-instance-method" class="signature"><strong>#enable_whitelist</strong> : Array(Bool)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#entities%3AArray%28String%29-instance-method" class="signature"><strong>#entities</strong> : Array(String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#entities%3D%28entities%3AArray%28String%29%29-instance-method" class="signature"><strong>#entities=</strong>(entities : Array(String))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#full_usercount%3ABool%7CNil-instance-method" class="signature"><strong>#full_usercount</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#inactivity_limit%3AInt32-instance-method" class="signature"><strong>#inactivity_limit</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#intermediary_linked_network%3AHash%28String%2CString%29%7CString%7CNil-instance-method" class="signature"><strong>#intermediary_linked_network</strong> : Hash(String, String) | String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#intermediate_valid_codepoints%3AArray%28Array%28Int32%29%29%7CNil-instance-method" class="signature"><strong>#intermediate_valid_codepoints</strong> : Array(Array(Int32)) | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#karma_levels%3AHash%28Int32%2CString%29-instance-method" class="signature"><strong>#karma_levels</strong> : Hash(Int32, String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#karma_levels%3D%28karma_levels%3AHash%28Int32%2CString%29%29-instance-method" class="signature"><strong>#karma_levels=</strong>(karma_levels : Hash(Int32, String))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#karma_warn_penalty%3AInt32-instance-method" class="signature"><strong>#karma_warn_penalty</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#lifetime%3AUInt32-instance-method" class="signature"><strong>#lifetime</strong> : UInt32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#lifetime%3D%28lifetime%3AUInt32%29-instance-method" class="signature"><strong>#lifetime=</strong>(lifetime : UInt32)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#linked_network%3AHash%28String%2CString%29-instance-method" class="signature"><strong>#linked_network</strong> : Hash(String, String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#locale%3AString-instance-method" class="signature"><strong>#locale</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#log_channel%3AString-instance-method" class="signature"><strong>#log_channel</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#log_file%3AString%7CNil-instance-method" class="signature"><strong>#log_file</strong> : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#log_level%3ALog%3A%3ASeverity-instance-method" class="signature"><strong>#log_level</strong> : Log::Severity</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#media_limit_period%3AInt32-instance-method" class="signature"><strong>#media_limit_period</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pseudonymous%3ABool%7CNil-instance-method" class="signature"><strong>#pseudonymous</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#r9k_cooldown%3AInt32-instance-method" class="signature"><strong>#r9k_cooldown</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#r9k_warn%3ABool%7CNil-instance-method" class="signature"><strong>#r9k_warn</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#ranks%3AHash%28Int32%2CRank%29-instance-method" class="signature"><strong>#ranks</strong> : Hash(Int32, Rank)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#ranks%3D%28ranks%3AHash%28Int32%2CRank%29%29-instance-method" class="signature"><strong>#ranks=</strong>(ranks : Hash(Int32, Rank))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#registration_open%3ABool%7CNil-instance-method" class="signature"><strong>#registration_open</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#regular_forwards%3ABool%7CNil-instance-method" class="signature"><strong>#regular_forwards</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_animation%3ABool%7CNil-instance-method" class="signature"><strong>#relay_animation</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_audio%3ABool%7CNil-instance-method" class="signature"><strong>#relay_audio</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_basketball%3ABool%7CNil-instance-method" class="signature"><strong>#relay_basketball</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_bowling%3ABool%7CNil-instance-method" class="signature"><strong>#relay_bowling</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_contact%3ABool%7CNil-instance-method" class="signature"><strong>#relay_contact</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_dart%3ABool%7CNil-instance-method" class="signature"><strong>#relay_dart</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_dice%3ABool%7CNil-instance-method" class="signature"><strong>#relay_dice</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_document%3ABool%7CNil-instance-method" class="signature"><strong>#relay_document</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_forwarded_message%3ABool%7CNil-instance-method" class="signature"><strong>#relay_forwarded_message</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_location%3ABool%7CNil-instance-method" class="signature"><strong>#relay_location</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_media_group%3ABool%7CNil-instance-method" class="signature"><strong>#relay_media_group</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_photo%3ABool%7CNil-instance-method" class="signature"><strong>#relay_photo</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_poll%3ABool%7CNil-instance-method" class="signature"><strong>#relay_poll</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_slot_machine%3ABool%7CNil-instance-method" class="signature"><strong>#relay_slot_machine</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_soccerball%3ABool%7CNil-instance-method" class="signature"><strong>#relay_soccerball</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_sticker%3ABool%7CNil-instance-method" class="signature"><strong>#relay_sticker</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_text%3ABool%7CNil-instance-method" class="signature"><strong>#relay_text</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_venue%3ABool%7CNil-instance-method" class="signature"><strong>#relay_venue</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_video%3ABool%7CNil-instance-method" class="signature"><strong>#relay_video</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_video_note%3ABool%7CNil-instance-method" class="signature"><strong>#relay_video_note</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#relay_voice%3ABool%7CNil-instance-method" class="signature"><strong>#relay_voice</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#salt%3AString-instance-method" class="signature"><strong>#salt</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#sign_limit_interval%3AInt32-instance-method" class="signature"><strong>#sign_limit_interval</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#smileys%3AArray%28String%29-instance-method" class="signature"><strong>#smileys</strong> : Array(String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#smileys%3D%28smileys%3AArray%28String%29%29-instance-method" class="signature"><strong>#smileys=</strong>(smileys : Array(String))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spam_interval_seconds%3AInt32-instance-method" class="signature"><strong>#spam_interval_seconds</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#spam_score_handler%3ASpamScoreHandler-instance-method" class="signature"><strong>#spam_score_handler</strong> : SpamScoreHandler</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#toggle_r9k_forwards%3ABool%7CNil-instance-method" class="signature"><strong>#toggle_r9k_forwards</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#toggle_r9k_media%3ABool%7CNil-instance-method" class="signature"><strong>#toggle_r9k_media</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#toggle_r9k_text%3ABool%7CNil-instance-method" class="signature"><strong>#toggle_r9k_text</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#token%3AString-instance-method" class="signature"><strong>#token</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#upvote_limit_interval%3AInt32-instance-method" class="signature"><strong>#upvote_limit_interval</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#valid_codepoints%3AArray%28Range%28Int32%2CInt32%29%29-instance-method" class="signature"><strong>#valid_codepoints</strong> : Array(Range(Int32, Int32))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#valid_codepoints%3D%28valid_codepoints%3AArray%28Range%28Int32%2CInt32%29%29%29-instance-method" class="signature"><strong>#valid_codepoints=</strong>(valid_codepoints : Array(Range(Int32, Int32)))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#warn_expire_hours%3AInt32-instance-method" class="signature"><strong>#warn_expire_hours</strong> : Int32</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(ctx:YAML::ParseContext,node:YAML::Nodes::Node)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(ctx : YAML::ParseContext, node : YAML::Nodes::Node)
+
+        <a class="method-permalink" href="#new%28ctx%3AYAML%3A%3AParseContext%2Cnode%3AYAML%3A%3ANodes%3A%3ANode%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L2" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="after_initialize-instance-method">
+      <div class="signature">
+        
+        def <strong>after_initialize</strong>
+
+        <a class="method-permalink" href="#after_initialize-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L292" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="allow_media_spoilers:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>allow_media_spoilers</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#allow_media_spoilers%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L29" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="blacklist_contact:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>blacklist_contact</strong> : String | Nil
+
+        <a class="method-permalink" href="#blacklist_contact%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L269" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown_time_begin:Array(Int32)-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown_time_begin</strong> : Array(Int32)
+
+        <a class="method-permalink" href="#cooldown_time_begin%3AArray%28Int32%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L239" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown_time_linear_b:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown_time_linear_b</strong> : Int32
+
+        <a class="method-permalink" href="#cooldown_time_linear_b%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L245" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown_time_linear_m:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown_time_linear_m</strong> : Int32
+
+        <a class="method-permalink" href="#cooldown_time_linear_m%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L242" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="database:String-instance-method">
+      <div class="signature">
+        
+        def <strong>database</strong> : String
+
+        <a class="method-permalink" href="#database%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L8" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="database_history:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>database_history</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#database_history%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="default_rank:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>default_rank</strong> : Int32
+
+        <a class="method-permalink" href="#default_rank%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L53" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="default_rank=(default_rank:Int32)-instance-method">
+      <div class="signature">
+        
+        def <strong>default_rank=</strong>(default_rank : Int32)
+
+        <a class="method-permalink" href="#default_rank%3D%28default_rank%3AInt32%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L53" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="downvote_limit_interval:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>downvote_limit_interval</strong> : Int32
+
+        <a class="method-permalink" href="#downvote_limit_interval%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L281" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_blacklist:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_blacklist</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_blacklist%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L154" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_delete:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_delete</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_delete%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L142" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_demote:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_demote</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_demote%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L136" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_downvote:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_downvote</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_downvote%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L130" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_help:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_help</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_help%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L124" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_info:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_info</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_info%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L88" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_karma_info:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_karma_info</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_karma_info%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L163" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_karma_sign:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_karma_sign</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_karma_sign%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L115" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_motd:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_motd</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_motd%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L121" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_pin:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_pin</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_pin%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L166" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_promote:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_promote</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_promote%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L133" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_purge:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_purge</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_purge%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L151" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_ranksay:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_ranksay</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_ranksay%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L118" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_remove:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_remove</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_remove%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L148" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_reveal:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_reveal</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_reveal%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L103" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_sign:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_sign</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_sign%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L109" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_spoiler:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_spoiler</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_spoiler%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L160" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_start:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_start</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_start%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L82" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_stop:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_stop</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_stop%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L85" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_toggle_debug:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_toggle_debug</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_toggle_debug%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L100" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_toggle_karma:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_toggle_karma</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_toggle_karma%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L97" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_tripcode:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_tripcode</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_tripcode%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L106" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_tripsign:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_tripsign</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_tripsign%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L112" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_uncooldown:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_uncooldown</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_uncooldown%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L145" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_unpin:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_unpin</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_unpin%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L169" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_upvote:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_upvote</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_upvote%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L127" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_users:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_users</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_users%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L91" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_version:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_version</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_version%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L94" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_warn:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_warn</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_warn%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L139" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_whitelist:Array(Bool)-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_whitelist</strong> : Array(Bool)
+
+        <a class="method-permalink" href="#enable_whitelist%3AArray%28Bool%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L157" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="entities:Array(String)-instance-method">
+      <div class="signature">
+        
+        def <strong>entities</strong> : Array(String)
+
+        <a class="method-permalink" href="#entities%3AArray%28String%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L287" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="entities=(entities:Array(String))-instance-method">
+      <div class="signature">
+        
+        def <strong>entities=</strong>(entities : Array(String))
+
+        <a class="method-permalink" href="#entities%3D%28entities%3AArray%28String%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L287" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="full_usercount:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>full_usercount</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#full_usercount%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L272" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="inactivity_limit:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>inactivity_limit</strong> : Int32
+
+        <a class="method-permalink" href="#inactivity_limit%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L35" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="intermediary_linked_network:Hash(String,String)|String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>intermediary_linked_network</strong> : Hash(String, String) | String | Nil
+
+        <a class="method-permalink" href="#intermediary_linked_network%3AHash%28String%2CString%29%7CString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L38" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="intermediate_valid_codepoints:Array(Array(Int32))|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>intermediate_valid_codepoints</strong> : Array(Array(Int32)) | Nil
+
+        <a class="method-permalink" href="#intermediate_valid_codepoints%3AArray%28Array%28Int32%29%29%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L74" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="karma_levels:Hash(Int32,String)-instance-method">
+      <div class="signature">
+        
+        def <strong>karma_levels</strong> : Hash(Int32, String)
+
+        <a class="method-permalink" href="#karma_levels%3AHash%28Int32%2CString%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L56" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="karma_levels=(karma_levels:Hash(Int32,String))-instance-method">
+      <div class="signature">
+        
+        def <strong>karma_levels=</strong>(karma_levels : Hash(Int32, String))
+
+        <a class="method-permalink" href="#karma_levels%3D%28karma_levels%3AHash%28Int32%2CString%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L56" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="karma_warn_penalty:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>karma_warn_penalty</strong> : Int32
+
+        <a class="method-permalink" href="#karma_warn_penalty%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L251" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="lifetime:UInt32-instance-method">
+      <div class="signature">
+        
+        def <strong>lifetime</strong> : UInt32
+
+        <a class="method-permalink" href="#lifetime%3AUInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L23" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="lifetime=(lifetime:UInt32)-instance-method">
+      <div class="signature">
+        
+        def <strong>lifetime=</strong>(lifetime : UInt32)
+
+        <a class="method-permalink" href="#lifetime%3D%28lifetime%3AUInt32%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L23" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="linked_network:Hash(String,String)-instance-method">
+      <div class="signature">
+        
+        def <strong>linked_network</strong> : Hash(String, String)
+
+        <a class="method-permalink" href="#linked_network%3AHash%28String%2CString%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L41" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="locale:String-instance-method">
+      <div class="signature">
+        
+        def <strong>locale</strong> : String
+
+        <a class="method-permalink" href="#locale%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L11" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="log_channel:String-instance-method">
+      <div class="signature">
+        
+        def <strong>log_channel</strong> : String
+
+        <a class="method-permalink" href="#log_channel%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L20" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="log_file:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>log_file</strong> : String | Nil
+
+        <a class="method-permalink" href="#log_file%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L17" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="log_level:Log::Severity-instance-method">
+      <div class="signature">
+        
+        def <strong>log_level</strong> : Log::Severity
+
+        <a class="method-permalink" href="#log_level%3ALog%3A%3ASeverity-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="media_limit_period:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>media_limit_period</strong> : Int32
+
+        <a class="method-permalink" href="#media_limit_period%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L260" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pseudonymous:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>pseudonymous</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#pseudonymous%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L266" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="r9k_cooldown:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>r9k_cooldown</strong> : Int32
+
+        <a class="method-permalink" href="#r9k_cooldown%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L68" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="r9k_warn:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>r9k_warn</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#r9k_warn%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L71" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="ranks:Hash(Int32,Rank)-instance-method">
+      <div class="signature">
+        
+        def <strong>ranks</strong> : Hash(Int32, <a href="Rank.html">Rank</a>)
+
+        <a class="method-permalink" href="#ranks%3AHash%28Int32%2CRank%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L44" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="ranks=(ranks:Hash(Int32,Rank))-instance-method">
+      <div class="signature">
+        
+        def <strong>ranks=</strong>(ranks : Hash(Int32, <a href="Rank.html">Rank</a>))
+
+        <a class="method-permalink" href="#ranks%3D%28ranks%3AHash%28Int32%2CRank%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L44" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="registration_open:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>registration_open</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#registration_open%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L263" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="regular_forwards:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>regular_forwards</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#regular_forwards%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L32" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_animation:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_animation</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_animation%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L177" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_audio:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_audio</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_audio%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L180" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_basketball:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_basketball</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_basketball%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L216" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_bowling:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_bowling</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_bowling%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L225" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_contact:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_contact</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_contact%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L234" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_dart:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_dart</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_dart%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L213" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_dice:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_dice</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_dice%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L210" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_document:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_document</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_document%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L183" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_forwarded_message:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_forwarded_message</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_forwarded_message%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L204" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_location:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_location</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_location%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L231" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_media_group:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_media_group</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_media_group%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L198" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_photo:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_photo</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_photo%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L195" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_poll:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_poll</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_poll%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L201" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_slot_machine:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_slot_machine</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_slot_machine%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L222" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_soccerball:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_soccerball</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_soccerball%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L219" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_sticker:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_sticker</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_sticker%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L207" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_text:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_text</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_text%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L174" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_venue:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_venue</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_venue%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L228" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_video:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_video</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_video%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L186" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_video_note:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_video_note</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_video_note%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L189" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="relay_voice:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>relay_voice</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#relay_voice%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L192" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="salt:String-instance-method">
+      <div class="signature">
+        
+        def <strong>salt</strong> : String
+
+        <a class="method-permalink" href="#salt%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L290" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="sign_limit_interval:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>sign_limit_interval</strong> : Int32
+
+        <a class="method-permalink" href="#sign_limit_interval%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L275" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="smileys:Array(String)-instance-method">
+      <div class="signature">
+        
+        def <strong>smileys</strong> : Array(String)
+
+        <a class="method-permalink" href="#smileys%3AArray%28String%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L284" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="smileys=(smileys:Array(String))-instance-method">
+      <div class="signature">
+        
+        def <strong>smileys=</strong>(smileys : Array(String))
+
+        <a class="method-permalink" href="#smileys%3D%28smileys%3AArray%28String%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L284" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spam_interval_seconds:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>spam_interval_seconds</strong> : Int32
+
+        <a class="method-permalink" href="#spam_interval_seconds%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L254" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="spam_score_handler:SpamScoreHandler-instance-method">
+      <div class="signature">
+        
+        def <strong>spam_score_handler</strong> : <a href="SpamScoreHandler.html">SpamScoreHandler</a>
+
+        <a class="method-permalink" href="#spam_score_handler%3ASpamScoreHandler-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L257" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="toggle_r9k_forwards:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>toggle_r9k_forwards</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#toggle_r9k_forwards%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L65" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="toggle_r9k_media:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>toggle_r9k_media</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#toggle_r9k_media%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L62" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="toggle_r9k_text:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>toggle_r9k_text</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#toggle_r9k_text%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L59" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="token:String-instance-method">
+      <div class="signature">
+        
+        def <strong>token</strong> : String
+
+        <a class="method-permalink" href="#token%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L5" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="upvote_limit_interval:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>upvote_limit_interval</strong> : Int32
+
+        <a class="method-permalink" href="#upvote_limit_interval%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L278" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="valid_codepoints:Array(Range(Int32,Int32))-instance-method">
+      <div class="signature">
+        
+        def <strong>valid_codepoints</strong> : Array(Range(Int32, Int32))
+
+        <a class="method-permalink" href="#valid_codepoints%3AArray%28Range%28Int32%2CInt32%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L77" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="valid_codepoints=(valid_codepoints:Array(Range(Int32,Int32)))-instance-method">
+      <div class="signature">
+        
+        def <strong>valid_codepoints=</strong>(valid_codepoints : Array(Range(Int32, Int32)))
+
+        <a class="method-permalink" href="#valid_codepoints%3D%28valid_codepoints%3AArray%28Range%28Int32%2CInt32%29%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L77" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="warn_expire_hours:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>warn_expire_hours</strong> : Int32
+
+        <a class="method-permalink" href="#warn_expire_hours%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/config/config.cr#L248" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

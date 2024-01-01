@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="privateparlor">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="privateparlor">
+  <title>DatabaseWarden - privateparlor master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          privateparlor
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="privateparlor/toplevel" data-name="top level namespace">
+      <a href="toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Album" data-name="album">
+      <a href="Album.html">Album</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/AuthorizedRanks" data-name="authorizedranks">
+      <a href="AuthorizedRanks.html">AuthorizedRanks</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandDescriptions" data-name="commanddescriptions">
+      <a href="CommandDescriptions.html">CommandDescriptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandPermissions" data-name="commandpermissions">
+      <a href="CommandPermissions.html">CommandPermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Config" data-name="config">
+      <a href="Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Configuration" data-name="configuration">
+      <a href="Configuration.html">Configuration</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/Database" data-name="database">
+      <a href="Database.html">Database</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/Database/User" data-name="database::user">
+      <a href="Database/User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseHistory" data-name="databasehistory">
+      <a href="DatabaseHistory.html">DatabaseHistory</a>
+      
+    </li>
+  
+  <li class=" current" data-id="privateparlor/DatabaseWarden" data-name="databasewarden">
+      <a href="DatabaseWarden.html">DatabaseWarden</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Format" data-name="format">
+      <a href="Format.html">Format</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/History" data-name="history">
+      <a href="History.html">History</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/History/MessageGroup" data-name="history::messagegroup">
+      <a href="History/MessageGroup.html">MessageGroup</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryBase" data-name="historybase">
+      <a href="HistoryBase.html">HistoryBase</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryBase/MessageGroupBase" data-name="historybase::messagegroupbase">
+      <a href="HistoryBase/MessageGroupBase.html">MessageGroupBase</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryFull" data-name="historyfull">
+      <a href="HistoryFull.html">HistoryFull</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryFull/MessageGroupFull" data-name="historyfull::messagegroupfull">
+      <a href="HistoryFull/MessageGroupFull.html">MessageGroupFull</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryRatings" data-name="historyratings">
+      <a href="HistoryRatings.html">HistoryRatings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryRatings/MessageGroupRatings" data-name="historyratings::messagegroupratings">
+      <a href="HistoryRatings/MessageGroupRatings.html">MessageGroupRatings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryWarnings" data-name="historywarnings">
+      <a href="HistoryWarnings.html">HistoryWarnings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryWarnings/MessageGroupWarnings" data-name="historywarnings::messagegroupwarnings">
+      <a href="HistoryWarnings/MessageGroupWarnings.html">MessageGroupWarnings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Locale" data-name="locale">
+      <a href="Locale.html">Locale</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Localization" data-name="localization">
+      <a href="Localization.html">Localization</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Logs" data-name="logs">
+      <a href="Logs.html">Logs</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessagePermissions" data-name="messagepermissions">
+      <a href="MessagePermissions.html">MessagePermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageProc" data-name="messageproc">
+      <a href="MessageProc.html">MessageProc</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageQueue" data-name="messagequeue">
+      <a href="MessageQueue.html">MessageQueue</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/PrivateParlor" data-name="privateparlor">
+      <a href="PrivateParlor.html">PrivateParlor</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/QueuedMessage" data-name="queuedmessage">
+      <a href="QueuedMessage.html">QueuedMessage</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Rank" data-name="rank">
+      <a href="Rank.html">Rank</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Replies" data-name="replies">
+      <a href="Replies.html">Replies</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Robot9000" data-name="robot9000">
+      <a href="Robot9000.html">Robot9000</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/SpamScoreHandler" data-name="spamscorehandler">
+      <a href="SpamScoreHandler.html">SpamScoreHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/User" data-name="user">
+      <a href="User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">module</span> DatabaseWarden
+
+</h1>
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="extended-modules" class="anchor" href="#extended-modules">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Extended Modules
+  </h2>
+  <ul class="other-types-list">
+    
+      <li class="other-type"><a href="DatabaseWarden.html">DatabaseWarden</a></li>
+    
+  </ul>
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L1" target="_blank">
+        management/database_warden.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#ban_user%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Cdb_name%3AString%2Creason%3AString%3D%22%22%29%3ADB%3A%3AExecResult%7CNil-instance-method" class="signature"><strong>#ban_user</strong>(db : DB::Database, id : Int64, db_name : String, reason : String = <span class="s">&quot;&quot;</span>) : DB::ExecResult | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#ban_user%28db%3ADB%3A%3ADatabase%2Cname%3AString%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method" class="signature"><strong>#ban_user</strong>(db : DB::Database, name : String, db_name : String) : DB::ExecResult | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#create_banned_user%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Cdb_name%3AString%2Creason%3AString%3D%22%22%29%3ADB%3A%3AExecResult%7CNil-instance-method" class="signature"><strong>#create_banned_user</strong>(db : DB::Database, id : Int64, db_name : String, reason : String = <span class="s">&quot;&quot;</span>) : DB::ExecResult | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#find_user%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Cdb_name%3AString%29%3AUser%7CNil-instance-method" class="signature"><strong>#find_user</strong>(db : DB::Database, id : Int64, db_name : String) : User | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#find_user%28db%3ADB%3A%3ADatabase%2Cname%3AString%2Cdb_name%3AString%29%3AUser%7CNil-instance-method" class="signature"><strong>#find_user</strong>(db : DB::Database, name : String, db_name : String) : User | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_banned_users%28db%3ADB%3A%3ADatabase%2Cdb_name%3AString%2Ctime%3ATime%29%3AArray%28User%29%7CNil-instance-method" class="signature"><strong>#get_banned_users</strong>(db : DB::Database, db_name : String, time : Time) : Array(User) | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_banned_users%28db%3ADB%3A%3ADatabase%2Cdb_name%3AString%29%3AArray%28User%29%7CNil-instance-method" class="signature"><strong>#get_banned_users</strong>(db : DB::Database, db_name : String) : Array(User) | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#list_banned_users%28db%3ADB%3A%3ADatabase%2Cdb_name%3AString%29%3AArray%28User%29%7CNil-instance-method" class="signature"><strong>#list_banned_users</strong>(db : DB::Database, db_name : String) : Array(User) | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#list_ranked_users%28db%3ADB%3A%3ADatabase%2Cdb_name%3AString%29%3AArray%28User%29%7CNil-instance-method" class="signature"><strong>#list_ranked_users</strong>(db : DB::Database, db_name : String) : Array(User) | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#set_user_rank%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Crank%3AInt32%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method" class="signature"><strong>#set_user_rank</strong>(db : DB::Database, id : Int64, rank : Int32, db_name : String) : DB::ExecResult | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#set_user_rank%28db%3ADB%3A%3ADatabase%2Cname%3AString%2Crank%3AInt32%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method" class="signature"><strong>#set_user_rank</strong>(db : DB::Database, name : String, rank : Int32, db_name : String) : DB::ExecResult | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#unban_user%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method" class="signature"><strong>#unban_user</strong>(db : DB::Database, id : Int64, db_name : String) : DB::ExecResult | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#unban_user%28db%3ADB%3A%3ADatabase%2Cname%3AString%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method" class="signature"><strong>#unban_user</strong>(db : DB::Database, name : String, db_name : String) : DB::ExecResult | Nil</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+</div>
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="ban_user(db:DB::Database,id:Int64,db_name:String,reason:String=&quot;&quot;):DB::ExecResult|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>ban_user</strong>(db : DB::Database, id : Int64, db_name : String, reason : String = <span class="s">&quot;&quot;</span>) : DB::ExecResult | Nil
+
+        <a class="method-permalink" href="#ban_user%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Cdb_name%3AString%2Creason%3AString%3D%22%22%29%3ADB%3A%3AExecResult%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L78" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="ban_user(db:DB::Database,name:String,db_name:String):DB::ExecResult|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>ban_user</strong>(db : DB::Database, name : String, db_name : String) : DB::ExecResult | Nil
+
+        <a class="method-permalink" href="#ban_user%28db%3ADB%3A%3ADatabase%2Cname%3AString%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L88" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="create_banned_user(db:DB::Database,id:Int64,db_name:String,reason:String=&quot;&quot;):DB::ExecResult|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>create_banned_user</strong>(db : DB::Database, id : Int64, db_name : String, reason : String = <span class="s">&quot;&quot;</span>) : DB::ExecResult | Nil
+
+        <a class="method-permalink" href="#create_banned_user%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Cdb_name%3AString%2Creason%3AString%3D%22%22%29%3ADB%3A%3AExecResult%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L98" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="find_user(db:DB::Database,id:Int64,db_name:String):User|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>find_user</strong>(db : DB::Database, id : Int64, db_name : String) : <a href="User.html">User</a> | Nil
+
+        <a class="method-permalink" href="#find_user%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Cdb_name%3AString%29%3AUser%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L6" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="find_user(db:DB::Database,name:String,db_name:String):User|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>find_user</strong>(db : DB::Database, name : String, db_name : String) : <a href="User.html">User</a> | Nil
+
+        <a class="method-permalink" href="#find_user%28db%3ADB%3A%3ADatabase%2Cname%3AString%2Cdb_name%3AString%29%3AUser%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L16" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_banned_users(db:DB::Database,db_name:String,time:Time):Array(User)|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_banned_users</strong>(db : DB::Database, db_name : String, time : Time) : Array(<a href="User.html">User</a>) | Nil
+
+        <a class="method-permalink" href="#get_banned_users%28db%3ADB%3A%3ADatabase%2Cdb_name%3AString%2Ctime%3ATime%29%3AArray%28User%29%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L141" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_banned_users(db:DB::Database,db_name:String):Array(User)|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>get_banned_users</strong>(db : DB::Database, db_name : String) : Array(<a href="User.html">User</a>) | Nil
+
+        <a class="method-permalink" href="#get_banned_users%28db%3ADB%3A%3ADatabase%2Cdb_name%3AString%29%3AArray%28User%29%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L131" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="list_banned_users(db:DB::Database,db_name:String):Array(User)|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>list_banned_users</strong>(db : DB::Database, db_name : String) : Array(<a href="User.html">User</a>) | Nil
+
+        <a class="method-permalink" href="#list_banned_users%28db%3ADB%3A%3ADatabase%2Cdb_name%3AString%29%3AArray%28User%29%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L38" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="list_ranked_users(db:DB::Database,db_name:String):Array(User)|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>list_ranked_users</strong>(db : DB::Database, db_name : String) : Array(<a href="User.html">User</a>) | Nil
+
+        <a class="method-permalink" href="#list_ranked_users%28db%3ADB%3A%3ADatabase%2Cdb_name%3AString%29%3AArray%28User%29%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L28" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="set_user_rank(db:DB::Database,id:Int64,rank:Int32,db_name:String):DB::ExecResult|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>set_user_rank</strong>(db : DB::Database, id : Int64, rank : Int32, db_name : String) : DB::ExecResult | Nil
+
+        <a class="method-permalink" href="#set_user_rank%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Crank%3AInt32%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L48" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="set_user_rank(db:DB::Database,name:String,rank:Int32,db_name:String):DB::ExecResult|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>set_user_rank</strong>(db : DB::Database, name : String, rank : Int32, db_name : String) : DB::ExecResult | Nil
+
+        <a class="method-permalink" href="#set_user_rank%28db%3ADB%3A%3ADatabase%2Cname%3AString%2Crank%3AInt32%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L58" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="unban_user(db:DB::Database,id:Int64,db_name:String):DB::ExecResult|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>unban_user</strong>(db : DB::Database, id : Int64, db_name : String) : DB::ExecResult | Nil
+
+        <a class="method-permalink" href="#unban_user%28db%3ADB%3A%3ADatabase%2Cid%3AInt64%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L111" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="unban_user(db:DB::Database,name:String,db_name:String):DB::ExecResult|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>unban_user</strong>(db : DB::Database, name : String, db_name : String) : DB::ExecResult | Nil
+
+        <a class="method-permalink" href="#unban_user%28db%3ADB%3A%3ADatabase%2Cname%3AString%2Cdb_name%3AString%29%3ADB%3A%3AExecResult%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/management/database_warden.cr#L121" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

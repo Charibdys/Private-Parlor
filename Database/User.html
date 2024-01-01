@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.9.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="privateparlor">
+
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/doc.js"></script>
+
+  <meta name="repository-name" content="privateparlor">
+  <title>Database::User - privateparlor master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../index.html">
+          privateparlor
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="privateparlor/toplevel" data-name="top level namespace">
+      <a href="../toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Album" data-name="album">
+      <a href="../Album.html">Album</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/AuthorizedRanks" data-name="authorizedranks">
+      <a href="../AuthorizedRanks.html">AuthorizedRanks</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandDescriptions" data-name="commanddescriptions">
+      <a href="../CommandDescriptions.html">CommandDescriptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/CommandPermissions" data-name="commandpermissions">
+      <a href="../CommandPermissions.html">CommandPermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Config" data-name="config">
+      <a href="../Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Configuration" data-name="configuration">
+      <a href="../Configuration.html">Configuration</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="privateparlor/Database" data-name="database">
+      <a href="../Database.html">Database</a>
+      
+        <ul>
+  
+  <li class=" current" data-id="privateparlor/Database/User" data-name="database::user">
+      <a href="../Database/User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseHistory" data-name="databasehistory">
+      <a href="../DatabaseHistory.html">DatabaseHistory</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/DatabaseWarden" data-name="databasewarden">
+      <a href="../DatabaseWarden.html">DatabaseWarden</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Format" data-name="format">
+      <a href="../Format.html">Format</a>
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/History" data-name="history">
+      <a href="../History.html">History</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/History/MessageGroup" data-name="history::messagegroup">
+      <a href="../History/MessageGroup.html">MessageGroup</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryBase" data-name="historybase">
+      <a href="../HistoryBase.html">HistoryBase</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryBase/MessageGroupBase" data-name="historybase::messagegroupbase">
+      <a href="../HistoryBase/MessageGroupBase.html">MessageGroupBase</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryFull" data-name="historyfull">
+      <a href="../HistoryFull.html">HistoryFull</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryFull/MessageGroupFull" data-name="historyfull::messagegroupfull">
+      <a href="../HistoryFull/MessageGroupFull.html">MessageGroupFull</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryRatings" data-name="historyratings">
+      <a href="../HistoryRatings.html">HistoryRatings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryRatings/MessageGroupRatings" data-name="historyratings::messagegroupratings">
+      <a href="../HistoryRatings/MessageGroupRatings.html">MessageGroupRatings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="privateparlor/HistoryWarnings" data-name="historywarnings">
+      <a href="../HistoryWarnings.html">HistoryWarnings</a>
+      
+        <ul>
+  
+  <li class=" " data-id="privateparlor/HistoryWarnings/MessageGroupWarnings" data-name="historywarnings::messagegroupwarnings">
+      <a href="../HistoryWarnings/MessageGroupWarnings.html">MessageGroupWarnings</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Locale" data-name="locale">
+      <a href="../Locale.html">Locale</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Localization" data-name="localization">
+      <a href="../Localization.html">Localization</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Logs" data-name="logs">
+      <a href="../Logs.html">Logs</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessagePermissions" data-name="messagepermissions">
+      <a href="../MessagePermissions.html">MessagePermissions</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageProc" data-name="messageproc">
+      <a href="../MessageProc.html">MessageProc</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/MessageQueue" data-name="messagequeue">
+      <a href="../MessageQueue.html">MessageQueue</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/PrivateParlor" data-name="privateparlor">
+      <a href="../PrivateParlor.html">PrivateParlor</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/QueuedMessage" data-name="queuedmessage">
+      <a href="../QueuedMessage.html">QueuedMessage</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Rank" data-name="rank">
+      <a href="../Rank.html">Rank</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Replies" data-name="replies">
+      <a href="../Replies.html">Replies</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/Robot9000" data-name="robot9000">
+      <a href="../Robot9000.html">Robot9000</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/SpamScoreHandler" data-name="spamscorehandler">
+      <a href="../SpamScoreHandler.html">SpamScoreHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="privateparlor/User" data-name="user">
+      <a href="../User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> Database::<wbr>User
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Database/User.html">Database::User</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="included-modules" class="anchor" href="#included-modules">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Included Modules
+  </h2>
+  <ul class="other-types-list">
+    
+      <li class="other-type">DB::Mappable</li>
+    
+      <li class="other-type">DB::Serializable</li>
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L11" target="_blank">
+        privateparlor/database.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28rs%3ADB%3A%3AResultSet%29-class-method" class="signature"><strong>.new</strong>(rs : DB::ResultSet)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#new%28id%3AInt64%2Cusername%3ANil%7CString%3Dnil%2Crealname%3AString%3D%22%22%2Crank%3AInt32%3D0%2Cjoined%3ATime%3DTime.utc%2Cleft%3ATime%7CNil%3Dnil%2Clast_active%3ATime%3DTime.utc%2Ccooldown_until%3ATime%7CNil%3Dnil%2Cblacklist_reason%3ANil%7CString%3Dnil%2Cwarnings%3AInt32%3D0%2Cwarn_expiry%3ATime%7CNil%3Dnil%2Ckarma%3AInt32%3D0%2Chide_karma%3ABool%7CNil%3Dfalse%2Cdebug_enabled%3ABool%7CNil%3Dfalse%2Ctripcode%3ANil%7CString%3Dnil%29-class-method" class="signature"><strong>.new</strong>(id : Int64, username : Nil | String = <span class="n">nil</span>, realname : String = <span class="s">&quot;&quot;</span>, rank : Int32 = <span class="n">0</span>, joined : Time = <span class="t">Time</span>.utc, left : Time | Nil = <span class="n">nil</span>, last_active : Time = <span class="t">Time</span>.utc, cooldown_until : Time | Nil = <span class="n">nil</span>, blacklist_reason : Nil | String = <span class="n">nil</span>, warnings : Int32 = <span class="n">0</span>, warn_expiry : Time | Nil = <span class="n">nil</span>, karma : Int32 = <span class="n">0</span>, hide_karma : Bool | Nil = <span class="n">false</span>, debug_enabled : Bool | Nil = <span class="n">false</span>, tripcode : Nil | String = <span class="n">nil</span>)</a>
+        
+          <div class="summary"><p>Create an instance of <code><a href="../Database/User.html">User</a></code></p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+  <h2>
+    <a id="class-method-summary" class="anchor" href="#class-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#from_rs%28rs%3ADB%3A%3AResultSet%29-class-method" class="signature"><strong>.from_rs</strong>(rs : DB::ResultSet)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#blacklist%28reason%3AString%7CNil%29%3ANil-instance-method" class="signature"><strong>#blacklist</strong>(reason : String | Nil) : Nil</a>
+        
+          <div class="summary"><p>Set user's rank to blacklisted, force leave, and update blacklist reason.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#blacklist_reason%3AString%7CNil-instance-method" class="signature"><strong>#blacklist_reason</strong> : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#blacklisted%3F%3ABool-instance-method" class="signature"><strong>#blacklisted?</strong> : Bool</a>
+        
+          <div class="summary"><p>Returns <code>true</code> if <em>rank</em> is -10; user is blacklisted.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#can_chat%3F%28limit%3ATime%3A%3ASpan%29%3ABool-instance-method" class="signature"><strong>#can_chat?</strong>(limit : Time::Span) : Bool</a>
+        
+          <div class="summary"><p>Returns <code>true</code> if user is joined, not in cooldown, not blacklisted, and not limited; user can chat</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#can_chat%3F%3ABool-instance-method" class="signature"><strong>#can_chat?</strong> : Bool</a>
+        
+          <div class="summary"><p>Returns <code>true</code> if user is joined, not in cooldown, and not blacklisted; user can chat</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#can_use_command%3F%3ABool-instance-method" class="signature"><strong>#can_use_command?</strong> : Bool</a>
+        
+          <div class="summary"><p>Returns <code>true</code> if user is joined and not blacklisted; user can use commands</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown%28cooldown_time%3AInt32%29%3ATime%3A%3ASpan-instance-method" class="signature"><strong>#cooldown</strong>(cooldown_time : Int32) : Time::Span</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown_and_warn%28cooldown_time_begin%3AArray%28Int32%29%2Clinear_m%3AInt32%2Clinear_b%3AInt32%2Cwarn_expire_hours%3AInt32%2Cpenalty%3AInt32%29%3ATime%3A%3ASpan-instance-method" class="signature"><strong>#cooldown_and_warn</strong>(cooldown_time_begin : Array(Int32), linear_m : Int32, linear_b : Int32, warn_expire_hours : Int32, penalty : Int32) : Time::Span</a>
+        
+          <div class="summary"><p>Sets user's cooldown and increments total warnings</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown_and_warn%28cooldown_time%3AInt32%2Cwarn_expire_hours%3AInt32%2Cpenalty%3AInt32%29%3ATime%3A%3ASpan-instance-method" class="signature"><strong>#cooldown_and_warn</strong>(cooldown_time : Int32, warn_expire_hours : Int32, penalty : Int32) : Time::Span</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#cooldown_until%3ATime%7CNil-instance-method" class="signature"><strong>#cooldown_until</strong> : Time | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#debug_enabled%3ABool%7CNil-instance-method" class="signature"><strong>#debug_enabled</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#decrement_karma%28amount%3AInt32%3D1%29%3ANil-instance-method" class="signature"><strong>#decrement_karma</strong>(amount : Int32 = <span class="n">1</span>) : Nil</a>
+        
+          <div class="summary"><p>Decrement the user's karma by a given amount (1 by default)</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_formatted_name%3AString-instance-method" class="signature"><strong>#get_formatted_name</strong> : String</a>
+        
+          <div class="summary"><p>Returns a string containing the username with an &quot;@&quot; appended to it if the user has a username.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_obfuscated_id%3AString-instance-method" class="signature"><strong>#get_obfuscated_id</strong> : String</a>
+        
+          <div class="summary"><p>Get the user's obfuscated ID</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_obfuscated_karma%3AInt32-instance-method" class="signature"><strong>#get_obfuscated_karma</strong> : Int32</a>
+        
+          <div class="summary"><p>Get the user's obfuscated karma</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#hide_karma%3ABool%7CNil-instance-method" class="signature"><strong>#hide_karma</strong> : Bool | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#id%3AInt64-instance-method" class="signature"><strong>#id</strong> : Int64</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#increment_karma%28amount%3AInt32%3D1%29%3ANil-instance-method" class="signature"><strong>#increment_karma</strong>(amount : Int32 = <span class="n">1</span>) : Nil</a>
+        
+          <div class="summary"><p>Increment the user's karma by a given amount (1 by default)</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#joined%3ATime-instance-method" class="signature"><strong>#joined</strong> : Time</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#karma%3AInt32-instance-method" class="signature"><strong>#karma</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#last_active%3ATime-instance-method" class="signature"><strong>#last_active</strong> : Time</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#left%3ATime%7CNil-instance-method" class="signature"><strong>#left</strong> : Time | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#left%3F%3ABool-instance-method" class="signature"><strong>#left?</strong> : Bool</a>
+        
+          <div class="summary"><p>Returns <code>true</code> if <em>left</em> is not nil; user has left the chat.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#rank%3AInt32-instance-method" class="signature"><strong>#rank</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#realname%3AString-instance-method" class="signature"><strong>#realname</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#rejoin%3ANil-instance-method" class="signature"><strong>#rejoin</strong> : Nil</a>
+        
+          <div class="summary"><p>Set <em>left</em> to nil, meaning that User has joined the chat.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#remove_cooldown%28override%3ABool%3Dfalse%29%3ABool-instance-method" class="signature"><strong>#remove_cooldown</strong>(override : Bool = <span class="n">false</span>) : Bool</a>
+        
+          <div class="summary"><p>Removes a cooldown from a user if it has expired.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#remove_warning%28amount%3AInt32%2Cwarn_expire_hours%3AInt32%29%3ANil-instance-method" class="signature"><strong>#remove_warning</strong>(amount : Int32, warn_expire_hours : Int32) : Nil</a>
+        
+          <div class="summary"><p>Removes one or multiple warnings from a user and resets the <code><a href="../Database/User.html#warn_expiry%3ATime%7CNil-instance-method">#warn_expiry</a></code></p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#set_active%3ANil-instance-method" class="signature"><strong>#set_active</strong> : Nil</a>
+        
+          <div class="summary"><p>Set <em>last_active</em> to the current time</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#set_left%3ANil-instance-method" class="signature"><strong>#set_left</strong> : Nil</a>
+        
+          <div class="summary"><p>Set <em>left</em> to the current time; user has left the chat.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#set_rank%28rank_value%3AInt32%29%3ANil-instance-method" class="signature"><strong>#set_rank</strong>(rank_value : Int32) : Nil</a>
+        
+          <div class="summary"><p>Set <em>rank</em> to the given <code>Ranks</code> value.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#set_tripcode%28tripcode%3AString%29%3ANil-instance-method" class="signature"><strong>#set_tripcode</strong>(tripcode : String) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#to_array-instance-method" class="signature"><strong>#to_array</strong></a>
+        
+          <div class="summary"><p>Returns an array with all the values in <code><a href="../Database/User.html">User</a></code>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#toggle_debug%3ANil-instance-method" class="signature"><strong>#toggle_debug</strong> : Nil</a>
+        
+          <div class="summary"><p>Set <em>debug_enabled</em> to its opposite value.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#toggle_karma%3ANil-instance-method" class="signature"><strong>#toggle_karma</strong> : Nil</a>
+        
+          <div class="summary"><p>Set <em>hide_karma</em> to its opposite value.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tripcode%3AString%7CNil-instance-method" class="signature"><strong>#tripcode</strong> : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#update_names%28username%3AString%7CNil%2Cfullname%3AString%29%3ANil-instance-method" class="signature"><strong>#update_names</strong>(username : String | Nil, fullname : String) : Nil</a>
+        
+          <div class="summary"><p>Updates <em>username</em> and <em>real name</em></p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#username%3AString%7CNil-instance-method" class="signature"><strong>#username</strong> : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#warn_expiry%3ATime%7CNil-instance-method" class="signature"><strong>#warn_expiry</strong> : Time | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#warnings%3AInt32-instance-method" class="signature"><strong>#warnings</strong> : Int32</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(rs:DB::ResultSet)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(rs : DB::ResultSet)
+
+        <a class="method-permalink" href="#new%28rs%3ADB%3A%3AResultSet%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L12" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new(id:Int64,username:Nil|String=nil,realname:String=&quot;&quot;,rank:Int32=0,joined:Time=Time.utc,left:Time|Nil=nil,last_active:Time=Time.utc,cooldown_until:Time|Nil=nil,blacklist_reason:Nil|String=nil,warnings:Int32=0,warn_expiry:Time|Nil=nil,karma:Int32=0,hide_karma:Bool|Nil=false,debug_enabled:Bool|Nil=false,tripcode:Nil|String=nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(id : Int64, username : Nil | String = <span class="n">nil</span>, realname : String = <span class="s">&quot;&quot;</span>, rank : Int32 = <span class="n">0</span>, joined : Time = <span class="t">Time</span>.utc, left : Time | Nil = <span class="n">nil</span>, last_active : Time = <span class="t">Time</span>.utc, cooldown_until : Time | Nil = <span class="n">nil</span>, blacklist_reason : Nil | String = <span class="n">nil</span>, warnings : Int32 = <span class="n">0</span>, warn_expiry : Time | Nil = <span class="n">nil</span>, karma : Int32 = <span class="n">0</span>, hide_karma : Bool | Nil = <span class="n">false</span>, debug_enabled : Bool | Nil = <span class="n">false</span>, tripcode : Nil | String = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#new%28id%3AInt64%2Cusername%3ANil%7CString%3Dnil%2Crealname%3AString%3D%22%22%2Crank%3AInt32%3D0%2Cjoined%3ATime%3DTime.utc%2Cleft%3ATime%7CNil%3Dnil%2Clast_active%3ATime%3DTime.utc%2Ccooldown_until%3ATime%7CNil%3Dnil%2Cblacklist_reason%3ANil%7CString%3Dnil%2Cwarnings%3AInt32%3D0%2Cwarn_expiry%3ATime%7CNil%3Dnil%2Ckarma%3AInt32%3D0%2Chide_karma%3ABool%7CNil%3Dfalse%2Cdebug_enabled%3ABool%7CNil%3Dfalse%2Ctripcode%3ANil%7CString%3Dnil%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Create an instance of <code><a href="../Database/User.html">User</a></code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L37" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+  <h2>
+    <a id="class-method-detail" class="anchor" href="#class-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="from_rs(rs:DB::ResultSet)-class-method">
+      <div class="signature">
+        
+        def self.<strong>from_rs</strong>(rs : DB::ResultSet)
+
+        <a class="method-permalink" href="#from_rs%28rs%3ADB%3A%3AResultSet%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L12" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="blacklist(reason:String|Nil):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>blacklist</strong>(reason : String | Nil) : Nil
+
+        <a class="method-permalink" href="#blacklist%28reason%3AString%7CNil%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set user's rank to blacklisted, force leave, and update blacklist reason.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L201" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="blacklist_reason:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>blacklist_reason</strong> : String | Nil
+
+        <a class="method-permalink" href="#blacklist_reason%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L25" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="blacklisted?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>blacklisted?</strong> : Bool
+
+        <a class="method-permalink" href="#blacklisted%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns <code>true</code> if <em>rank</em> is -10; user is blacklisted.</p>
+<p>Returns <code>false</code> otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L210" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="can_chat?(limit:Time::Span):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>can_chat?</strong>(limit : Time::Span) : Bool
+
+        <a class="method-permalink" href="#can_chat%3F%28limit%3ATime%3A%3ASpan%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns <code>true</code> if user is joined, not in cooldown, not blacklisted, and not limited; user can chat</p>
+<p>Returns false otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L231" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="can_chat?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>can_chat?</strong> : Bool
+
+        <a class="method-permalink" href="#can_chat%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns <code>true</code> if user is joined, not in cooldown, and not blacklisted; user can chat</p>
+<p>Returns false otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L224" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="can_use_command?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>can_use_command?</strong> : Bool
+
+        <a class="method-permalink" href="#can_use_command%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns <code>true</code> if user is joined and not blacklisted; user can use commands</p>
+<p>Returns false otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L242" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown(cooldown_time:Int32):Time::Span-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown</strong>(cooldown_time : Int32) : Time::Span
+
+        <a class="method-permalink" href="#cooldown%28cooldown_time%3AInt32%29%3ATime%3A%3ASpan-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L168" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown_and_warn(cooldown_time_begin:Array(Int32),linear_m:Int32,linear_b:Int32,warn_expire_hours:Int32,penalty:Int32):Time::Span-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown_and_warn</strong>(cooldown_time_begin : Array(Int32), linear_m : Int32, linear_b : Int32, warn_expire_hours : Int32, penalty : Int32) : Time::Span
+
+        <a class="method-permalink" href="#cooldown_and_warn%28cooldown_time_begin%3AArray%28Int32%29%2Clinear_m%3AInt32%2Clinear_b%3AInt32%2Cwarn_expire_hours%3AInt32%2Cpenalty%3AInt32%29%3ATime%3A%3ASpan-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Sets user's cooldown and increments total warnings</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L145" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown_and_warn(cooldown_time:Int32,warn_expire_hours:Int32,penalty:Int32):Time::Span-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown_and_warn</strong>(cooldown_time : Int32, warn_expire_hours : Int32, penalty : Int32) : Time::Span
+
+        <a class="method-permalink" href="#cooldown_and_warn%28cooldown_time%3AInt32%2Cwarn_expire_hours%3AInt32%2Cpenalty%3AInt32%29%3ATime%3A%3ASpan-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L159" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="cooldown_until:Time|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>cooldown_until</strong> : Time | Nil
+
+        <a class="method-permalink" href="#cooldown_until%3ATime%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L23" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="debug_enabled:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>debug_enabled</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#debug_enabled%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L33" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="decrement_karma(amount:Int32=1):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>decrement_karma</strong>(amount : Int32 = <span class="n">1</span>) : Nil
+
+        <a class="method-permalink" href="#decrement_karma%28amount%3AInt32%3D1%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Decrement the user's karma by a given amount (1 by default)</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L140" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_formatted_name:String-instance-method">
+      <div class="signature">
+        
+        def <strong>get_formatted_name</strong> : String
+
+        <a class="method-permalink" href="#get_formatted_name%3AString-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns a string containing the username with an &quot;@&quot; appended to it if the user has a username.</p>
+<p>Otherwise, the user's realname is returned.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L71" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_obfuscated_id:String-instance-method">
+      <div class="signature">
+        
+        def <strong>get_obfuscated_id</strong> : String
+
+        <a class="method-permalink" href="#get_obfuscated_id%3AString-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Get the user's obfuscated ID</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L80" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_obfuscated_karma:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>get_obfuscated_karma</strong> : Int32
+
+        <a class="method-permalink" href="#get_obfuscated_karma%3AInt32-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Get the user's obfuscated karma</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L85" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="hide_karma:Bool|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>hide_karma</strong> : Bool | Nil
+
+        <a class="method-permalink" href="#hide_karma%3ABool%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L31" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="id:Int64-instance-method">
+      <div class="signature">
+        
+        def <strong>id</strong> : Int64
+
+        <a class="method-permalink" href="#id%3AInt64-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="increment_karma(amount:Int32=1):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>increment_karma</strong>(amount : Int32 = <span class="n">1</span>) : Nil
+
+        <a class="method-permalink" href="#increment_karma%28amount%3AInt32%3D1%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Increment the user's karma by a given amount (1 by default)</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L135" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="joined:Time-instance-method">
+      <div class="signature">
+        
+        def <strong>joined</strong> : Time
+
+        <a class="method-permalink" href="#joined%3ATime-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L18" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="karma:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>karma</strong> : Int32
+
+        <a class="method-permalink" href="#karma%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L29" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="last_active:Time-instance-method">
+      <div class="signature">
+        
+        def <strong>last_active</strong> : Time
+
+        <a class="method-permalink" href="#last_active%3ATime-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L21" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="left:Time|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>left</strong> : Time | Nil
+
+        <a class="method-permalink" href="#left%3ATime%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L19" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="left?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>left?</strong> : Bool
+
+        <a class="method-permalink" href="#left%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns <code>true</code> if <em>left</em> is not nil; user has left the chat.</p>
+<p>Returns <code>false</code> otherwise.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L217" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="rank:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>rank</strong> : Int32
+
+        <a class="method-permalink" href="#rank%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L17" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="realname:String-instance-method">
+      <div class="signature">
+        
+        def <strong>realname</strong> : String
+
+        <a class="method-permalink" href="#realname%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L16" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="rejoin:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>rejoin</strong> : Nil
+
+        <a class="method-permalink" href="#rejoin%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set <em>left</em> to nil, meaning that User has joined the chat.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L91" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="remove_cooldown(override:Bool=false):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>remove_cooldown</strong>(override : Bool = <span class="n">false</span>) : Bool
+
+        <a class="method-permalink" href="#remove_cooldown%28override%3ABool%3Dfalse%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Removes a cooldown from a user if it has expired.</p>
+<p>Returns true if the cooldown can be expired, false otherwise</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L177" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="remove_warning(amount:Int32,warn_expire_hours:Int32):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>remove_warning</strong>(amount : Int32, warn_expire_hours : Int32) : Nil
+
+        <a class="method-permalink" href="#remove_warning%28amount%3AInt32%2Cwarn_expire_hours%3AInt32%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Removes one or multiple warnings from a user and resets the <code><a href="../Database/User.html#warn_expiry%3ATime%7CNil-instance-method">#warn_expiry</a></code></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L190" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="set_active:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>set_active</strong> : Nil
+
+        <a class="method-permalink" href="#set_active%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set <em>last_active</em> to the current time</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L102" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="set_left:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>set_left</strong> : Nil
+
+        <a class="method-permalink" href="#set_left%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set <em>left</em> to the current time; user has left the chat.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L107" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="set_rank(rank_value:Int32):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>set_rank</strong>(rank_value : Int32) : Nil
+
+        <a class="method-permalink" href="#set_rank%28rank_value%3AInt32%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set <em>rank</em> to the given <code>Ranks</code> value.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L112" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="set_tripcode(tripcode:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>set_tripcode</strong>(tripcode : String) : Nil
+
+        <a class="method-permalink" href="#set_tripcode%28tripcode%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L120" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="to_array-instance-method">
+      <div class="signature">
+        
+        def <strong>to_array</strong>
+
+        <a class="method-permalink" href="#to_array-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Returns an array with all the values in <code><a href="../Database/User.html">User</a></code>. Used for Database query arguments.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L57" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="toggle_debug:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>toggle_debug</strong> : Nil
+
+        <a class="method-permalink" href="#toggle_debug%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set <em>debug_enabled</em> to its opposite value.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L130" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="toggle_karma:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>toggle_karma</strong> : Nil
+
+        <a class="method-permalink" href="#toggle_karma%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Set <em>hide_karma</em> to its opposite value.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L125" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tripcode:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>tripcode</strong> : String | Nil
+
+        <a class="method-permalink" href="#tripcode%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L34" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="update_names(username:String|Nil,fullname:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>update_names</strong>(username : String | Nil, fullname : String) : Nil
+
+        <a class="method-permalink" href="#update_names%28username%3AString%7CNil%2Cfullname%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Updates <em>username</em> and <em>real name</em></p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L96" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="username:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>username</strong> : String | Nil
+
+        <a class="method-permalink" href="#username%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L15" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="warn_expiry:Time|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>warn_expiry</strong> : Time | Nil
+
+        <a class="method-permalink" href="#warn_expiry%3ATime%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L28" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="warnings:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>warnings</strong> : Int32
+
+        <a class="method-permalink" href="#warnings%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/Charibdys/Private-Parlor/blob/63076d0896f2830c800abea7cbe64385adbc1501/src/privateparlor/database.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>
