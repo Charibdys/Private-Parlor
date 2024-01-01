@@ -1,7 +1,7 @@
 # privateparlor
 
 ## Archived - See [PrivateParlorXT](https://github.com/Private-Parlor/Private-Parlor-XT) for Updates 
-### This repository has been archived, as is likely outdated. Development has moved to [PrivateParlorXT](https://github.com/Private-Parlor/Private-Parlor-XT)
+### This repository has been archived, and is likely outdated. Development has moved to [PrivateParlorXT](https://github.com/Private-Parlor/Private-Parlor-XT)
 
 
 A rewrite of [secretlounge-ng](https://github.com/secretlounge/secretlounge-ng), a bot to make an anonymous group chat on Telegram. 
