@@ -1,5 +1,9 @@
 # privateparlor
 
+## Archived - See [PrivateParlorXT](https://github.com/Private-Parlor/Private-Parlor-XT) for Updates 
+### This repository has been archived, as is likely outdated. Development has moved to [PrivateParlorXT](https://github.com/Private-Parlor/Private-Parlor-XT)
+
+
 A rewrite of [secretlounge-ng](https://github.com/secretlounge/secretlounge-ng), a bot to make an anonymous group chat on Telegram. 
 Written in Crystal with the aim of being a fast, memory efficient, and featureful alternative.
 
